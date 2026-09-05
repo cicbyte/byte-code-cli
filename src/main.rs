@@ -30,6 +30,11 @@ async fn main() {
         eprintln!("bcode: 警告：TLS 证书校验已关闭（--insecure），仅限自签/调试环境使用");
     }
     let profile = config::effective_profile(&cfg, cli.profile.as_ref());
+    // profile 拼进本地路径，非法名（路径分隔符等）在入口拦截，退出码 2
+    if let Err(e) = config::validate_profile_name(&profile) {
+        eprintln!("bcode: {e:#}");
+        std::process::exit(2);
+    }
 
     let result = match cli.command {
         Command::Register {

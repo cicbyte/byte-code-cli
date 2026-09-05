@@ -96,6 +96,22 @@ fn resolve_profile(cfg: &Config, flag: Option<&str>, env: Option<&str>) -> Strin
         .unwrap_or_else(|| "default".into())
 }
 
+/// profile 名合法性：profile 会拼进本地路径（agents/<profile>/credential），
+/// 仅允许字母/数字/`._-`（1-64 字符，不得以 . 开头）——拒绝路径分隔符等
+/// 字符，防 --profile/BC_AGENT 值把读写引出数据目录
+pub fn validate_profile_name(profile: &str) -> Result<()> {
+    let ok = !profile.is_empty()
+        && profile.len() <= 64
+        && !profile.starts_with('.')
+        && profile
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.'));
+    if !ok {
+        bail!("profile 名不合法「{profile}」：仅允许字母/数字/._-，1-64 字符且不以 . 开头");
+    }
+    Ok(())
+}
+
 /// 向上查找 .bc/project（当前目录及祖先——agent 可能在 repo 子目录工作）。
 /// 以 .git 为仓库边界：不越出仓库向上找，防父目录杂散指针静默劫持项目上下文
 pub fn find_project_pointer(start: &Path) -> Result<Option<cred::ProjectPointer>> {
@@ -142,6 +158,24 @@ mod tests {
         assert_eq!(resolve_profile(&cfg, None, Some("env")), "env");
         assert_eq!(resolve_profile(&cfg, None, None), "from-config");
         assert_eq!(resolve_profile(&Config::default(), None, None), "default");
+    }
+
+    #[test]
+    fn profile_name_rejects_path_escape_and_odd_chars() {
+        for ok in ["default", "codex-cli", "claude_code", "a1.2"] {
+            assert!(validate_profile_name(ok).is_ok(), "{ok} 应合法");
+        }
+        for bad in [
+            "",
+            "../evil",
+            "a/b",
+            ".hidden",
+            "a b",
+            "窗",
+            &"x".repeat(65),
+        ] {
+            assert!(validate_profile_name(bad).is_err(), "{bad} 应被拒绝");
+        }
     }
 
     #[test]

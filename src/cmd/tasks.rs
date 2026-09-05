@@ -33,7 +33,8 @@ pub async fn tasks(
         path.push(sep);
         path.push_str(&format!("keyword={}", encode_query(kw)));
     }
-    let page: AgentTasks = ctx.client.get_as(&path).await?;
+    // 免参端点走 sessioned_get：缓存会话失效时自愈重建（见 Ctx::sessioned_get）
+    let page: AgentTasks = ctx.sessioned_get(&path).await?;
 
     if page.list.is_empty() {
         out.line(&format!("（无任务，共 {} 条记录）", page.total));

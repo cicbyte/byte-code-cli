@@ -53,7 +53,19 @@ pub fn load_credential(profile: &str) -> Result<Credential> {
     serde_json::from_str(&raw).with_context(|| format!("解析 {} 失败", p.display()))
 }
 
-/// 写凭证并在类 Unix 上收紧为 0600（Windows 依赖用户目录 ACL）
+/// 落盘后收紧为仅属主可读（类 Unix 0600；Windows 依赖用户目录 ACL）
+fn set_private(p: &std::path::Path) -> Result<()> {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        fs::set_permissions(p, fs::Permissions::from_mode(0o600))?;
+    }
+    #[cfg(not(unix))]
+    let _ = p;
+    Ok(())
+}
+
+/// 写凭证并收紧权限（key 不回显）
 pub fn save_credential(profile: &str, cred: &Credential) -> Result<()> {
     let p = credential_path(profile)?;
     if let Some(dir) = p.parent() {
@@ -61,11 +73,7 @@ pub fn save_credential(profile: &str, cred: &Credential) -> Result<()> {
     }
     let raw = serde_json::to_string_pretty(cred)?;
     fs::write(&p, raw).with_context(|| format!("写入 {} 失败", p.display()))?;
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::PermissionsExt;
-        fs::set_permissions(&p, fs::Permissions::from_mode(0o600))?;
-    }
+    set_private(&p)?;
     Ok(())
 }
 
@@ -105,6 +113,8 @@ pub fn save_session(profile: &str, rec: &SessionRecord) -> Result<()> {
         fs::create_dir_all(dir)?;
     }
     fs::write(&p, serde_json::to_string_pretty(rec)?)?;
+    // 与凭证同款收紧：session_id 虽非权限边界，也不该同机可读
+    set_private(&p)?;
     Ok(())
 }
 

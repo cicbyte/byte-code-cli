@@ -10,11 +10,13 @@ pub mod tasks;
 pub mod vault;
 
 use anyhow::{Result, anyhow};
+use serde::de::DeserializeOwned;
 use serde_json::json;
 
 use crate::client::BcodeClient;
 use crate::config::{self, Config};
 use crate::cred::{self, Credential, ProjectPointer};
+use crate::error::BcodeError;
 use crate::model::agent::SessionCreated;
 
 /// 项目作用域上下文：--profile 身份 + cwd 项目指向 + 会话（免参命令共用）
@@ -22,6 +24,45 @@ pub(crate) struct Ctx {
     pub client: BcodeClient,
     pub credential: Credential,
     pub project: ProjectPointer,
+    server: String,
+    profile: String,
+    insecure: bool,
+}
+
+impl Ctx {
+    /// 会话免参 GET：缓存会话被平台废弃（Auth）时，重建会话后重试一次——
+    /// 会话键=agent+project 服务端同键复用，重建幂等；二次仍 Auth 说明
+    /// 是 key 本身失效，按原错误透出（退出码 3 引导 register）
+    pub(crate) async fn sessioned_get<T: DeserializeOwned>(&self, path: &str) -> Result<T> {
+        match self.client.get_as::<T>(path).await {
+            Ok(v) => Ok(v),
+            Err(e) => {
+                if !is_auth(&e) {
+                    return Err(e);
+                }
+                // 会话键=agent+project 服务端同键复用，重建幂等
+                let boot = ensure_session(
+                    &self.server,
+                    &self.profile,
+                    &self.credential,
+                    self.project.project_id,
+                    self.insecure,
+                )
+                .await?;
+                let fresh = BcodeClient::new(
+                    self.server.clone(),
+                    self.credential.clone(),
+                    Some(boot.session_id),
+                    self.insecure,
+                )?;
+                fresh.get_as::<T>(path).await
+            }
+        }
+    }
+}
+
+fn is_auth(e: &anyhow::Error) -> bool {
+    matches!(e.downcast_ref::<BcodeError>(), Some(BcodeError::Auth(_)))
 }
 
 /// 建立/续期工作会话并落盘（start 显式调用；其余命令缺会话时懒建立，F04）
@@ -71,11 +112,19 @@ pub(crate) async fn project_ctx(cfg: &Config, profile: &str) -> Result<Ctx> {
             .session_id
         }
     };
-    let client = BcodeClient::new(server, credential.clone(), Some(session_id), cfg.insecure)?;
+    let client = BcodeClient::new(
+        server.clone(),
+        credential.clone(),
+        Some(session_id),
+        cfg.insecure,
+    )?;
     Ok(Ctx {
         client,
         credential,
         project,
+        server,
+        profile: profile.to_string(),
+        insecure: cfg.insecure,
     })
 }
 

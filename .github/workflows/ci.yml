@@ -8,8 +8,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # 项目在 Windows 开发，cred.rs 有 cfg(unix) 分支——双平台必须同时验证
-        os: [ubuntu-latest, windows-latest]
+        # 需求承诺 Win/mac/Linux 三平台分发（cred.rs 有 cfg(unix) 分支），三矩阵同验
+        os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4

@@ -24,6 +24,18 @@ pub async fn join(cfg: &Config, profile: &str, code: &str, out: &Out) -> Result<
         project_name: res.project_name.clone(),
     };
     let cwd = std::env::current_dir()?;
+    // 覆盖不同项目的既有指向时明示切换，避免无感知改写
+    if let Some(old) = config::find_project_pointer(&cwd)?
+        && old.project_id != res.project_id
+    {
+        out.kv(
+            "替换指向",
+            &format!(
+                "{} (id={}) → {} (id={})",
+                old.project_name, old.project_id, res.project_name, res.project_id
+            ),
+        );
+    }
     let marker = config::save_project_pointer(&cwd, &ptr)?;
 
     out.kv(
@@ -144,11 +156,23 @@ async fn resolve_project(client: &BcodeClient, spec: &str) -> Result<i64> {
     if let Ok(id) = spec.parse::<i64>() {
         return Ok(id);
     }
-    let list: ProjectList = client.get_as("/v1/projects?size=100").await?;
-    let hit = list.list.iter().find(|p| p.name == spec).ok_or_else(|| {
-        anyhow!("未找到名为「{spec}」的项目（agent 只能看到已加入的项目；也可直接用数字 id）")
-    })?;
-    Ok(hit.id)
+    // 名称解析：按 total 翻页，避免 >100 个已加入项目时漏配
+    let mut page = 1;
+    loop {
+        let list: ProjectList = client
+            .get_as(&format!("/v1/projects?page={page}&size=100"))
+            .await?;
+        if let Some(hit) = list.list.iter().find(|p| p.name == spec) {
+            return Ok(hit.id);
+        }
+        if list.list.is_empty() || (page * 100) >= list.total {
+            break;
+        }
+        page += 1;
+    }
+    Err(anyhow!(
+        "未找到名为「{spec}」的项目（agent 只能看到已加入的项目；也可直接用数字 id）"
+    ))
 }
 
 /// 开工包三段展示：约定 / 我的任务 / 待审

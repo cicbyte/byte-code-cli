@@ -199,3 +199,13 @@ fn completion_and_man_smoke() {
     let out2 = cmd2.assert().success().get_output().stdout.clone();
     assert!(String::from_utf8(out2).unwrap().contains("bcode"));
 }
+
+#[test]
+fn profile_name_with_path_separator_is_rejected() {
+    let (_sb, mut cmd) = Sandbox::new();
+    cmd.args(["--profile", "../evil", "whoami"]);
+    cmd.assert()
+        .failure()
+        .code(2)
+        .stderr(predicate::str::contains("profile 名不合法"));
+}
