@@ -2,6 +2,8 @@
 
 use serde::{Deserialize, Serialize};
 
+use super::null_to_default;
+
 /// POST /v1/agent/register 响应——key 只此一次返回，落盘后不再可见
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -24,11 +26,11 @@ pub struct JoinResult {
 pub struct SessionCreated {
     pub session_id: String,
     pub project: ProjectBrief,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "null_to_default")]
     pub conventions: Vec<ConventionItem>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "null_to_default")]
     pub my_tasks: Vec<TaskBrief>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "null_to_default")]
     pub pending_reviews: Vec<TaskBrief>,
 }
 
@@ -54,7 +56,7 @@ pub struct ConventionItem {
 pub struct AgentTasks {
     #[serde(default)]
     pub total: i64,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "null_to_default")]
     pub list: Vec<TaskBrief>,
 }
 

@@ -81,8 +81,8 @@ pub enum Command {
     Log {
         id: i64,
         message: String,
-        /// running / success / failed
-        #[arg(long, default_value = "running")]
+        /// success / failed（平台 schema 约束）
+        #[arg(long, default_value = "success")]
         status: String,
         /// 动作分类（如 build / test / progress）
         #[arg(long, default_value = "progress")]

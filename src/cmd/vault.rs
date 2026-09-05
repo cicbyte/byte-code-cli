@@ -29,6 +29,9 @@ pub async fn docs(
                 .client
                 .get_as(&format!("/v1/projects/{pid}/docs/tree"))
                 .await?;
+            if tree.tree.is_empty() {
+                out.line("（文档树为空）");
+            }
             if list {
                 for n in flatten_tree(&tree.tree) {
                     if !n.is_dir {

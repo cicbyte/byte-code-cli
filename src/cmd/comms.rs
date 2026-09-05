@@ -129,19 +129,33 @@ pub async fn notify(
     }
 }
 
-/// 消费 SSE 流：事件以空行分隔，`data:` 行负载为通知 JSON；`: comment` 心跳行忽略
+/// 消费 SSE 流：事件以空行分隔，`data:` 行负载为通知 JSON；`: comment` 心跳行忽略。
+/// 平台心跳 30s——90s 无任何字节视为静默断线，返回错误交给上层重连
 async fn consume_sse(resp: reqwest::Response, out: &Out) -> Result<()> {
     let mut stream = resp.bytes_stream();
     let mut buf = String::new();
-    while let Some(chunk) = stream.next().await {
-        let chunk = chunk.map_err(|e| BcodeError::Network(format!("SSE 流中断：{e}")))?;
+    loop {
+        let next = tokio::time::timeout(std::time::Duration::from_secs(90), stream.next()).await;
+        let chunk = match next {
+            // 空闲超时：连接半开/网络静默死亡，按断线处理
+            Err(_) => {
+                return Err(BcodeError::Network("SSE 流 90s 无数据（心跳丢失）".into()).into());
+            }
+            Ok(None) => return Ok(()),
+            Ok(Some(Err(e))) => return Err(BcodeError::Network(format!("SSE 流中断：{e}")).into()),
+            Ok(Some(Ok(c))) => c,
+        };
         buf.push_str(&String::from_utf8_lossy(&chunk));
         while let Some(pos) = buf.find("\n\n") {
             let block: String = buf.drain(..pos + 2).collect();
             if let Some(event) = parse_sse_event(&block) {
+                // SSE 事件负载无 createdAt 字段（与列表接口不同构），缺省标「实时」
+                let prefix = match event.get("createdAt").and_then(Value::as_str) {
+                    Some(t) => format!("[{t}]"),
+                    None => "[实时]".to_string(),
+                };
                 out.line(&format!(
-                    "[{}] {} — {}",
-                    event.get("createdAt").and_then(Value::as_str).unwrap_or(""),
+                    "{prefix} {} — {}",
                     event.get("title").and_then(Value::as_str).unwrap_or(""),
                     event.get("content").and_then(Value::as_str).unwrap_or("")
                 ));
@@ -149,7 +163,6 @@ async fn consume_sse(resp: reqwest::Response, out: &Out) -> Result<()> {
             }
         }
     }
-    Ok(())
 }
 
 /// 解析单个 SSE 事件块：多条 data: 行按规范以 \n 拼接；无 data 行（心跳注释）返回 None

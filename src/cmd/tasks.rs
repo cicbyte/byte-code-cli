@@ -220,8 +220,9 @@ pub async fn log(
     action: &str,
     out: &Out,
 ) -> Result<()> {
-    if !matches!(status, "running" | "success" | "failed") {
-        bail!("--status 仅支持 running / success / failed");
+    // 平台 schema 约束 CHECK(status IN ('success','failed'))——"running" 不可入库
+    if !matches!(status, "success" | "failed") {
+        bail!("--status 仅支持 success / failed（平台约束）");
     }
     let ctx = project_ctx(cfg, profile).await?;
     let created: CreatedId = ctx

@@ -34,6 +34,9 @@ impl BcodeClient {
     ) -> Result<Self> {
         let http = Client::builder()
             .user_agent(concat!("bcode/", env!("CARGO_PKG_VERSION")))
+            // 连接级超时全体生效（含 SSE 长连接的建立阶段）；
+            // 总超时不设在客户端上——SSE 需要无限期，常规请求按请求级覆盖
+            .connect_timeout(std::time::Duration::from_secs(10))
             .build()
             .map_err(|e| BcodeError::Network(e.to_string()))?;
         Ok(Self {
@@ -61,7 +64,9 @@ impl BcodeClient {
         if let Some(b) = body {
             req = req.json(&b);
         }
+        // 常规请求总超时（连接+读整体）；SSE 流不走本方法，不受影响
         let resp = req
+            .timeout(std::time::Duration::from_secs(30))
             .send()
             .await
             .map_err(|e| BcodeError::Network(e.to_string()))?;

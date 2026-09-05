@@ -2,6 +2,8 @@
 
 use serde::{Deserialize, Serialize};
 
+use super::null_to_default;
+
 /// 创建类响应 {id}（评论 / 执行日志）
 #[derive(Debug, Deserialize)]
 pub struct CreatedId {
@@ -37,7 +39,7 @@ pub struct TaskDetail {
     pub artifacts: String,
     #[serde(default)]
     pub due_date: String,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "null_to_default")]
     pub tags: Vec<String>,
     #[serde(default)]
     pub created_at: String,
@@ -54,7 +56,7 @@ impl TaskDetail {
 /// GET /v1/tasks/{taskId}/comments 响应
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CommentList {
-    #[serde(default)]
+    #[serde(default, deserialize_with = "null_to_default")]
     pub list: Vec<CommentItem>,
 }
 
@@ -76,7 +78,7 @@ pub struct CommentItem {
 /// GET /v1/tasks/{taskId}/ai-logs 响应
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AiLogList {
-    #[serde(default)]
+    #[serde(default, deserialize_with = "null_to_default")]
     pub list: Vec<AiLogItem>,
 }
 

@@ -3,12 +3,14 @@
 
 use serde::{Deserialize, Serialize};
 
+use super::null_to_default;
+
 /// GET /v1/notifications 响应
 #[derive(Debug, Serialize, Deserialize)]
 pub struct NotificationList {
     #[serde(default)]
     pub total: i64,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "null_to_default")]
     pub list: Vec<NotificationItem>,
 }
 
@@ -44,7 +46,7 @@ impl NotificationItem {
 pub struct SearchResults {
     #[serde(default)]
     pub total: i64,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "null_to_default")]
     pub list: Vec<SearchItem>,
 }
 
@@ -67,7 +69,7 @@ pub struct SearchItem {
 /// agent 视角只含已获准入的项目）
 #[derive(Debug, Deserialize)]
 pub struct ProjectList {
-    #[serde(default)]
+    #[serde(default, deserialize_with = "null_to_default")]
     pub list: Vec<ProjectRef>,
     #[serde(default)]
     pub total: i64,

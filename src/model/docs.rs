@@ -2,10 +2,12 @@
 
 use serde::{Deserialize, Serialize};
 
+use super::null_to_default;
+
 /// GET /v1/projects/{id}/docs/tree 响应
 #[derive(Debug, Serialize, Deserialize)]
 pub struct VaultTree {
-    #[serde(default)]
+    #[serde(default, deserialize_with = "null_to_default")]
     pub tree: Vec<VaultNode>,
 }
 
@@ -22,7 +24,7 @@ pub struct VaultNode {
     pub size: i64,
     #[serde(default)]
     pub mod_time: String,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "null_to_default")]
     pub children: Vec<VaultNode>,
 }
 
@@ -43,7 +45,7 @@ pub struct DocFile {
 /// GET /v1/projects/{id}/memories 响应（单条记忆为同构内嵌）
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MemoryList {
-    #[serde(default)]
+    #[serde(default, deserialize_with = "null_to_default")]
     pub list: Vec<MemoryItem>,
 }
 

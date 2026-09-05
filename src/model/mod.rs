@@ -11,6 +11,17 @@ use serde::Deserialize;
 
 use crate::error::BcodeError;
 
+/// Go nil slice 会序列化为显式 null（而非省略键）——
+/// 此助手把 null 容错为空集合，配合 #[serde(default)] 覆盖键缺席与 null 两态
+pub fn null_to_default<'de, D, T>(d: D) -> Result<T, D::Error>
+where
+    T: Default + Deserialize<'de>,
+    D: serde::Deserializer<'de>,
+{
+    let v = Option::<T>::deserialize(d)?;
+    Ok(v.unwrap_or_default())
+}
+
 /// 平台统一响应壳 {code, message, data}（GoFrame 标准格式）
 #[derive(Debug, Deserialize)]
 pub struct ApiEnvelope {
@@ -81,6 +92,19 @@ mod tests {
         assert_eq!(boot.project.id, 7);
         assert_eq!(boot.conventions[0].key, "git.style");
         // myTasks / pendingReviews 缺席时容错为空
+        assert!(boot.my_tasks.is_empty());
+        assert!(boot.pending_reviews.is_empty());
+    }
+
+    #[test]
+    fn go_nil_slice_null_decodes_to_empty() {
+        // 真机形态：Go nil slice 序列化为显式 null（2026-09-05 平台实测）
+        let v = serde_json::json!({
+            "sessionId": "bcsh_2", "project": { "id": 4, "name": "byte-code-cli" },
+            "conventions": null, "myTasks": null, "pendingReviews": null
+        });
+        let boot: agent::SessionCreated = serde_json::from_value(v).unwrap();
+        assert!(boot.conventions.is_empty());
         assert!(boot.my_tasks.is_empty());
         assert!(boot.pending_reviews.is_empty());
     }
