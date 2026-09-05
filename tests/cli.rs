@@ -152,3 +152,15 @@ fn status_exits_2_outside_any_project() {
         .code(2)
         .stderr(predicate::str::contains("不在任何项目"));
 }
+
+#[test]
+fn help_lists_full_command_surface() {
+    let (_sb, mut cmd) = Sandbox::new();
+    cmd.arg("--help");
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("register"))
+        .stdout(predicate::str::contains("claim"))
+        .stdout(predicate::str::contains("notify"))
+        .stdout(predicate::str::contains("search"));
+}

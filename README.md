@@ -20,8 +20,18 @@ bcode tasks                   # 免参列表（会话承载当前项目）
 bcode claim 42 && bcode complete 42 --artifacts-file out.md
 ```
 
-> M0（当前）：whoami / status / profiles + 凭证布局 + 错误码体系。
-> 任务工作流（claim/complete/log）与通信（comment/notify）见 M1/M2。
+> 覆盖 M0-M2（F01-F17）：身份/接入/任务闭环 + 通信 + 上下文消费；
+> MCP 化（F21）独立里程碑。
+
+## 命令面
+
+| 域 | 命令 | 说明 |
+|---|---|---|
+| 身份 | `register` / `whoami` / `status` / `profiles` | 注册拿 key（只此一次落盘）/ 本地概览 / 在线校验 / profile 清单 |
+| 项目 | `join <code>` / `start` / `context` | 接入码换准入（写 `.bc/project`）/ 会话+开工包 / 约定原样输出 |
+| 任务 | `tasks` / `task <id>` / `claim <id>` / `complete <id>` / `log <id> <msg>` | 免参列表 / 详情 / 原子认领 / 完成+artifacts / 过程留痕（租约心跳） |
+| 通信 | `comment` / `comments [--follow]` / `notify [--watch]` | 评论 / 评论流增量轮询 / 通知列表与 SSE 实时流 |
+| 上下文 | `docs [path]` / `memory <key>` / `memories` / `search <kw>` | 文档树与正文 / 项目记忆 / 记忆列表 / 全局搜索 |
 
 ## 本地布局（四A 模型：身份与项目指向正交）
 

@@ -8,7 +8,7 @@ use anyhow::{Context, Result};
 use crate::config::bc_root;
 
 /// 身份凭证：数据根下 agents/<profile>/credential（0600，key 不回显）
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Credential {
     /// 平台侧名称（全局唯一，如 codex-cli）
     pub name: String,

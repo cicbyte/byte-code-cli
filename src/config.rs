@@ -109,6 +109,17 @@ pub fn find_project_pointer(start: &Path) -> Result<Option<cred::ProjectPointer>
     Ok(None)
 }
 
+/// 写项目指向到 <root>/.bc/project（join 成功后调用），返回落盘路径
+pub fn save_project_pointer(root: &Path, ptr: &cred::ProjectPointer) -> Result<PathBuf> {
+    let marker = root.join(".bc").join("project");
+    if let Some(dir) = marker.parent() {
+        fs::create_dir_all(dir).with_context(|| format!("创建 {} 失败", dir.display()))?;
+    }
+    let raw = serde_json::to_string_pretty(ptr)?;
+    fs::write(&marker, raw).with_context(|| format!("写入 {} 失败", marker.display()))?;
+    Ok(marker)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

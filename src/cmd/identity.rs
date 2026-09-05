@@ -1,11 +1,59 @@
-//! 身份域命令（注册层）：whoami 本地概览 / profiles 本地清单。
+//! 身份域命令（注册层）：register 注册 / whoami 本地概览 / profiles 本地清单。
 
 use anyhow::Result;
 use serde_json::json;
 
+use crate::client::BcodeClient;
 use crate::config::{self, Config};
 use crate::cred;
+use crate::model::agent::RegisterCreated;
 use crate::output::Out;
+
+/// `bcode register <name>`：注册身份（F01）——key 只此一次返回并落盘，不回显。
+/// 重名时平台返回业务错（退出码 6），客户端提示加后缀重试。
+pub async fn register(
+    cfg: &Config,
+    profile: &str,
+    name: &str,
+    capabilities: Option<&str>,
+    out: &Out,
+) -> Result<()> {
+    let server = config::effective_server_url(cfg)?;
+    if cred::load_credential(profile).is_ok() {
+        // profile 已有凭证：register 生成的是新身份，覆盖前明示
+        out.line(&format!(
+            "注意：profile「{profile}」已有凭证，本次将覆盖（旧 key 请在 Web Agent 管理页吊销）"
+        ));
+    }
+
+    let mut body = json!({ "name": name });
+    if let Some(caps) = capabilities {
+        body["capabilities"] = json!(caps);
+    }
+    let client = BcodeClient::anonymous(server)?;
+    let created: RegisterCreated = client.post_as("/v1/agent/register", body).await?;
+
+    let credential = cred::Credential {
+        name: name.to_string(),
+        agent_id: created.agent_id,
+        api_key: created.api_key,
+    };
+    let cred_path = cred::credential_path(profile);
+    cred::save_credential(profile, &credential)?;
+
+    out.kv("profile", profile);
+    out.kv("agent", &format!("{name} (id={})", created.agent_id));
+    out.kv("凭证已落盘", &cred_path.display().to_string());
+    out.line("（key 仅此一次返回，已写入本地，不再显示）");
+
+    out.emit_value(&json!({
+        "profile": profile,
+        "agent": name,
+        "agent_id": created.agent_id,
+        "credential_path": cred_path.display().to_string(),
+    }));
+    Ok(())
+}
 
 /// `bcode whoami`：纯本地——当前 profile/凭证/项目指向/会话缓存一屏概览。
 /// 不打网络（离线可用），远端有效性校验是 status 的职责。

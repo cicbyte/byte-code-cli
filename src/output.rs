@@ -15,6 +15,13 @@ impl Out {
         }
     }
 
+    /// 流式事件输出（notify --watch / comments --follow）：json 模式一行一事件
+    pub fn emit_event(&self, v: &Value) {
+        if self.json {
+            println!("{}", serde_json::to_string(v).unwrap_or_default());
+        }
+    }
+
     /// 仅 human 模式打印的说明行
     pub fn line(&self, human: &str) {
         if !self.json {

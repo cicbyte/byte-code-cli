@@ -13,12 +13,25 @@ use crate::model::ApiEnvelope;
 pub struct BcodeClient {
     http: Client,
     server: String,
-    credential: Credential,
+    credential: Option<Credential>,
     session: Option<String>,
 }
 
 impl BcodeClient {
     pub fn new(server: String, credential: Credential, session: Option<String>) -> Result<Self> {
+        Self::build(server, Some(credential), session)
+    }
+
+    /// 无认证客户端（register 公开端点用）
+    pub fn anonymous(server: String) -> Result<Self> {
+        Self::build(server, None, None)
+    }
+
+    fn build(
+        server: String,
+        credential: Option<Credential>,
+        session: Option<String>,
+    ) -> Result<Self> {
         let http = Client::builder()
             .user_agent(concat!("bcode/", env!("CARGO_PKG_VERSION")))
             .build()
@@ -31,13 +44,6 @@ impl BcodeClient {
         })
     }
 
-    // M1：start 建立会话后注入
-    #[allow(dead_code)]
-    pub fn with_session(mut self, sid: impl Into<String>) -> Self {
-        self.session = Some(sid.into());
-        self
-    }
-
     async fn request(
         &self,
         method: reqwest::Method,
@@ -45,10 +51,10 @@ impl BcodeClient {
         body: Option<Value>,
     ) -> Result<Value> {
         let url = format!("{}{}", self.server, path);
-        let mut req = self.http.request(method, &url).header(
-            "Authorization",
-            format!("Bearer {}", self.credential.api_key),
-        );
+        let mut req = self.http.request(method, &url);
+        if let Some(c) = &self.credential {
+            req = req.header("Authorization", format!("Bearer {}", c.api_key));
+        }
         if let Some(sid) = &self.session {
             req = req.header("X-Session", sid);
         }
@@ -82,9 +88,58 @@ impl BcodeClient {
             .map_err(|e| BcodeError::Network(format!("响应结构不符：{e}")).into())
     }
 
-    // M1：claim/complete/log 等写操作接入
-    #[allow(dead_code)]
     pub async fn post(&self, path: &str, body: Value) -> Result<Value> {
         self.request(reqwest::Method::POST, path, Some(body)).await
+    }
+
+    /// POST 并按 model 层强类型解码
+    pub async fn post_as<T: DeserializeOwned>(&self, path: &str, body: Value) -> Result<T> {
+        let v = self.post(path, body).await?;
+        serde_json::from_value(v)
+            .map_err(|e| BcodeError::Network(format!("响应结构不符：{e}")).into())
+    }
+
+    /// 打开 SSE 长连接（notify --watch）：认证与状态检查在此，流由调用方消费
+    pub async fn open_stream(&self, path: &str) -> Result<reqwest::Response> {
+        let url = format!("{}{}", self.server, path);
+        let mut req = self.http.get(&url);
+        if let Some(c) = &self.credential {
+            req = req.header("Authorization", format!("Bearer {}", c.api_key));
+        }
+        let resp = req
+            .send()
+            .await
+            .map_err(|e| BcodeError::Network(e.to_string()))?;
+        let status = resp.status();
+        if !status.is_success() {
+            return Err(BcodeError::Network(format!("SSE 连接失败（HTTP {status}）")).into());
+        }
+        Ok(resp)
+    }
+}
+
+/// 最小百分号编码（query 值用）：非保留字符外的字节转 %XX
+pub fn encode_query(s: &str) -> String {
+    let mut out = String::new();
+    for b in s.as_bytes() {
+        match b {
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => {
+                out.push(*b as char);
+            }
+            _ => out.push_str(&format!("%{b:02X}")),
+        }
+    }
+    out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn encode_query_keeps_unreserved_and_encodes_rest() {
+        assert_eq!(encode_query("AZaz09-_.~"), "AZaz09-_.~");
+        assert_eq!(encode_query("a b&c=1"), "a%20b%26c%3D1");
+        assert_eq!(encode_query("约定"), "%E7%BA%A6%E5%AE%9A");
     }
 }

@@ -1,6 +1,11 @@
-//! 平台 API 线缆类型的 serde 强类型（源：byte-code `api/v1/agent/agent.go`，
-//! 字段为 camelCase）。反序列化即校验，替代命令内裸 `Value` 拼装；
-//! M1 各端点（register/join/sessions/claim…）在此扩充。
+//! 平台 API 线缆类型的 serde 强类型，按端点域分文件
+//! （源：byte-code `api/v1/{agent,project,platform,docs}`，字段为 camelCase）。
+//! 反序列化即校验，替代命令内裸 `Value` 拼装。
+
+pub mod agent;
+pub mod docs;
+pub mod platform;
+pub mod task;
 
 use serde::Deserialize;
 
@@ -28,32 +33,6 @@ impl ApiEnvelope {
             Err(BcodeError::Business(self.message))
         }
     }
-}
-
-/// GET /v1/agent/tasks 响应（status 采样可见任务用）
-#[derive(Debug, Deserialize)]
-pub struct TaskList {
-    #[serde(default)]
-    pub total: i64,
-    #[serde(default)]
-    pub list: Vec<TaskBrief>,
-}
-
-/// 任务摘要（工作会话开工包与任务列表共用）
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct TaskBrief {
-    #[serde(default)]
-    pub id: i64,
-    #[serde(default)]
-    pub title: String,
-    #[serde(default)]
-    pub status: String,
-    #[serde(default)]
-    pub priority: i64,
-    /// 仅有值时平台才输出
-    #[serde(default)]
-    pub due_date: Option<String>,
 }
 
 #[cfg(test)]
@@ -92,14 +71,17 @@ mod tests {
     }
 
     #[test]
-    fn task_list_decodes_wire_payload() {
+    fn session_kickoff_decodes_camel_case() {
         let v = serde_json::json!({
-            "total": 3,
-            "list": [{ "id": 1, "title": "t", "status": "open", "priority": 2, "dueDate": "2026-01-01" }]
+            "sessionId": "bcsh_1", "project": { "id": 7, "name": "demo" },
+            "conventions": [{ "key": "git.style", "value": "sq", "scope": "global" }]
         });
-        let tl: TaskList = serde_json::from_value(v).unwrap();
-        assert_eq!(tl.total, 3);
-        assert_eq!(tl.list.len(), 1);
-        assert_eq!(tl.list[0].due_date.as_deref(), Some("2026-01-01"));
+        let boot: agent::SessionCreated = serde_json::from_value(v).unwrap();
+        assert_eq!(boot.session_id, "bcsh_1");
+        assert_eq!(boot.project.id, 7);
+        assert_eq!(boot.conventions[0].key, "git.style");
+        // myTasks / pendingReviews 缺席时容错为空
+        assert!(boot.my_tasks.is_empty());
+        assert!(boot.pending_reviews.is_empty());
     }
 }
