@@ -34,7 +34,10 @@ pub async fn whoami(cfg: &Config, profile: &str, out: &Out) -> Result<()> {
             payload["server"] = json!(u);
         }
         None => {
-            out.kv("server", "（未配置——见 ~/.bc/config.toml）");
+            out.kv(
+                "server",
+                "（未配置——见 ~/.cicbyte/apps/byte-code-cli/config.toml）",
+            );
             payload["server"] = json!(null);
         }
     }

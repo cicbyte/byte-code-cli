@@ -7,7 +7,7 @@ use anyhow::{Context, Result};
 
 use crate::config::bc_root;
 
-/// 身份凭证：~/.bc/agents/<profile>/credential（0600，key 不回显）
+/// 身份凭证：数据根下 agents/<profile>/credential（0600，key 不回显）
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct Credential {
     /// 平台侧名称（全局唯一，如 codex-cli）
@@ -23,7 +23,7 @@ pub struct ProjectPointer {
     pub project_name: String,
 }
 
-/// 会话缓存：~/.bc/sessions/<profile>/<project_id>.json
+/// 会话缓存：数据根下 sessions/<profile>/<project_id>.json
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct SessionRecord {
     pub session_id: String,

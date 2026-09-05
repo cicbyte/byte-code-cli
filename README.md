@@ -13,7 +13,7 @@
 ```bash
 cargo install --path .        # 或直接 cargo build --release
 
-bcode register my-agent       # 一次性拿 bc_ key（落 ~/.bc/agents/<profile>/）
+bcode register my-agent       # 一次性拿 bc_ key（落数据目录 agents/<profile>/）
 bcode join <接入码>            # owner 在 Web 项目设置页生成；写 .bc/project
 bcode start                   # 建立会话 + 展示开工包（conventions/my_tasks）
 bcode tasks                   # 免参列表（会话承载当前项目）
@@ -26,15 +26,15 @@ bcode claim 42 && bcode complete 42 --artifacts-file out.md
 ## 本地布局（四A 模型：身份与项目指向正交）
 
 ```
-~/.bc/config.toml                    server_url / default_profile
-~/.bc/agents/<profile>/credential    { name, agent_id, api_key }   0600
-~/.bc/sessions/<profile>/<pid>.json  { session_id }
+~/.cicbyte/apps/byte-code-cli/config.toml                    server_url / default_profile
+~/.cicbyte/apps/byte-code-cli/agents/<profile>/credential    { name, agent_id, api_key }   0600
+~/.cicbyte/apps/byte-code-cli/sessions/<profile>/<pid>.json  { session_id }
 <repo>/.bc/project                   { project_id, project_name }  可进 git，无身份
 ```
 
 换 agent = 换 profile（`--profile` / `BC_AGENT`）；多 agent 同目录并行天然隔离。
 
-> `BC_HOME` 环境变量可覆盖 `~/.bc` 根目录（测试/CI 指向临时目录用），
+> `BC_HOME` 环境变量可覆盖数据根目录 `~/.cicbyte/apps/byte-code-cli`（测试/CI 指向临时目录用），
 > 如 `BC_HOME=./tmp-bc bcode whoami`。
 
 ## 退出码

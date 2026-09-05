@@ -1,9 +1,9 @@
-//! ~/.bc/ 全局布局（协议 4A：身份在主目录，项目目录只存指向）：
-//!   ~/.bc/config.toml                    server_url / default_profile
-//!   ~/.bc/agents/<profile>/credential    { name, agent_id, api_key }
-//!   ~/.bc/sessions/<profile>/<pid>.json  { session_id, project_id, project_name }
-//!   <repo>/.bc/project                   { project_id, project_name }（可进 git，无身份）
-//! BC_HOME 环境变量可覆盖 ~/.bc 根——测试与 CI 指向临时目录，不污染真实主目录。
+//! 应用数据目录布局（协议 4A：身份在主目录，项目目录只存指向）：
+//!   ~/.cicbyte/apps/byte-code-cli/config.toml                    server_url / default_profile
+//!   ~/.cicbyte/apps/byte-code-cli/agents/<profile>/credential    { name, agent_id, api_key }
+//!   ~/.cicbyte/apps/byte-code-cli/sessions/<profile>/<pid>.json  { session_id, project_id, project_name }
+//!   <repo>/.bc/project                                            { project_id, project_name }（可进 git，无身份）
+//! BC_HOME 环境变量可覆盖数据根——测试与 CI 指向临时目录，不污染真实主目录。
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -19,6 +19,7 @@ pub struct Config {
     pub default_profile: Option<String>,
 }
 
+/// 数据根：~/.cicbyte/apps/byte-code-cli（BC_HOME 可覆盖）
 pub fn bc_root() -> PathBuf {
     if let Ok(root) = std::env::var("BC_HOME") {
         let root = root.trim();
@@ -26,7 +27,11 @@ pub fn bc_root() -> PathBuf {
             return PathBuf::from(root);
         }
     }
-    dirs::home_dir().expect("无法定位用户主目录").join(".bc")
+    dirs::home_dir()
+        .expect("无法定位用户主目录")
+        .join(".cicbyte")
+        .join("apps")
+        .join("byte-code-cli")
 }
 
 pub fn config_path() -> PathBuf {
@@ -46,7 +51,8 @@ pub fn load_config() -> Result<Config> {
 #[allow(dead_code)]
 pub fn save_config(cfg: &Config) -> Result<()> {
     let p = config_path();
-    fs::create_dir_all(bc_root()).with_context(|| "创建 ~/.bc 失败")?;
+    fs::create_dir_all(bc_root())
+        .with_context(|| "创建数据目录 ~/.cicbyte/apps/byte-code-cli 失败")?;
     let raw = toml::to_string_pretty(cfg)?;
     fs::write(&p, raw).with_context(|| format!("写入 {} 失败", p.display()))?;
     Ok(())

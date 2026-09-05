@@ -1,5 +1,5 @@
 //! CLI 对外契约测试：退出码表（error.rs）与 --json 输出形状。
-//! 通过 BC_HOME + 临时 cwd 隔离，全程不触碰真实 ~/.bc 与项目外目录。
+//! 通过 BC_HOME + 临时 cwd 隔离，全程不触碰真实数据目录与项目外目录。
 
 use assert_cmd::Command;
 use predicates::prelude::*;
