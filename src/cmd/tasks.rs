@@ -9,7 +9,7 @@ use crate::client::encode_query;
 use crate::config::Config;
 use crate::model::agent::AgentTasks;
 use crate::model::task::{AiLogList, CommentList, CreatedId, TaskDetail};
-use crate::output::Out;
+use crate::output::{Out, pad_display};
 
 /// `bcode tasks [--status s] [--keyword kw]`（F06）：免参任务列表。
 /// status 透传平台语义：缺省=未完成三态（open/in_progress/review），all=全部。
@@ -38,18 +38,23 @@ pub async fn tasks(
     if page.list.is_empty() {
         out.line(&format!("（无任务，共 {} 条记录）", page.total));
     } else {
-        out.line(&format!(
-            "  {:<7} {:<13} {:<4} {:<12} {}",
-            "id", "状态", "优先", "截止", "标题"
-        ));
+        let head = format!(
+            "  {} {} {} {} {}",
+            pad_display("id", 7),
+            pad_display("状态", 13),
+            pad_display("优先", 4),
+            pad_display("截止", 12),
+            "标题"
+        );
+        out.line(&head);
         for t in &page.list {
             let due = t.due_date.as_deref().unwrap_or("—");
             out.line(&format!(
-                "  {:<7} {:<13} {:<4} {:<12} {}",
-                t.id,
-                t.status,
-                format!("P{}", t.priority),
-                due,
+                "  {} {} {} {} {}",
+                pad_display(&t.id.to_string(), 7),
+                pad_display(&t.status, 13),
+                pad_display(&format!("P{}", t.priority), 4),
+                pad_display(due, 12),
                 t.title
             ));
         }

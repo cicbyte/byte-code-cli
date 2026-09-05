@@ -18,6 +18,10 @@ pub struct Cli {
     #[arg(long, global = true)]
     pub json: bool,
 
+    /// 跳过 TLS 证书校验（自签/调试专用；优先于 config.toml 的 insecure）
+    #[arg(long, global = true)]
+    pub insecure: bool,
+
     #[command(subcommand)]
     pub command: Command,
 }

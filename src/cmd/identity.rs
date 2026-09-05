@@ -30,7 +30,7 @@ pub async fn register(
     if let Some(caps) = capabilities {
         body["capabilities"] = json!(caps);
     }
-    let client = BcodeClient::anonymous(server)?;
+    let client = BcodeClient::anonymous(server, cfg.insecure)?;
     let created: RegisterCreated = client.post_as("/v1/agent/register", body).await?;
 
     let credential = cred::Credential {
@@ -38,7 +38,7 @@ pub async fn register(
         agent_id: created.agent_id,
         api_key: created.api_key,
     };
-    let cred_path = cred::credential_path(profile);
+    let cred_path = cred::credential_path(profile)?;
     cred::save_credential(profile, &credential)?;
 
     out.kv("profile", profile);

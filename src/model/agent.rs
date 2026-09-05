@@ -5,11 +5,21 @@ use serde::{Deserialize, Serialize};
 use super::null_to_default;
 
 /// POST /v1/agent/register 响应——key 只此一次返回，落盘后不再可见
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RegisterCreated {
     pub agent_id: i64,
     pub api_key: String,
+}
+
+/// Debug 脱敏（与 cred::Credential 同款）：key 不进任何调试输出
+impl std::fmt::Debug for RegisterCreated {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RegisterCreated")
+            .field("agent_id", &self.agent_id)
+            .field("api_key", &"bc_***")
+            .finish()
+    }
 }
 
 /// POST /v1/agent/projects/join 响应

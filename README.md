@@ -47,6 +47,12 @@ bcode claim 42 && bcode complete 42 --artifacts-file out.md
 > `BC_HOME` 环境变量可覆盖数据根目录 `~/.cicbyte/apps/byte-code-cli`（测试/CI 指向临时目录用），
 > 如 `BC_HOME=./tmp-bc bcode whoami`。
 
+## 终端兼容
+
+输出为 UTF-8。Windows Terminal / PowerShell / Git Bash / Linux 终端开箱即用；
+传统 `cmd.exe` 若中文乱码，先执行 `chcp 65001` 或改用上述终端。自签 HTTPS 部署用
+`--insecure`（会打警告）或 config.toml 的 `insecure = true`。
+
 ## 退出码
 
 `0` 成功 · `2` 用法错 · `3` 认证失效 · `4` 权限拒 · `5` 网络错 · `6` 业务拒

@@ -32,11 +32,18 @@ pub struct ApiEnvelope {
 }
 
 impl ApiEnvelope {
-    /// code=0 成功；非 0 时按语义分类（平台 code 50=通用业务错，401/403 同名映射）
+    /// code=0 成功；非 0 优先按结构化 code 分类（401/403 语义稳定，不随文案变），
+    /// 仅 code 不明时退回 message 文本关键字识别，其余归业务错（平台 code 50=通用业务错）
     pub fn into_data(self) -> Result<serde_json::Value, BcodeError> {
         if self.code == 0 {
-            Ok(self.data)
-        } else if self.message.contains("未登录") || self.message.contains("认证") {
+            return Ok(self.data);
+        }
+        match self.code {
+            401 => return Err(BcodeError::Auth(self.message.clone())),
+            403 => return Err(BcodeError::Forbidden(self.message.clone())),
+            _ => {}
+        }
+        if self.message.contains("未登录") || self.message.contains("认证") {
             Err(BcodeError::Auth(self.message))
         } else if self.message.contains("无权限") || self.message.contains("权限") {
             Err(BcodeError::Forbidden(self.message))
@@ -79,6 +86,33 @@ mod tests {
             mk("任务已被认领").into_data(),
             Err(BcodeError::Business(_))
         ));
+    }
+
+    #[test]
+    fn envelope_prefers_numeric_code_over_message_text() {
+        // code 语义稳定：文案无关（平台改措辞不影响退出码契约）
+        let auth = ApiEnvelope {
+            code: 401,
+            message: "session expired".into(),
+            data: serde_json::Value::Null,
+        };
+        assert!(matches!(auth.into_data(), Err(BcodeError::Auth(_))));
+        let forbidden = ApiEnvelope {
+            code: 403,
+            message: "denied".into(),
+            data: serde_json::Value::Null,
+        };
+        assert!(matches!(
+            forbidden.into_data(),
+            Err(BcodeError::Forbidden(_))
+        ));
+        // code 不明时退回文本识别（"认证"/"未登录"关键字命中 Auth）
+        let textual = ApiEnvelope {
+            code: 99,
+            message: "请先完成认证".into(),
+            data: serde_json::Value::Null,
+        };
+        assert!(matches!(textual.into_data(), Err(BcodeError::Auth(_))));
     }
 
     #[test]

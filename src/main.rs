@@ -15,13 +15,20 @@ async fn main() {
     let out = Out { json: cli.json };
 
     // 环境错误（读/解析 config.toml 失败）与用法错同走退出码 2，不 panic
-    let cfg = match config::load_config() {
+    let mut cfg = match config::load_config() {
         Ok(cfg) => cfg,
         Err(e) => {
             eprintln!("bcode: {e:#}");
             std::process::exit(2);
         }
     };
+    // 命令行 > 配置文件：--insecure 旗标覆盖 config.toml
+    if cli.insecure {
+        cfg.insecure = true;
+    }
+    if cfg.insecure {
+        eprintln!("bcode: 警告：TLS 证书校验已关闭（--insecure），仅限自签/调试环境使用");
+    }
     let profile = config::effective_profile(&cfg, cli.profile.as_ref());
 
     let result = match cli.command {

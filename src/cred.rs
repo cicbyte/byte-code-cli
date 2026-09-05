@@ -8,12 +8,23 @@ use anyhow::{Context, Result};
 use crate::config::bc_root;
 
 /// 身份凭证：数据根下 agents/<profile>/credential（0600，key 不回显）
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub struct Credential {
     /// 平台侧名称（全局唯一，如 codex-cli）
     pub name: String,
     pub agent_id: i64,
     pub api_key: String,
+}
+
+/// Debug 脱敏：key 只保留前缀占位，杜绝任何 `{:?}` 调试输出泄漏
+impl std::fmt::Debug for Credential {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Credential")
+            .field("name", &self.name)
+            .field("agent_id", &self.agent_id)
+            .field("api_key", &"bc_***")
+            .finish()
+    }
 }
 
 /// 项目指向：<repo>/.bc/project（无身份信息，可进 git）
@@ -31,22 +42,20 @@ pub struct SessionRecord {
     pub project_name: String,
 }
 
-pub fn credential_path(profile: &str) -> PathBuf {
-    bc_root().join("agents").join(profile).join("credential")
+pub fn credential_path(profile: &str) -> Result<PathBuf> {
+    Ok(bc_root()?.join("agents").join(profile).join("credential"))
 }
 
 pub fn load_credential(profile: &str) -> Result<Credential> {
-    let p = credential_path(profile);
+    let p = credential_path(profile)?;
     let raw = fs::read_to_string(&p)
         .with_context(|| format!("profile「{profile}」无本地凭证（{}）", p.display()))?;
     serde_json::from_str(&raw).with_context(|| format!("解析 {} 失败", p.display()))
 }
 
 /// 写凭证并在类 Unix 上收紧为 0600（Windows 依赖用户目录 ACL）
-// M1：register 落盘凭证时接入
-#[allow(dead_code)]
 pub fn save_credential(profile: &str, cred: &Credential) -> Result<()> {
-    let p = credential_path(profile);
+    let p = credential_path(profile)?;
     if let Some(dir) = p.parent() {
         fs::create_dir_all(dir)?;
     }
@@ -61,7 +70,10 @@ pub fn save_credential(profile: &str, cred: &Credential) -> Result<()> {
 }
 
 pub fn list_profiles() -> Vec<String> {
-    let dir = bc_root().join("agents");
+    // 数据根不可定位（极罕见）时视同无 profile，不阻断本地命令
+    let Ok(dir) = bc_root().map(|r| r.join("agents")) else {
+        return vec![];
+    };
     let Ok(entries) = fs::read_dir(&dir) else {
         return vec![];
     };
@@ -74,26 +86,41 @@ pub fn list_profiles() -> Vec<String> {
     out
 }
 
-pub fn session_path(profile: &str, project_id: i64) -> PathBuf {
-    bc_root()
+pub fn session_path(profile: &str, project_id: i64) -> Result<PathBuf> {
+    Ok(bc_root()?
         .join("sessions")
         .join(profile)
-        .join(format!("{project_id}.json"))
+        .join(format!("{project_id}.json")))
 }
 
 pub fn load_session(profile: &str, project_id: i64) -> Option<SessionRecord> {
-    let p = session_path(profile, project_id);
+    let p = session_path(profile, project_id).ok()?;
     let raw = fs::read_to_string(p).ok()?;
     serde_json::from_str(&raw).ok()
 }
 
-// M1：start 建立会话后落盘
-#[allow(dead_code)]
 pub fn save_session(profile: &str, rec: &SessionRecord) -> Result<()> {
-    let p = session_path(profile, rec.project_id);
+    let p = session_path(profile, rec.project_id)?;
     if let Some(dir) = p.parent() {
         fs::create_dir_all(dir)?;
     }
     fs::write(&p, serde_json::to_string_pretty(rec)?)?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn debug_output_never_contains_plain_key() {
+        let cred = Credential {
+            name: "bcode-e2e".into(),
+            agent_id: 25,
+            api_key: "bc_deadbeefdeadbeef".into(),
+        };
+        let dbg = format!("{cred:?}");
+        assert!(!dbg.contains("deadbeef"), "Debug 输出泄漏了明文 key：{dbg}");
+        assert!(dbg.contains("bc_***"));
+    }
 }

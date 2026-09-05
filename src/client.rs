@@ -18,25 +18,35 @@ pub struct BcodeClient {
 }
 
 impl BcodeClient {
-    pub fn new(server: String, credential: Credential, session: Option<String>) -> Result<Self> {
-        Self::build(server, Some(credential), session)
+    pub fn new(
+        server: String,
+        credential: Credential,
+        session: Option<String>,
+        insecure: bool,
+    ) -> Result<Self> {
+        Self::build(server, Some(credential), session, insecure)
     }
 
     /// 无认证客户端（register 公开端点用）
-    pub fn anonymous(server: String) -> Result<Self> {
-        Self::build(server, None, None)
+    pub fn anonymous(server: String, insecure: bool) -> Result<Self> {
+        Self::build(server, None, None, insecure)
     }
 
     fn build(
         server: String,
         credential: Option<Credential>,
         session: Option<String>,
+        insecure: bool,
     ) -> Result<Self> {
-        let http = Client::builder()
+        let mut builder = Client::builder()
             .user_agent(concat!("bcode/", env!("CARGO_PKG_VERSION")))
             // 连接级超时全体生效（含 SSE 长连接的建立阶段）；
             // 总超时不设在客户端上——SSE 需要无限期，常规请求按请求级覆盖
-            .connect_timeout(std::time::Duration::from_secs(10))
+            .connect_timeout(std::time::Duration::from_secs(10));
+        if insecure {
+            builder = builder.danger_accept_invalid_certs(true);
+        }
+        let http = builder
             .build()
             .map_err(|e| BcodeError::Network(e.to_string()))?;
         Ok(Self {
@@ -78,6 +88,9 @@ impl BcodeClient {
             .map_err(|e| BcodeError::Network(format!("响应解析失败（HTTP {status}）：{e}")))?;
         if status.as_u16() == 401 {
             return Err(BcodeError::Auth(envelope.message).into());
+        }
+        if status.as_u16() == 403 {
+            return Err(BcodeError::Forbidden(envelope.message).into());
         }
         Ok(envelope.into_data()?)
     }

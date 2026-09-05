@@ -53,7 +53,7 @@ pub async fn start(
     // 项目解析：--project（数字 id 或名称）优先，缺省取 .bc/project 指向
     let project_id = match project_flag {
         Some(spec) => {
-            let client = BcodeClient::new(server.clone(), credential.clone(), None)?;
+            let client = BcodeClient::new(server.clone(), credential.clone(), None, cfg.insecure)?;
             resolve_project(&client, spec).await?
         }
         None => {
@@ -66,7 +66,7 @@ pub async fn start(
         }
     };
 
-    let boot = ensure_session(&server, profile, &credential, project_id).await?;
+    let boot = ensure_session(&server, profile, &credential, project_id, cfg.insecure).await?;
     display_kickoff(&boot, out);
     out.emit_value(&serde_json::to_value(&boot)?);
     Ok(())
@@ -82,7 +82,7 @@ pub async fn context(cfg: &Config, profile: &str, out: &Out) -> Result<()> {
         anyhow!("当前目录不在任何项目内：在项目仓库根目录执行，或先 bcode join <接入码>")
     })?;
 
-    let boot = ensure_session(&server, profile, &credential, ptr.project_id).await?;
+    let boot = ensure_session(&server, profile, &credential, ptr.project_id, cfg.insecure).await?;
     if boot.conventions.is_empty() {
         out.line("（无约定——项目与全局记忆均未配置 conventions.*）");
     }
@@ -126,7 +126,7 @@ pub async fn status(cfg: &Config, profile: &str, out: &Out) -> Result<()> {
         return Ok(());
     };
 
-    let client = BcodeClient::new(server, credential, Some(sess.session_id))?;
+    let client = BcodeClient::new(server, credential, Some(sess.session_id), cfg.insecure)?;
     let tasks = client.get_as::<AgentTasks>("/v1/agent/tasks").await?;
 
     out.kv("连接", "正常（身份/准入/会话全部有效）");

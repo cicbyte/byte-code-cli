@@ -28,8 +28,9 @@ pub(crate) async fn ensure_session(
     profile: &str,
     credential: &Credential,
     project_id: i64,
+    insecure: bool,
 ) -> Result<SessionCreated> {
-    let client = BcodeClient::new(server.to_string(), credential.clone(), None)?;
+    let client = BcodeClient::new(server.to_string(), credential.clone(), None, insecure)?;
     let boot = client
         .post_as::<SessionCreated>("/v1/agent/sessions", json!({ "projectId": project_id }))
         .await?;
@@ -57,12 +58,18 @@ pub(crate) async fn project_ctx(cfg: &Config, profile: &str) -> Result<Ctx> {
     let session_id = match cred::load_session(profile, project.project_id) {
         Some(s) => s.session_id,
         None => {
-            ensure_session(&server, profile, &credential, project.project_id)
-                .await?
-                .session_id
+            ensure_session(
+                &server,
+                profile,
+                &credential,
+                project.project_id,
+                cfg.insecure,
+            )
+            .await?
+            .session_id
         }
     };
-    let client = BcodeClient::new(server, credential.clone(), Some(session_id))?;
+    let client = BcodeClient::new(server, credential.clone(), Some(session_id), cfg.insecure)?;
     Ok(Ctx {
         client,
         credential,
@@ -74,5 +81,5 @@ pub(crate) async fn project_ctx(cfg: &Config, profile: &str) -> Result<Ctx> {
 pub(crate) fn identity_client(cfg: &Config, profile: &str) -> Result<BcodeClient> {
     let server = config::effective_server_url(cfg)?;
     let credential = cred::load_credential(profile)?;
-    BcodeClient::new(server, credential, None)
+    BcodeClient::new(server, credential, None, cfg.insecure)
 }

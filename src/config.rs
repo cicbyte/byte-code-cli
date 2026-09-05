@@ -8,7 +8,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use anyhow::{Context, Result, bail};
+use anyhow::{Context, Result, anyhow, bail};
 
 use crate::cred;
 
@@ -17,29 +17,33 @@ pub struct Config {
     /// 平台地址，含 API 前缀，如 http://127.0.0.1:8000/api
     pub server_url: Option<String>,
     pub default_profile: Option<String>,
+    /// 跳过 TLS 证书校验（自签/调试用；--insecure 旗标优先于此）
+    #[serde(default)]
+    pub insecure: bool,
 }
 
-/// 数据根：~/.cicbyte/apps/byte-code-cli（BC_HOME 可覆盖）
-pub fn bc_root() -> PathBuf {
+/// 数据根：~/.cicbyte/apps/byte-code-cli（BC_HOME 可覆盖）。
+/// 主目录不可定位时报错（由调用方收敛为退出码 2），不再 panic
+pub fn bc_root() -> Result<PathBuf> {
     if let Ok(root) = std::env::var("BC_HOME") {
         let root = root.trim();
         if !root.is_empty() {
-            return PathBuf::from(root);
+            return Ok(PathBuf::from(root));
         }
     }
     dirs::home_dir()
-        .expect("无法定位用户主目录")
-        .join(".cicbyte")
-        .join("apps")
-        .join("byte-code-cli")
+        .map(|h| h.join(".cicbyte").join("apps").join("byte-code-cli"))
+        .ok_or_else(|| {
+            anyhow!("无法定位用户主目录（HOME/USERPROFILE 均缺失）：可用 BC_HOME 显式指定数据根")
+        })
 }
 
-pub fn config_path() -> PathBuf {
-    bc_root().join("config.toml")
+pub fn config_path() -> Result<PathBuf> {
+    Ok(bc_root()?.join("config.toml"))
 }
 
 pub fn load_config() -> Result<Config> {
-    let p = config_path();
+    let p = config_path()?;
     if !p.exists() {
         return Ok(Config::default());
     }
@@ -47,11 +51,11 @@ pub fn load_config() -> Result<Config> {
     toml::from_str(&raw).with_context(|| format!("解析 {} 失败", p.display()))
 }
 
-// M1：register/join 流程写回配置时接入
+// M3：init 引导式写配置时接入
 #[allow(dead_code)]
 pub fn save_config(cfg: &Config) -> Result<()> {
-    let p = config_path();
-    fs::create_dir_all(bc_root())
+    let p = config_path()?;
+    fs::create_dir_all(bc_root()?)
         .with_context(|| "创建数据目录 ~/.cicbyte/apps/byte-code-cli 失败")?;
     let raw = toml::to_string_pretty(cfg)?;
     fs::write(&p, raw).with_context(|| format!("写入 {} 失败", p.display()))?;
@@ -61,12 +65,12 @@ pub fn save_config(cfg: &Config) -> Result<()> {
 /// 生效配置：server_url 未配置时报错并给出引导（F18 的 init 交互留 M3，
 /// 当前阶段直接提示手写 config.toml）
 pub fn effective_server_url(cfg: &Config) -> Result<String> {
+    let hint = config_path()
+        .map(|p| p.display().to_string())
+        .unwrap_or_default();
     match &cfg.server_url {
         Some(u) => Ok(u.trim_end_matches('/').to_string()),
-        None => bail!(
-            "未配置平台地址：请在 {} 写入 server_url = \"http://<host>:8000/api\"",
-            config_path().display()
-        ),
+        None => bail!("未配置平台地址：请在 {hint} 写入 server_url = \"http://<host>:8000/api\""),
     }
 }
 
@@ -92,7 +96,8 @@ fn resolve_profile(cfg: &Config, flag: Option<&str>, env: Option<&str>) -> Strin
         .unwrap_or_else(|| "default".into())
 }
 
-/// 向上查找 .bc/project（当前目录及祖先——agent 可能在 repo 子目录工作）
+/// 向上查找 .bc/project（当前目录及祖先——agent 可能在 repo 子目录工作）。
+/// 以 .git 为仓库边界：不越出仓库向上找，防父目录杂散指针静默劫持项目上下文
 pub fn find_project_pointer(start: &Path) -> Result<Option<cred::ProjectPointer>> {
     let mut cur = Some(start);
     while let Some(dir) = cur {
@@ -103,6 +108,9 @@ pub fn find_project_pointer(start: &Path) -> Result<Option<cred::ProjectPointer>
             let ptr: cred::ProjectPointer = serde_json::from_str(&raw)
                 .with_context(|| format!("解析 {} 失败", marker.display()))?;
             return Ok(Some(ptr));
+        }
+        if dir.join(".git").exists() {
+            return Ok(None);
         }
         cur = dir.parent();
     }
@@ -162,5 +170,42 @@ mod tests {
         fs::create_dir_all(root.join(".bc")).unwrap();
         fs::write(root.join(".bc").join("project"), "not-json").unwrap();
         assert!(find_project_pointer(root).is_err());
+    }
+
+    #[test]
+    fn project_pointer_stops_at_git_boundary() {
+        // 仓库外层被投放杂散指针：repo（含 .git）内部查找不得越界命中
+        let tmp = tempfile::TempDir::new().unwrap();
+        let root = tmp.path();
+        fs::create_dir_all(root.join(".bc")).unwrap();
+        fs::write(
+            root.join(".bc").join("project"),
+            r#"{"project_id":666,"project_name":"hijack"}"#,
+        )
+        .unwrap();
+        let repo = root.join("repo");
+        fs::create_dir_all(repo.join(".git")).unwrap();
+        fs::create_dir_all(repo.join("sub")).unwrap();
+
+        assert!(find_project_pointer(&repo.join("sub")).unwrap().is_none());
+        assert!(find_project_pointer(&repo).unwrap().is_none());
+    }
+
+    #[test]
+    fn project_pointer_finds_marker_in_repo_root() {
+        // 指针与 .git 同级（正常形态：join 写在仓库根）必须能找到
+        let tmp = tempfile::TempDir::new().unwrap();
+        let repo = tmp.path().join("repo");
+        fs::create_dir_all(repo.join(".git")).unwrap();
+        fs::create_dir_all(repo.join(".bc")).unwrap();
+        fs::write(
+            repo.join(".bc").join("project"),
+            r#"{"project_id":7,"project_name":"demo"}"#,
+        )
+        .unwrap();
+        fs::create_dir_all(repo.join("a")).unwrap();
+
+        let ptr = find_project_pointer(&repo.join("a")).unwrap().unwrap();
+        assert_eq!(ptr.project_id, 7);
     }
 }
