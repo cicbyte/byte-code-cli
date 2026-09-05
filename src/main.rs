@@ -95,6 +95,10 @@ async fn main() {
             ref query,
             ref module,
         } => cmd::vault::search(&cfg, &profile, query, module.as_deref(), &out).await,
+        Command::Init { ref url } => cmd::system::init(&mut cfg, url.as_deref(), &out).await,
+        Command::Open { ref target, id } => cmd::system::open(&cfg, target, id, &out),
+        Command::Completion { shell } => cmd::system::completion(shell),
+        Command::Man => cmd::system::man(),
     };
 
     if let Err(e) = result {

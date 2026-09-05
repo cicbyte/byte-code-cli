@@ -164,3 +164,38 @@ fn help_lists_full_command_surface() {
         .stdout(predicate::str::contains("notify"))
         .stdout(predicate::str::contains("search"));
 }
+
+#[test]
+fn init_writes_config_in_noninteractive_mode() {
+    let (sb, mut cmd) = Sandbox::new();
+    let _ = sb;
+    // 指向不可达端口：探测失败仅警告，配置仍写入（离线可测）
+    cmd.args(["init", "http://127.0.0.1:9/api"]);
+    cmd.assert().success();
+    let raw = std::fs::read_to_string(sb.root.join("config.toml")).unwrap();
+    assert!(
+        raw.contains(r#"server_url = "http://127.0.0.1:9/api""#),
+        "config 未写入：{raw}"
+    );
+}
+
+#[test]
+fn init_rejects_non_http_url() {
+    let (_sb, mut cmd) = Sandbox::new();
+    cmd.args(["init", "127.0.0.1:8000"]);
+    cmd.assert().failure().code(2);
+}
+
+#[test]
+fn completion_and_man_smoke() {
+    let (_sb, mut cmd) = Sandbox::new();
+    cmd.args(["completion", "bash"]);
+    let out = cmd.assert().success().get_output().stdout.clone();
+    let script = String::from_utf8(out).unwrap();
+    assert!(script.contains("register"), "补全脚本缺少子命令");
+
+    let (_sb2, mut cmd2) = Sandbox::new();
+    cmd2.arg("man");
+    let out2 = cmd2.assert().success().get_output().stdout.clone();
+    assert!(String::from_utf8(out2).unwrap().contains("bcode"));
+}

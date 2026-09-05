@@ -1,9 +1,11 @@
 //! 命令实现，按协议域分组：identity（注册/身份）、project（准入与会话）、
-//! tasks（任务工作流）、comms（通信）、vault（文档/记忆/搜索 上下文消费）。
+//! tasks（任务工作流）、comms（通信）、vault（文档/记忆/搜索 上下文消费）、
+//! system（init/open/completion/man 便利命令）。
 
 pub mod comms;
 pub mod identity;
 pub mod project;
+pub mod system;
 pub mod tasks;
 pub mod vault;
 

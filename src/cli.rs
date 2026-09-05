@@ -135,4 +135,27 @@ pub enum Command {
         #[arg(long)]
         module: Option<String>,
     },
+    /// 引导式写 config.toml（server_url；缺省交互询问）
+    Init {
+        /// 平台地址（含 /api 前缀）；非交互环境必须提供
+        url: Option<String>,
+    },
+    /// 生成 Web 深链并尝试打开浏览器
+    Open {
+        target: OpenTarget,
+        /// 任务 id（target=task 时必填）
+        id: Option<i64>,
+    },
+    /// 生成 shell 补全脚本到 stdout（source 或装入补全目录）
+    Completion { shell: clap_complete::Shell },
+    /// 生成 man 手册（roff）到 stdout
+    Man,
+}
+
+#[derive(clap::ValueEnum, Clone, Debug)]
+pub enum OpenTarget {
+    /// 任务（前端暂无直达路由，落到项目看板）
+    Task,
+    /// 项目看板
+    Board,
 }
