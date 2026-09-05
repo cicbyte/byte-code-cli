@@ -209,3 +209,16 @@ fn profile_name_with_path_separator_is_rejected() {
         .code(2)
         .stderr(predicate::str::contains("profile 名不合法"));
 }
+
+#[test]
+fn complete_rejects_oversized_artifacts_before_network() {
+    let (sb, mut cmd) = Sandbox::new();
+    let big = sb.root.join("big.md");
+    std::fs::write(&big, "x".repeat(2 * 1024 * 1024)).unwrap();
+    cmd.args(["complete", "1", "--artifacts-file", big.to_str().unwrap()]);
+    // 上限校验先于联网：沙箱无 server 配置也应报「过大」而非「未配置平台地址」
+    cmd.assert()
+        .failure()
+        .code(2)
+        .stderr(predicate::str::contains("上限 1 MiB"));
+}

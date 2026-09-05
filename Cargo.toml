@@ -4,6 +4,13 @@ version = "0.1.0"
 edition = "2024"
 description = "ByteCode CLI — 外部 coding agent 与 ByteCode 平台之间的本地桥"
 license = "MIT"
+# 发布前填：repository = "https://github.com/<owner>/bcode-cli"（binstall 解析 {repo} 用）
+
+# cargo-binstall 直装模板：资产命名与 .github/workflows/release.yml 的
+# bcode-<target>.tar.gz / .zip 对应（archive-suffix 按平台自动取 .tar.gz/.zip）
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ target }{ archive-suffix }"
+bin-dir = "{ bin }{ binary-ext }"
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }

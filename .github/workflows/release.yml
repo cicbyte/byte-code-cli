@@ -1,0 +1,65 @@
+name: Release
+
+# 发布流水线：tag 推送（v*）或手动指定已存在 tag 触发。
+# 产物：三平台静态单二进制（tar.gz / zip）+ sha256 校验，挂到 GitHub Releases；
+# 资产命名 bcode-<target>.<ext> 与 [package.metadata.binstall] 模板对应，
+# 配好 repository 字段后 `cargo binstall bcode` 即可直装。
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '发布标签（如 v0.1.0，需已推送）'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, target: x86_64-unknown-linux-gnu, archive: tar.gz }
+          - { os: windows-latest, target: x86_64-pc-windows-msvc, archive: zip }
+          - { os: macos-latest, target: aarch64-apple-darwin, archive: tar.gz }
+          - { os: macos-latest, target: x86_64-apple-darwin, archive: tar.gz }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+      - run: cargo build --release --target ${{ matrix.target }}
+      - name: Package
+        shell: bash
+        run: |
+          set -euo pipefail
+          T=${{ matrix.target }}
+          EXT=""
+          [[ "$T" == *windows* ]] && EXT=".exe"
+          STAGE="bcode-$T"
+          mkdir -p "$STAGE"
+          cp "target/$T/release/bcode$EXT" "$STAGE/"
+          cp README.md "$STAGE/"
+          if [[ "${{ matrix.archive }}" == "zip" ]]; then
+            powershell Compress-Archive -Path "$STAGE" -DestinationPath "$STAGE.zip"
+          else
+            tar czf "$STAGE.tar.gz" "$STAGE"
+          fi
+          # 每个目标只有一种归档存在；对实际产物生成 sha256
+          ARTIFACT=$(ls "$STAGE".tar.gz "$STAGE".zip 2>/dev/null | head -1)
+          sha256sum "$ARTIFACT" > "$STAGE.sha256"
+          ls -la "$STAGE".*
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          files: |
+            bcode-*.tar.gz
+            bcode-*.zip
+            bcode-*.sha256

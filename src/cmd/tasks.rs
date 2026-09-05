@@ -201,6 +201,14 @@ pub async fn complete(
         }
         text.push_str(&format!("## 备注\n{n}"));
     }
+    // 平台侧无 artifacts 长度校验（DB TEXT），CLI 兜底防误传超大文件整段上传
+    const MAX_ARTIFACTS_BYTES: usize = 1024 * 1024;
+    if text.len() > MAX_ARTIFACTS_BYTES {
+        bail!(
+            "artifacts 过大（{} 字节，上限 1 MiB）：请精简正文或拆分后用 log 补充",
+            text.len()
+        );
+    }
 
     let ctx = project_ctx(cfg, profile).await?;
     ctx.client

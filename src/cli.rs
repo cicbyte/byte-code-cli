@@ -74,7 +74,7 @@ pub enum Command {
         /// artifacts 文本
         #[arg(long, conflicts_with = "artifacts_file")]
         artifacts: Option<String>,
-        /// artifacts 文件路径（读取文件内容作为产出）
+        /// artifacts 文件路径（读取文件内容作为产出；上限 1 MiB）
         #[arg(long)]
         artifacts_file: Option<String>,
         /// 备注（追加到 artifacts 末尾）
