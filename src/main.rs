@@ -37,72 +37,58 @@ async fn main() {
     }
 
     let result = match cli.command {
-        Command::Register {
-            ref name,
-            ref capabilities,
-        } => cmd::identity::register(&cfg, &profile, name, capabilities.as_deref(), &out).await,
+        Command::Register(a) => {
+            cmd::identity::register(&cfg, &profile, &a.name, a.capabilities.as_deref(), &out).await
+        }
         Command::Whoami => cmd::identity::whoami(&cfg, &profile, &out).await,
         Command::Status => cmd::project::status(&cfg, &profile, &out).await,
         Command::Profiles => cmd::identity::profiles(&cfg, &out),
-        Command::Join { ref code } => cmd::project::join(&cfg, &profile, code, &out).await,
-        Command::Start { ref project } => {
-            cmd::project::start(&cfg, &profile, project.as_deref(), &out).await
-        }
+        Command::Join(a) => cmd::project::join(&cfg, &profile, &a.code, &out).await,
+        Command::Start(a) => cmd::project::start(&cfg, &profile, a.project.as_deref(), &out).await,
         Command::Context => cmd::project::context(&cfg, &profile, &out).await,
-        Command::Tasks {
-            ref status,
-            ref keyword,
-        } => cmd::tasks::tasks(&cfg, &profile, status.as_deref(), keyword.as_deref(), &out).await,
-        Command::Task { id } => cmd::tasks::task(&cfg, &profile, id, &out).await,
-        Command::Claim { id } => cmd::tasks::claim(&cfg, &profile, id, &out).await,
-        Command::Complete {
-            id,
-            ref artifacts,
-            ref artifacts_file,
-            ref note,
-        } => {
-            cmd::tasks::complete(
+        Command::Tasks(a) => {
+            cmd::tasks::tasks(
                 &cfg,
                 &profile,
-                id,
-                artifacts.as_deref(),
-                artifacts_file.as_deref(),
-                note.as_deref(),
+                a.status.as_deref(),
+                a.keyword.as_deref(),
                 &out,
             )
             .await
         }
-        Command::Log {
-            id,
-            ref message,
-            ref status,
-            ref action,
-        } => cmd::tasks::log(&cfg, &profile, id, message, status, action, &out).await,
-        Command::Comment { task_id, ref text } => {
-            cmd::comms::comment(&cfg, &profile, task_id, text, &out).await
+        Command::Task(a) => cmd::tasks::task(&cfg, &profile, a.id, &out).await,
+        Command::Claim(a) => cmd::tasks::claim(&cfg, &profile, a.id, &out).await,
+        Command::Complete(a) => {
+            cmd::tasks::complete(
+                &cfg,
+                &profile,
+                a.id,
+                a.artifacts.as_deref(),
+                a.artifacts_file.as_deref(),
+                a.note.as_deref(),
+                &out,
+            )
+            .await
         }
-        Command::Comments {
-            task_id,
-            follow,
-            interval,
-        } => cmd::comms::comments(&cfg, &profile, task_id, follow, interval, &out).await,
-        Command::Notify { unread, watch } => {
-            cmd::comms::notify(&cfg, &profile, unread, watch, &out).await
+        Command::Log(a) => {
+            cmd::tasks::log(&cfg, &profile, a.id, &a.message, &a.status, &a.action, &out).await
         }
-        Command::Docs { ref path, list } => {
-            cmd::vault::docs(&cfg, &profile, path.as_deref(), list, &out).await
+        Command::Comment(a) => cmd::comms::comment(&cfg, &profile, a.task_id, &a.text, &out).await,
+        Command::Comments(a) => {
+            cmd::comms::comments(&cfg, &profile, a.task_id, a.follow, a.interval, &out).await
         }
-        Command::Memory { ref key } => cmd::vault::memory(&cfg, &profile, key, &out).await,
-        Command::Memories { ref prefix } => {
-            cmd::vault::memories(&cfg, &profile, prefix.as_deref(), &out).await
+        Command::Notify(a) => cmd::comms::notify(&cfg, &profile, a.unread, a.watch, &out).await,
+        Command::Docs(a) => cmd::vault::docs(&cfg, &profile, a.path.as_deref(), a.list, &out).await,
+        Command::Memory(a) => cmd::vault::memory(&cfg, &profile, &a.key, &out).await,
+        Command::Memories(a) => {
+            cmd::vault::memories(&cfg, &profile, a.prefix.as_deref(), &out).await
         }
-        Command::Search {
-            ref query,
-            ref module,
-        } => cmd::vault::search(&cfg, &profile, query, module.as_deref(), &out).await,
-        Command::Init { ref url } => cmd::system::init(&mut cfg, url.as_deref(), &out).await,
-        Command::Open { ref target, id } => cmd::system::open(&cfg, target, id, &out),
-        Command::Completion { shell } => cmd::system::completion(shell),
+        Command::Search(a) => {
+            cmd::vault::search(&cfg, &profile, &a.query, a.module.as_deref(), &out).await
+        }
+        Command::Init(a) => cmd::system::init(&mut cfg, a.url.as_deref(), &out).await,
+        Command::Open(a) => cmd::system::open(&cfg, &a.target, a.id, &out),
+        Command::Completion(a) => cmd::system::completion(a.shell),
         Command::Man => cmd::system::man(),
     };
 
