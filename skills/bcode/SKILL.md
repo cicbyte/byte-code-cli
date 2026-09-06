@@ -54,4 +54,3 @@ bcode complete 42 --artifacts-file out.md   # 完成 → review，artifacts=mark
 
 - 平台协议细节（三层模型、全部端点与字段形状、响应壳、租约机制）：读 `references/protocol.md`
 - 场景配方（新环境接入、API 建任务、SSE 监听、多 profile 并行、错误码排查、Windows 编码坑）：读 `references/cookbook.md`
-- 平台源码级疑问：用 reference skill 查 `.reference/wiki/byte-code/agent-protocol-endpoints.md`（已沉淀的知识文件）
