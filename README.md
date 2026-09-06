@@ -58,6 +58,14 @@ bcode claim 42 && bcode complete 42 --artifacts-file out.md
 
 `0` 成功 · `2` 用法错 · `3` 认证失效 · `4` 权限拒 · `5` 网络错 · `6` 业务拒
 
+## 发版
+
+提交遵循 conventional commits（feat/fix/chore/…），发版只需在 GitHub Actions
+跑 **Tag Release** 工作流：版本号留空由 git-cliff 按提交语义自动推导
+（有 feat → minor，仅 fix/chore → patch），也可填 patch/minor/major 或完整版本号；
+bot 自动打 tag 并触发 Release 工作流（三平台单二进制 + sha256 + 中文分类
+changelog 挂 Release）。二进制版本由构建期注入（tag 优先），与发布版本一致。
+
 ## 租约契约
 
 认领后 2 小时无平台侧动作会被自动释放（回 open + lease_expired 留痕）——

@@ -1,8 +1,9 @@
 name: Release
 
-# 发布流水线：tag 推送（v*）或手动指定已存在 tag 触发。
-# 产物：三平台静态单二进制（tar.gz / zip）+ sha256 校验，挂到 GitHub Releases；
-# 资产命名 bcode-<target>.<ext> 与 [package.metadata.binstall] 模板对应，
+# 发布流水线：tag 推送（v*，通常由 tag.yml 一键发版触发）或手动指定已存在 tag。
+# 结构（借鉴 byte-code release.yml）：矩阵构建只产出 artifacts，
+# 汇聚 job 集中生成 changelog（cliff 经文件传 body）与 sha256 后统一挂 Release。
+# 产物命名 bcode-<target>.<ext> 与 [package.metadata.binstall] 模板对应，
 # 配好 repository 字段后 `cargo binstall bcode` 即可直装。
 on:
   push:
@@ -35,7 +36,13 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           key: ${{ matrix.target }}
-      - run: cargo build --release --target ${{ matrix.target }}
+      # tag 触发时按 tag 注入版本，保证二进制与发布版本一致（build.rs 消费）
+      - name: Build
+        shell: bash
+        run: |
+          V=${GITHUB_REF_NAME#v}
+          [ "$V" = "${GITHUB_REF_NAME}" ] && V=""   # 非 tag 触发则走 git describe 兜底
+          BCODE_VERSION=$V cargo build --release --target ${{ matrix.target }}
       - name: Package
         shell: bash
         run: |
@@ -52,13 +59,52 @@ jobs:
           else
             tar czf "$STAGE.tar.gz" "$STAGE"
           fi
-          # 每个目标只有一种归档存在；对实际产物生成 sha256
-          ARTIFACT=$(ls "$STAGE".tar.gz "$STAGE".zip 2>/dev/null | head -1)
-          sha256sum "$ARTIFACT" > "$STAGE.sha256"
-          ls -la "$STAGE".*
-      - uses: softprops/action-gh-release@v2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-$T
+          path: bcode-${{ matrix.target }}.*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      # cliff 生成发版说明需要全历史与 tag
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Generate changelog
+        uses: orhun/git-cliff-action@v4
+        id: cliff
+        with:
+          config: cliff.toml
+          args: --latest --strip header
+        env:
+          # 多行 body 经文件传给 release 最稳（byte-code b750e45 同款结论）
+          OUTPUT: CHANGELOG.md
+          GITHUB_REPO: ${{ github.repository }}
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: .
+          merge-multiple: true
+
+      - name: Checksums
+        run: |
+          ls -la bcode-*
+          for f in bcode-*.tar.gz bcode-*.zip; do
+            [ -e "$f" ] || continue
+            sha256sum "$f" > "$f.sha256"
+          done
+          cat bcode-*.sha256
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.tag || github.ref_name }}
+          body_path: CHANGELOG.md
           files: |
             bcode-*.tar.gz
             bcode-*.zip

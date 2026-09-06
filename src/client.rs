@@ -39,7 +39,7 @@ impl BcodeClient {
         insecure: bool,
     ) -> Result<Self> {
         let mut builder = Client::builder()
-            .user_agent(concat!("bcode/", env!("CARGO_PKG_VERSION")))
+            .user_agent(concat!("bcode/", env!("BCODE_BUILD_VERSION")))
             // 连接级超时全体生效（含 SSE 长连接的建立阶段）；
             // 总超时不设在客户端上——SSE 需要无限期，常规请求按请求级覆盖
             .connect_timeout(std::time::Duration::from_secs(10));

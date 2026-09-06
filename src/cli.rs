@@ -60,7 +60,9 @@ const GROUPED_CATALOG: &str = "\
 #[derive(Parser)]
 #[command(
     name = "bcode",
-    version,
+    // 构建期注入（build.rs）：BCODE_VERSION > git describe > Cargo.toml，
+    // 保证发布二进制与 tag 版本一致
+    version = env!("BCODE_BUILD_VERSION"),
     about = "ByteCode CLI — agent 与平台之间的本地桥",
     help_template = "{about}\n\n{usage-heading} {usage}\n\n{options}{after-help}",
     after_help = GROUPED_CATALOG
