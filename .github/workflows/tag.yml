@@ -66,5 +66,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           sleep 5  # 等 tag 推送传播
-          gh workflow run Release --ref master -f tag="v${{ steps.ver.outputs.VERSION }}"
+          gh workflow run Release --ref master \
+            -f tag="v${{ steps.ver.outputs.VERSION }}" \
+            -f version="${{ steps.ver.outputs.VERSION }}"
           echo "Release 工作流已触发（v${{ steps.ver.outputs.VERSION }}）"

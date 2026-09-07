@@ -11,8 +11,11 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: '发布标签（如 v0.1.0，需已推送）'
+        description: '发布标签（如 v0.0.1，需已推送）'
         required: true
+      version:
+        description: '注入二进制的版本号（如 0.0.1；缺省按 tag 推导，再退 git describe）'
+        required: false
 
 permissions:
   contents: write
@@ -40,12 +43,12 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           key: ${{ matrix.target }}
-      # tag 触发时按 tag 注入版本，保证二进制与发布版本一致（build.rs 消费）
+      # 版本注入优先级：dispatch 显式传参 > tag 推导 > git describe（build.rs 兜底）
       - name: Build
         shell: bash
         run: |
-          V=${GITHUB_REF_NAME#v}
-          [ "$V" = "${GITHUB_REF_NAME}" ] && V=""   # 非 tag 触发则走 git describe 兜底
+          V="${{ inputs.version }}"
+          if [ -z "$V" ] && [[ "$GITHUB_REF_NAME" == v* ]]; then V=${GITHUB_REF_NAME#v}; fi
           BCODE_VERSION=$V cargo build --release --target ${{ matrix.target }}
       - name: Package
         shell: bash
@@ -59,7 +62,8 @@ jobs:
           cp "target/$T/release/bcode$EXT" "$STAGE/"
           cp README.md "$STAGE/"
           if [[ "${{ matrix.archive }}" == "zip" ]]; then
-            powershell Compress-Archive -Path "$STAGE" -DestinationPath "$STAGE.zip"
+            # 7z 而非 Compress-Archive：后者产生反斜杠分隔符的 zip，跨平台解压会坏（v0.0.1 实测）
+            7z a "$STAGE.zip" "$STAGE"
           else
             tar czf "$STAGE.tar.gz" "$STAGE"
           fi
