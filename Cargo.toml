@@ -12,7 +12,8 @@ build = "build.rs"
 # pkg-fmt（默认 tar.gz 会导致 404 回退源码安装）
 [package.metadata.binstall]
 pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ target }{ archive-suffix }"
-bin-dir = "{ bin }{ binary-ext }"
+# 归档内有 bcode-<target>/ 层级目录（与 release.yml 打包结构对应）
+bin-dir = "{ name }-{ target }/{ bin }{ binary-ext }"
 
 [package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
 pkg-fmt = "zip"
