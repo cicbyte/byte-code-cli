@@ -8,10 +8,14 @@ repository = "https://github.com/cicbyte/byte-code-cli"
 build = "build.rs"
 
 # cargo-binstall 直装模板：资产命名与 .github/workflows/release.yml 的
-# bcode-<target>.tar.gz / .zip 对应（archive-suffix 按平台自动取 .tar.gz/.zip）
+# bcode-<target>.tar.gz / .zip 对应；Windows 资产是 zip，需按 target 覆盖
+# pkg-fmt（默认 tar.gz 会导致 404 回退源码安装）
 [package.metadata.binstall]
 pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ target }{ archive-suffix }"
 bin-dir = "{ bin }{ binary-ext }"
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-fmt = "zip"
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
