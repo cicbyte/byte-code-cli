@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: write
+  actions: write  # gh workflow run dispatch Release 需要（仅 contents 不够）
 
 jobs:
   tag:
@@ -45,6 +46,8 @@ jobs:
           if [ -z "$V" ]; then
             echo "无法确定版本号（可能是首个 tag，请显式填写 version）" && exit 1
           fi
+          # git-cliff 部分版本输出带 v 前缀，统一剥掉防拼出 vv*
+          V=${V#v}
           # 防 dedup：目标 tag 已存在则拒绝
           if git rev-parse "v$V" >/dev/null 2>&1; then
             echo "tag v$V 已存在，拒绝重复发版" && exit 1
