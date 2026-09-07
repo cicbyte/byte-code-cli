@@ -1,11 +1,11 @@
 [package]
 name = "bcode"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2024"
 description = "ByteCode CLI — 外部 coding agent 与 ByteCode 平台之间的本地桥"
 license = "MIT"
+repository = "https://github.com/cicbyte/byte-code-cli"
 build = "build.rs"
-# 发布前填：repository = "https://github.com/<owner>/bcode-cli"（binstall 解析 {repo} 用）
 
 # cargo-binstall 直装模板：资产命名与 .github/workflows/release.yml 的
 # bcode-<target>.tar.gz / .zip 对应（archive-suffix 按平台自动取 .tar.gz/.zip）
