@@ -29,7 +29,11 @@ jobs:
           - { os: macos-latest, target: x86_64-apple-darwin, archive: tar.gz }
     runs-on: ${{ matrix.os }}
     steps:
+      # fetch-tags：手动 dispatch（ref=分支）时 build.rs 靠 git describe 取 tag 版本
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
@@ -61,7 +65,8 @@ jobs:
           fi
       - uses: actions/upload-artifact@v4
         with:
-          name: dist-$T
+          # 必须按 target 区分：v4 同名 artifact 会互相覆盖（首版踩坑：四个平台只剩一个）
+          name: dist-${{ matrix.target }}
           path: bcode-${{ matrix.target }}.*
 
   release:

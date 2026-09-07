@@ -58,3 +58,13 @@ jobs:
           git config user.email "release-bot@users.noreply.github.com"
           git tag -a "v${{ steps.ver.outputs.VERSION }}" -m "release v${{ steps.ver.outputs.VERSION }}"
           git push origin "v${{ steps.ver.outputs.VERSION }}"
+
+      # GITHUB_TOKEN 推送的 tag 不会触发其他工作流（防递归限制，workflow_dispatch 除外）
+      # ——必须在此显式 dispatch Release
+      - name: Trigger Release workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sleep 5  # 等 tag 推送传播
+          gh workflow run Release --ref master -f tag="v${{ steps.ver.outputs.VERSION }}"
+          echo "Release 工作流已触发（v${{ steps.ver.outputs.VERSION }}）"
