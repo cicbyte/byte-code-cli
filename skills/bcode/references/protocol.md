@@ -28,6 +28,7 @@
 | 端点 | 要点 |
 |---|---|
 | `GET /v1/tasks/{id}` | TaskItem 全量（title/description/status/priority/assigneeName/artifacts/dueDate/tags…） |
+| `POST /v1/projects/{id}/tasks` `{title 必填, description?, type?, priority?, dueDate?}` | → `{id}`（CLI 侧 `bcode create` 已封装） |
 | `POST /v1/tasks/{id}/claim` | 空 body，原子；被抢业务错（退出码 6） |
 | `POST /v1/tasks/{id}/complete` `{artifacts}` | → review 状态 |
 | `POST /v1/tasks/{taskId}/comments` `{content}` | → `{id}`；支持 @提及 |
@@ -37,16 +38,31 @@
 
 ## 通用端点
 
-- `GET /v1/notifications?unread=&size=` → `{list, total}`；`GET /v1/notifications/stream` SSE（data 行=通知 JSON，30s 心跳注释行；**事件负载无 createdAt/id**）
+- `GET /v1/notifications?unread=&size=` → `{list, total}`；`PUT /v1/notifications/{id}/read`、`PUT /v1/notifications/read-all`（CLI `notify --read <id>` / `--read-all`）；`GET /v1/notifications/stream` SSE（data 行=通知 JSON，30s 心跳注释行；**事件负载无 createdAt/id**）
 - `GET /v1/search?q=&module=` → `{list:[{module,id,projectId,title,summary}], total}`
-- `GET /v1/projects` → agent 视角只含已加入项目
-- 文档/记忆需显式 projectId：`/v1/projects/{id}/docs/tree|file?path=`、`/v1/projects/{id}/memories[/{key}]`
+- `GET /v1/projects` → **agent 身份恒返回空**（成员过滤只查 project_members，不含 agent_project_bindings——v2 真机实测订正）；agent 无项目清单端点，靠 `.bc/project` 指向
+- 文档/记忆（显式 projectId）：
+  - 读：`GET /v1/projects/{id}/docs/tree`、`GET /v1/projects/{id}/docs/file?path=`（文本返回正文）
+  - **写**：`PUT /v1/projects/{id}/docs/file` `{path, content}`（整文件覆盖，写前自动 .history 快照；CLI `docs <path> --write-file <本地>`）
+  - 记忆：`GET|PUT|DELETE /v1/projects/{id}/memories/{key}`（PUT `{value, ttl?: 30m|12h|7d, status?: pending|active}` 为 upsert；CLI `memory <key> [--set|--file|--ttl] [--delete]`）
 
 ## 响应壳与错误分类
 
-- 壳：`{code, message, data}`，`code=0` 成功（GoFrame 标准）
+- 壳：`{code, message, data}`，`code=0` 成功（GoFrame 标准）。**API 直调必读**：业务数据在 `data` 字段内，别把整个壳当负载（v1 反馈实测踩过）：
+
+```json
+POST /v1/projects/4/tasks → {"code":0,"message":"OK","data":{"id":39}}
+```
+
+- **两套 JSON 契约勿混淆**（v2 反馈）：平台 API 响应带 `{code,message,data}` 壳；CLI `--json` 输出的是**纯业务负载**（已解壳，如 tasks 输出 `{list,total}`）——CLI 消费方直接取 stdout 整行，API 直调方才需要解壳
 - CLI 分类优先按壳 `code`（401→认证失效码 3 / 403→权限拒码 4），message 文本（"未登录/认证"、"权限"）仅兜底；HTTP 401/403 状态码同路收敛
 - **Go nil slice 序列化为显式 `null`**（空数组字段常是 `null` 而非缺键）——自写解析时必须同时容忍两态
+
+## 写侧权限边界（v2 核实）
+
+- `PUT /v1/tasks/{id}`：agent **禁改 status/assigneeId**（平台门禁：状态流转必须走 claim/complete 专用端点，防绕过并发防护）；可改 title/description/type/priority/sprintId/parentTaskId/sortOrder/dueDate/checklist（CLI `update` 只暴露这些）。指针语义：nil=不更新，dueDate 空串=清除
+- **无主动释放端点**：认领后只能等 2h 租约自动释放（`log --status failed` 是记录失败事件，不是放弃）；release 端点是平台侧待补项
+- 记忆/文档写入对 agent 开放（binding 命中即 member 级权限）
 
 ## 本地布局（四A：身份与项目指向正交）
 

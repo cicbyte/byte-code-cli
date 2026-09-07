@@ -1,23 +1,27 @@
-//! 任务域命令（工作会话层）：tasks 列表 / task 详情 /
-//! claim 认领 / complete 完成 / log 过程留痕（F06-F10）。
+//! 任务域命令（工作会话层）：tasks 列表 / task 详情 / create 建任务 /
+//! update 改字段 / claim 认领 / complete 完成 / log 过程留痕。
 
 use anyhow::{Context, Result, bail};
 use serde_json::json;
 
 use super::project_ctx;
+use crate::cli::UpdateArgs;
 use crate::client::encode_query;
 use crate::config::Config;
-use crate::model::agent::AgentTasks;
+use crate::model::agent::{AgentTasks, TaskBrief};
 use crate::model::task::{AiLogList, CommentList, CreatedId, TaskDetail};
 use crate::output::{Out, pad_display};
 
-/// `bcode tasks [--status s] [--keyword kw]`（F06）：免参任务列表。
-/// status 透传平台语义：缺省=未完成三态（open/in_progress/review），all=全部。
+/// `bcode tasks [--status s] [--keyword kw] [--priority p] [--sort s]`（F06）：
+/// 免参任务列表。status 透传平台语义：缺省=未完成三态，all=全部。
+/// 默认按优先级升序（P1 在前）+ id 降序，`--sort id` 恢复平台原始顺序。
 pub async fn tasks(
     cfg: &Config,
     profile: &str,
     status: Option<&str>,
     keyword: Option<&str>,
+    priority: Option<i64>,
+    sort: &str,
     out: &Out,
 ) -> Result<()> {
     let ctx = project_ctx(cfg, profile).await?;
@@ -34,7 +38,13 @@ pub async fn tasks(
         path.push_str(&format!("keyword={}", encode_query(kw)));
     }
     // 免参端点走 sessioned_get：缓存会话失效时自愈重建（见 Ctx::sessioned_get）
-    let page: AgentTasks = ctx.sessioned_get(&path).await?;
+    let mut page: AgentTasks = ctx.sessioned_get(&path).await?;
+
+    if let Some(p) = priority {
+        page.list.retain(|t| t.priority == p);
+        page.total = page.list.len() as i64;
+    }
+    sort_tasks(&mut page.list, sort);
 
     if page.list.is_empty() {
         out.line(&format!("（无任务，共 {} 条记录）", page.total));
@@ -93,6 +103,12 @@ pub async fn task(cfg: &Config, profile: &str, id: i64, out: &Out) -> Result<()>
         },
     );
     out.kv("创建人", &detail.creator_name);
+    if !detail.created_at.is_empty() {
+        out.kv("创建时间", &detail.created_at);
+    }
+    if !detail.updated_at.is_empty() {
+        out.kv("更新时间", &detail.updated_at);
+    }
     out.kv(
         "截止",
         if detail.due_date.is_empty() {
@@ -255,4 +271,137 @@ pub async fn log(
     out.kv("留痕", &format!("#{id} action={action} status={status}"));
     out.emit_value(&json!({ "logged": true, "log_id": created.id, "task_id": id }));
     Ok(())
+}
+
+/// `bcode create`（实验性，v1 反馈新增）：建任务——CLI 侧补齐建任务入口，
+/// 绕开 Windows 下 curl 内联中文的编码坑（--file 由 Rust 按 UTF-8 读取、
+/// argv 天然无代码页问题）。请求体字段即平台 TaskCreateReq。
+pub async fn create(
+    cfg: &Config,
+    profile: &str,
+    a: &crate::cli::CreateArgs,
+    out: &Out,
+) -> Result<()> {
+    // 请求体组装在联网前：缺 title 立即报错，不浪费一次握手
+    let mut body = match a.file.as_deref() {
+        Some(p) => serde_json::from_str(
+            &std::fs::read_to_string(p).with_context(|| format!("读取 {p} 失败"))?,
+        )
+        .with_context(|| format!("解析 {p} 为 JSON 失败"))?,
+        None => json!({}),
+    };
+    if let Some(t) = a.title.as_deref() {
+        body["title"] = json!(t);
+    }
+    if let Some(d) = a.description.as_deref() {
+        body["description"] = json!(d);
+    }
+    if let Some(t) = a.r#type.as_deref() {
+        body["type"] = json!(t);
+    }
+    if let Some(p) = a.priority {
+        body["priority"] = json!(p);
+    }
+    if let Some(d) = a.due.as_deref() {
+        body["dueDate"] = json!(d);
+    }
+    let title = body
+        .get("title")
+        .and_then(|v| v.as_str())
+        .filter(|s| !s.trim().is_empty())
+        .ok_or_else(|| anyhow::anyhow!("title 必填：--title <标题> 或 --file JSON 内提供"))?;
+
+    let ctx = project_ctx(cfg, profile).await?;
+    let created: CreatedId = ctx
+        .client
+        .post_as(
+            &format!("/v1/projects/{}/tasks", ctx.project.project_id),
+            body.clone(),
+        )
+        .await?;
+
+    out.kv("已创建", &format!("#{} {title}", created.id));
+    out.emit_value(&json!({ "created": true, "task_id": created.id, "title": title }));
+    Ok(())
+}
+
+/// `bcode update <id>`（v2 反馈新增）：改任务字段。平台门禁：agent 禁改
+/// status/assigneeId（状态流转必须走 claim/complete），CLI 不暴露这两项。
+/// 指针语义：只提交出现的字段，其余不动；--due "" 传空串=清除截止。
+pub async fn update(cfg: &Config, profile: &str, a: &UpdateArgs, out: &Out) -> Result<()> {
+    let mut body = json!({});
+    if let Some(t) = a.title.as_deref() {
+        body["title"] = json!(t);
+    }
+    if let Some(d) = a.description.as_deref() {
+        body["description"] = json!(d);
+    }
+    if let Some(t) = a.r#type.as_deref() {
+        body["type"] = json!(t);
+    }
+    if let Some(p) = a.priority {
+        body["priority"] = json!(p);
+    }
+    if let Some(d) = a.due.as_deref() {
+        body["dueDate"] = json!(d);
+    }
+    if body.as_object().is_none_or(|m| m.is_empty()) {
+        bail!(
+            "未指定修改项：--title/--description/--type/--priority/--due 至少一个（状态流转走 claim/complete，改派是 owner 权限）"
+        );
+    }
+
+    let ctx = project_ctx(cfg, profile).await?;
+    ctx.client.put(&format!("/v1/tasks/{}", a.id), body).await?;
+    // 回显要点（失败不影响更新结果）
+    let mut payload = json!({ "updated": true, "task_id": a.id });
+    match ctx
+        .client
+        .get_as::<TaskDetail>(&format!("/v1/tasks/{}", a.id))
+        .await
+    {
+        Ok(d) => {
+            out.kv("已更新", &d.one_line());
+            payload["task"] = serde_json::to_value(&d)?;
+        }
+        Err(_) => out.kv("已更新", &format!("#{}", a.id)),
+    }
+    out.emit_value(&payload);
+    Ok(())
+}
+
+/// 列表排序：priority=优先级升序（P1 在前）+ id 降序；id=平台原始顺序（id 降序）
+fn sort_tasks(list: &mut [TaskBrief], sort: &str) {
+    match sort {
+        "id" => list.sort_by_key(|t| std::cmp::Reverse(t.id)),
+        _ => list.sort_by_key(|t| (t.priority, std::cmp::Reverse(t.id))),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn brief(id: i64, priority: i64) -> TaskBrief {
+        TaskBrief {
+            id,
+            title: format!("t{id}"),
+            status: "open".into(),
+            priority,
+            due_date: None,
+        }
+    }
+
+    #[test]
+    fn sort_puts_low_priority_number_first() {
+        let mut list = vec![brief(30, 3), brief(31, 1), brief(25, 1), brief(28, 2)];
+        sort_tasks(&mut list, "priority");
+        let ids: Vec<i64> = list.iter().map(|t| t.id).collect();
+        // P1 组内 id 降序，然后 P2、P3
+        assert_eq!(ids, vec![31, 25, 28, 30]);
+
+        let mut raw = vec![brief(1, 5), brief(9, 1)];
+        sort_tasks(&mut raw, "id");
+        assert_eq!(raw[0].id, 9);
+    }
 }

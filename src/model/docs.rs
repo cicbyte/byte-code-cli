@@ -42,6 +42,16 @@ pub struct DocFile {
     pub size: i64,
 }
 
+/// PUT /v1/projects/{id}/docs/file 响应（写通道，v2 CLI 接入）
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DocWriteResult {
+    #[serde(default)]
+    pub path: String,
+    #[serde(default)]
+    pub size: i64,
+}
+
 /// GET /v1/projects/{id}/memories 响应（单条记忆为同构内嵌）
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MemoryList {

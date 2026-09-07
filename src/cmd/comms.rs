@@ -82,19 +82,35 @@ pub async fn comments(
     }
 }
 
-/// `bcode notify [--unread] [--watch]`（F13）：通知列表 / 未读；
-/// --watch 走 SSE 实时流（一行一事件；指数退避重连 1s→60s，Ctrl-C 退出）。
+/// `bcode notify [--unread] [--watch] [--read <id>] [--read-all]`（F13 + v2）：
+/// 通知列表 / 未读 / 标已读；--watch 走 SSE 实时流（一行一事件；
+/// 指数退避重连 1s→60s，Ctrl-C 退出）。
 pub async fn notify(
     cfg: &Config,
     profile: &str,
-    unread: bool,
-    watch: bool,
+    a: &crate::cli::NotifyArgs,
     out: &Out,
 ) -> Result<()> {
     let client = identity_client(cfg, profile)?;
 
-    if !watch {
-        let path = if unread {
+    // 已读操作优先分流（v2 反馈：unread 只读不可操作，永远堆积）
+    if let Some(id) = a.read {
+        client
+            .put(&format!("/v1/notifications/{id}/read"), json!({}))
+            .await?;
+        out.kv("已读", &format!("#{id}"));
+        out.emit_value(&json!({ "marked": id }));
+        return Ok(());
+    }
+    if a.read_all {
+        client.put("/v1/notifications/read-all", json!({})).await?;
+        out.line("已全部标记已读");
+        out.emit_value(&json!({ "marked_all": true }));
+        return Ok(());
+    }
+
+    if !a.watch {
+        let path = if a.unread {
             "/v1/notifications?unread=1&size=50"
         } else {
             "/v1/notifications?size=50"

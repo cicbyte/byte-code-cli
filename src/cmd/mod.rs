@@ -30,14 +30,15 @@ pub(crate) struct Ctx {
 }
 
 impl Ctx {
-    /// 会话免参 GET：缓存会话被平台废弃（Auth）时，重建会话后重试一次——
-    /// 会话键=agent+project 服务端同键复用，重建幂等；二次仍 Auth 说明
-    /// 是 key 本身失效，按原错误透出（退出码 3 引导 register）
+    /// 会话免参 GET：缓存会话失效时重建后重试一次。触发面：
+    /// Auth 错（key 对但会话被平台废弃）或「会话不存在」业务错
+    /// （本地缓存属于旧 agent——换 key 重注册后 id 变化）。
+    /// 二次仍失败按原错误透出（key/准入问题，引导 register/join）
     pub(crate) async fn sessioned_get<T: DeserializeOwned>(&self, path: &str) -> Result<T> {
         match self.client.get_as::<T>(path).await {
             Ok(v) => Ok(v),
             Err(e) => {
-                if !is_auth(&e) {
+                if !is_auth(&e) && !is_stale_session(&e) {
                     return Err(e);
                 }
                 // 会话键=agent+project 服务端同键复用，重建幂等
@@ -63,6 +64,15 @@ impl Ctx {
 
 fn is_auth(e: &anyhow::Error) -> bool {
     matches!(e.downcast_ref::<BcodeError>(), Some(BcodeError::Auth(_)))
+}
+
+/// 「会话不存在」：平台对无效 X-Session 返回的业务错（实测：换 key 重注册后
+/// 本地缓存 session 属旧 agent_id，平台以 Business 而非 Auth 报出）
+fn is_stale_session(e: &anyhow::Error) -> bool {
+    matches!(
+        e.downcast_ref::<BcodeError>(),
+        Some(BcodeError::Business(m)) if m.contains("会话")
+    )
 }
 
 /// 建立/续期工作会话并落盘（start 显式调用；其余命令缺会话时懒建立，F04）

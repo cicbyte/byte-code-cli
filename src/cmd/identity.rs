@@ -82,10 +82,8 @@ pub async fn whoami(cfg: &Config, profile: &str, out: &Out) -> Result<()> {
             payload["server"] = json!(u);
         }
         None => {
-            out.kv(
-                "server",
-                "（未配置——见 ~/.cicbyte/apps/byte-code-cli/config.toml）",
-            );
+            // 引导闭环：直接给下一步命令，与"无凭证→register"风格对齐（v1 反馈）
+            out.kv("server", "（未配置——bcode init <平台地址>）");
             payload["server"] = json!(null);
         }
     }

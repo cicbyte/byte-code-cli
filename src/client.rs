@@ -110,6 +110,23 @@ impl BcodeClient {
         self.request(reqwest::Method::POST, path, Some(body)).await
     }
 
+    /// PUT（任务更新 / 记忆写入 / 通知已读等写侧端点）
+    pub async fn put(&self, path: &str, body: Value) -> Result<Value> {
+        self.request(reqwest::Method::PUT, path, Some(body)).await
+    }
+
+    /// PUT 并按 model 层强类型解码
+    pub async fn put_as<T: DeserializeOwned>(&self, path: &str, body: Value) -> Result<T> {
+        let v = self.put(path, body).await?;
+        serde_json::from_value(v)
+            .map_err(|e| BcodeError::Network(format!("响应结构不符：{e}")).into())
+    }
+
+    /// DELETE（记忆删除等；body 为空对象，平台壳解包复用）
+    pub async fn delete(&self, path: &str) -> Result<Value> {
+        self.request(reqwest::Method::DELETE, path, None).await
+    }
+
     /// POST 并按 model 层强类型解码
     pub async fn post_as<T: DeserializeOwned>(&self, path: &str, body: Value) -> Result<T> {
         let v = self.post(path, body).await?;

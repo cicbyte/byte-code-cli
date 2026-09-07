@@ -222,3 +222,25 @@ fn complete_rejects_oversized_artifacts_before_network() {
         .code(2)
         .stderr(predicate::str::contains("上限 1 MiB"));
 }
+
+#[test]
+fn create_requires_title_before_any_network() {
+    let (_sb, mut cmd) = Sandbox::new();
+    cmd.args(["create"]); // 无 --title 无 --file：应在联网前报错
+    cmd.assert()
+        .failure()
+        .code(2)
+        .stderr(predicate::str::contains("title 必填"));
+}
+
+#[test]
+fn init_auto_appends_api_prefix() {
+    let (sb, mut cmd) = Sandbox::new();
+    cmd.args(["init", "http://127.0.0.1:9"]); // 无路径：自动补 /api
+    cmd.assert().success();
+    let raw = std::fs::read_to_string(sb.root.join("config.toml")).unwrap();
+    assert!(
+        raw.contains(r#"server_url = "http://127.0.0.1:9/api""#),
+        "未自动补 /api：{raw}"
+    );
+}

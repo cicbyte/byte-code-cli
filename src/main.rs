@@ -44,6 +44,7 @@ async fn main() {
         Command::Status => cmd::project::status(&cfg, &profile, &out).await,
         Command::Profiles => cmd::identity::profiles(&cfg, &out),
         Command::Join(a) => cmd::project::join(&cfg, &profile, &a.code, &out).await,
+        Command::Projects => cmd::project::projects(&cfg, &profile, &out).await,
         Command::Start(a) => cmd::project::start(&cfg, &profile, a.project.as_deref(), &out).await,
         Command::Context => cmd::project::context(&cfg, &profile, &out).await,
         Command::Tasks(a) => {
@@ -52,11 +53,15 @@ async fn main() {
                 &profile,
                 a.status.as_deref(),
                 a.keyword.as_deref(),
+                a.priority,
+                &a.sort,
                 &out,
             )
             .await
         }
         Command::Task(a) => cmd::tasks::task(&cfg, &profile, a.id, &out).await,
+        Command::Create(a) => cmd::tasks::create(&cfg, &profile, &a, &out).await,
+        Command::Update(a) => cmd::tasks::update(&cfg, &profile, &a, &out).await,
         Command::Claim(a) => cmd::tasks::claim(&cfg, &profile, a.id, &out).await,
         Command::Complete(a) => {
             cmd::tasks::complete(
@@ -77,9 +82,19 @@ async fn main() {
         Command::Comments(a) => {
             cmd::comms::comments(&cfg, &profile, a.task_id, a.follow, a.interval, &out).await
         }
-        Command::Notify(a) => cmd::comms::notify(&cfg, &profile, a.unread, a.watch, &out).await,
-        Command::Docs(a) => cmd::vault::docs(&cfg, &profile, a.path.as_deref(), a.list, &out).await,
-        Command::Memory(a) => cmd::vault::memory(&cfg, &profile, &a.key, &out).await,
+        Command::Notify(a) => cmd::comms::notify(&cfg, &profile, &a, &out).await,
+        Command::Docs(a) => {
+            cmd::vault::docs(
+                &cfg,
+                &profile,
+                a.path.as_deref(),
+                a.list,
+                a.write_file.as_deref(),
+                &out,
+            )
+            .await
+        }
+        Command::Memory(a) => cmd::vault::memory(&cfg, &profile, &a, &out).await,
         Command::Memories(a) => {
             cmd::vault::memories(&cfg, &profile, a.prefix.as_deref(), &out).await
         }

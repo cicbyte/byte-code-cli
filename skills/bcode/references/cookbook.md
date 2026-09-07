@@ -25,16 +25,17 @@ bcode complete <id> --artifacts-file out.md --note "一句话备注"   # → rev
 bcode task <id>                    # 核对详情（artifacts/日志/评论）
 ```
 
-## 3. CLI 没有任务创建命令时：API 直调（agent 有 member 权限）
+## 3. 建任务（优先 `bcode create`，v1 反馈后新增）
 
 ```bash
-KEY=$(grep -o 'bc_[0-9a-f]*' <数据根>/agents/<profile>/credential | head -1)
-curl -s -X POST "http://<host>:<port>/api/v1/projects/<pid>/tasks" \
-  -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
-  -d '{"title":"...","type":"chore","priority":3}'
+bcode create --title "标题" --description "描述" --type chore --priority 2
+# 或复杂结构：写 UTF-8 JSON 文件（Windows 下最稳，天然绕开 shell 编码坑）
+bcode create --file payload.json      # 字段即平台 TaskCreateReq：title 必填
 ```
 
-**Windows 编码坑（两次真机踩过）**：Git Bash 的 curl `-d` 内联中文会以本地代码页发送，中文标题存库即乱码。含中文的 body 一律写成 UTF-8 文件后 `--data-binary @file.json`。KEY 提取用上面的 grep 单行匹配——多行 sed 会把整个 JSON 塞进 Authorization 头导致 400 空响应。
+`create` 走 CLI 自己的认证与会话，无需提取 key；argv 与文件读取均为 UTF-8，没有 curl 的代码页问题。
+
+**历史方案（API 直调，仅作参考）**：提取 key `grep -o 'bc_[0-9a-f]*' <数据根>/agents/<profile>/credential | head -1` 后 curl `POST /v1/projects/<pid>/tasks`。两个真机坑：Git Bash curl `-d` 内联中文按本地代码页发送（存库乱码，必须 `--data-binary @utf8文件`）；多行 sed 提 key 会把整个 JSON 塞进 Authorization 头导致 400 空响应。响应壳 `{code, message, data}`——业务数据在 `data` 内。
 
 ## 4. 监听通知与评论（编排消费）
 

@@ -22,15 +22,16 @@ bcode status    # 在线校验：身份/准入/会话三件套是否有效
 
 ```bash
 bcode register my-agent        # 一次性：拿 bc_ key 落盘（只此一次返回，不回显）
+bcode init <host[:port]>       # 写 config.toml；纯 host 自动补 /api 前缀
 bcode join <接入码>             # 每项目一次：owner 在 Web 项目设置页生成 bcg_ 码
 bcode start                    # 每目录一次：会话 + 开工包（约定/我的任务/待审）
-bcode tasks                    # 免参列表（缺省=未完成三态）
+bcode tasks                    # 免参列表（缺省=未完成三态；默认优先级升序，P1 在前）
 bcode claim 42                 # 原子认领；被抢会明确失败（退出码 6）
 bcode log 42 "进展描述"          # 过程留痕——长任务每 <2h 打一条保活租约
 bcode complete 42 --artifacts-file out.md   # 完成 → review，artifacts=markdown 产出
 ```
 
-辅助：`bcode task 42`（详情：描述/artifacts/日志/评论）、`bcode comment 42 "文本"`、`bcode comments 42`、`bcode notify`、`bcode context`（开工包约定原样输出，建立项目认知）、`bcode search <kw>`、`bcode docs [path]`、`bcode memory <key>`。
+辅助：`bcode task 42`（详情：描述/artifacts/日志/评论）、`bcode create --title/--file`（建任务，实验性）、`bcode update 42 --priority 1`（改字段，状态流转除外）、`bcode tasks --priority 1 --sort id`（过滤/排序）、`bcode comment 42 "文本"`、`bcode comments 42`、`bcode notify --read-all`（清未读）、`bcode context`（开工包约定原样输出，建立项目认知）、`bcode search <kw>`、`bcode docs [path]`（读）/ `docs <path> --write-file f.md`（设计沉淀写入）、`bcode memory <key>`（读）/ `--set`/`--delete`（写/删）、`bcode projects`（项目清单）。
 
 完整命令面（按协议域分组）看 `bcode --help`，一屏全貌。
 
@@ -48,9 +49,13 @@ bcode complete 42 --artifacts-file out.md   # 完成 → review，artifacts=mark
 3. **register 的 key 只此一次返回**，落盘后不再可见；profile 已有凭证时 register 会明示覆盖。
 4. **SSE 通知事件没有 createdAt/id 字段**（与列表接口不同构），human 输出标 `[实时]`。
 5. **profile 名仅允许字母/数字/`._-`**（1-64 字符）——它会拼进本地路径，非法名入口即拦（退出码 2）。
-6. **CLI 没有任务创建命令**（有意设计：建任务是 owner/编排侧职责）。agent 确需建任务时走 API 直调——配方见 `references/cookbook.md`。
+6. **建任务用 `bcode create`**（`--title/--description` 或 `--file payload.json`）——argv/文件读取均为 UTF-8，天然绕开 Windows shell 内联中文的编码坑；API 直调配方（含响应壳说明）见 `references/cookbook.md`。
+7. **平台 API 响应壳是 `{code, message, data}`**——业务数据在 `data` 内，直接调 API 别把整个壳当负载。注意 CLI `--json` 输出的是**已解壳的纯负载**，两套契约勿混淆。
+8. **认领后无主动释放**——平台没有 release 端点（agent 也被禁改 status/assignee），认领错了只能等 2h 租约自动回收。`log --status failed` 只是记录一次失败事件，不是放弃。
+9. **`GET /v1/projects` 对 agent 恒为空**（成员过滤不含 bindings，v2 真机实测）——agent 的项目认知靠 `.bc/project` 指向与 start 开工包，勿依赖该端点。
+10. **agent 可改任务字段但禁改状态**——`update` 支持 title/description/type/priority/dueDate（空串=清截止）；status 流转只走 claim/complete，改派是 owner 权限。
 
 ## 深入阅读（按需，勿预读）
 
-- 平台协议细节（三层模型、全部端点与字段形状、响应壳、租约机制）：读 `references/protocol.md`
-- 场景配方（新环境接入、API 建任务、SSE 监听、多 profile 并行、错误码排查、Windows 编码坑）：读 `references/cookbook.md`
+- 平台协议细节（三层模型、全部端点与字段形状、写侧权限边界、响应壳、租约机制）：读 `references/protocol.md`
+- 场景配方（新环境接入、建任务、SSE 监听、多 profile 并行、错误码排查、Windows 编码坑）：读 `references/cookbook.md`

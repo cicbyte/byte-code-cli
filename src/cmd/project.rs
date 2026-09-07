@@ -1,5 +1,5 @@
 //! 项目域命令（准入与会话层）：join 接入 / start 会话+开工包 /
-//! context 约定输出 / status 在线校验。
+//! context 约定输出 / projects 已加入清单 / status 在线校验。
 
 use anyhow::{Result, anyhow, bail};
 use serde_json::json;
@@ -11,6 +11,51 @@ use crate::cred::{self, ProjectPointer};
 use crate::model::agent::{AgentTasks, JoinResult, SessionCreated};
 use crate::model::platform::ProjectList;
 use crate::output::Out;
+
+/// `bcode projects`（v2 反馈新增）：列出已加入的项目（agent 视角），
+/// 标注当前目录指向——多项目 agent 的切换入口。
+pub async fn projects(cfg: &Config, profile: &str, out: &Out) -> Result<()> {
+    let client = super::identity_client(cfg, profile)?;
+    let mut all = vec![];
+    let mut page = 1;
+    loop {
+        let list: ProjectList = client
+            .get_as(&format!("/v1/projects?page={page}&size=100"))
+            .await?;
+        let n = list.list.len();
+        all.extend(list.list);
+        if n == 0 || (page * 100) >= list.total {
+            break;
+        }
+        page += 1;
+    }
+
+    let cwd = std::env::current_dir()?;
+    let current = config::find_project_pointer(&cwd)?.map(|p| p.project_id);
+
+    if all.is_empty() {
+        // 平台现状：GET /v1/projects 的成员过滤不含 agent bindings（真机实测），
+        // agent 身份恒为空——退路显示当前指向而非误导性的「未加入」
+        match current {
+            Some(pid) => out.line(&format!(
+                "（平台暂无 agent 项目清单端点；当前目录指向 → 项目 id={pid}）"
+            )),
+            None => out.line("（未加入任何项目——向 owner 索取接入码后 bcode join <code>）"),
+        }
+    }
+    let mut arr = vec![];
+    for p in &all {
+        let mark = if Some(p.id) == current {
+            " ←当前目录"
+        } else {
+            ""
+        };
+        out.line(&format!("  #{:<5} {}{mark}", p.id, p.name));
+        arr.push(json!({ "id": p.id, "name": p.name, "current": Some(p.id) == current }));
+    }
+    out.emit_value(&json!({ "projects": arr }));
+    Ok(())
+}
 
 /// `bcode join <code>`（F03）：接入码换项目准入，成功写 <repo>/.bc/project。
 pub async fn join(cfg: &Config, profile: &str, code: &str, out: &Out) -> Result<()> {
@@ -185,7 +230,7 @@ fn display_kickoff(boot: &SessionCreated, out: &Out) {
     out.line("");
     out.line(&format!("── 约定（{} 条）──", boot.conventions.len()));
     if boot.conventions.is_empty() {
-        out.line("  （无）");
+        out.line("  （无约定——owner 可在 Web 维护项目记忆 conventions.*，agent 将自动消费）");
     }
     for c in &boot.conventions {
         out.line(&format!("  [{}] {} = {}", c.scope, c.key, c.value));

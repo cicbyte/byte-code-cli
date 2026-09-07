@@ -1,27 +1,58 @@
-//! 上下文消费域命令（F15-F17）：docs 文档中枢 / memory·memories 项目记忆 /
-//! search 全局搜索。
+//! 上下文消费域命令（F15-F17 + v2 写侧扩展）：docs 文档中枢（读+写）/
+//! memory·memories 项目记忆（读+写）/ search 全局搜索。
 
-use anyhow::{Result, bail};
+use anyhow::{Context, Result, anyhow, bail};
 use serde_json::json;
 
 use super::{identity_client, project_ctx};
+use crate::cli::MemoryArgs;
 use crate::client::encode_query;
 use crate::config::Config;
-use crate::model::docs::{DocFile, MemoryItem, MemoryList, VaultNode, VaultTree};
+use crate::model::docs::{DocFile, DocWriteResult, MemoryItem, MemoryList, VaultNode, VaultTree};
 use crate::model::platform::SearchResults;
 use crate::output::Out;
 
-/// `bcode docs [path] [--list]`（F15）：缺省展示目录树；给 path 输出文件正文。
+/// `bcode docs [path] [--list] [--write-file f]`：缺省展示目录树；给 path 输出
+/// 文件正文；`--write-file` 将本地文件写入 vault（整文件覆盖，写前平台自动
+/// .history 快照）——agent 设计文档/方案沉淀进平台的通道。
 /// 平台无免参别名，从 .bc/project 取项目 id 调 /v1/projects/{id}/docs/*。
 pub async fn docs(
     cfg: &Config,
     profile: &str,
     path: Option<&str>,
     list: bool,
+    write_file: Option<&str>,
     out: &Out,
 ) -> Result<()> {
     let ctx = project_ctx(cfg, profile).await?;
     let pid = ctx.project.project_id;
+
+    // 写通道优先分流（v2 反馈新增）：本地文件 → vault 路径
+    if let Some(local) = write_file {
+        let target = path.ok_or_else(|| {
+            anyhow!(
+                "docs --write-file 需要目标路径：bcode docs <vault 路径> --write-file <本地文件>"
+            )
+        })?;
+        let content =
+            std::fs::read_to_string(local).with_context(|| format!("读取本地文件 {local} 失败"))?;
+        let res: DocWriteResult = ctx
+            .client
+            .put_as(
+                &format!("/v1/projects/{pid}/docs/file"),
+                json!({ "path": target, "content": content }),
+            )
+            .await?;
+        out.kv(
+            "已写入",
+            &format!(
+                "{}（{} 字节，写前已自动 .history 快照）",
+                res.path, res.size
+            ),
+        );
+        out.emit_value(&serde_json::to_value(&res)?);
+        return Ok(());
+    }
 
     match path {
         None => {
@@ -99,17 +130,40 @@ pub async fn memories(cfg: &Config, profile: &str, prefix: Option<&str>, out: &O
     Ok(())
 }
 
-/// `bcode memory <key>`（F16）：读取单条记忆——human 模式直接输出 value。
-pub async fn memory(cfg: &Config, profile: &str, key: &str, out: &Out) -> Result<()> {
+/// `bcode memory <key>`（F16 + v2 写侧扩展）：
+/// 缺省读取（human 直出 value）；`--set/--file` 写入（upsert）；
+/// `--delete` 删除。记忆是 agent 间经验传递的载体，写通道补齐后
+/// 「踩坑→沉淀为记忆→下一个 agent 消费」闭环成立。
+pub async fn memory(cfg: &Config, profile: &str, a: &MemoryArgs, out: &Out) -> Result<()> {
     let ctx = project_ctx(cfg, profile).await?;
     let pid = ctx.project.project_id;
-    let item: MemoryItem = ctx
-        .client
-        .get_as(&format!(
-            "/v1/projects/{pid}/memories/{}",
-            encode_query(key)
-        ))
-        .await?;
+    let key_path = format!("/v1/projects/{pid}/memories/{}", encode_query(&a.key));
+
+    if a.delete {
+        ctx.client.delete(&key_path).await?;
+        out.kv("已删除", &a.key);
+        out.emit_value(&json!({ "deleted": true, "key": a.key }));
+        return Ok(());
+    }
+
+    if a.set.is_some() || a.file.is_some() {
+        let value = match (a.file.as_deref(), a.set.as_deref()) {
+            (Some(f), _) => std::fs::read_to_string(f).with_context(|| format!("读取 {f} 失败"))?,
+            (None, Some(s)) => s.to_string(),
+            (None, None) => unreachable!(),
+        };
+        let mut body = json!({ "value": value });
+        if let Some(ttl) = a.ttl.as_deref() {
+            body["ttl"] = json!(ttl);
+        }
+        ctx.client.put(&key_path, body).await?;
+        out.kv("已写入", &a.key);
+        out.emit_value(&json!({ "set": true, "key": a.key }));
+        return Ok(());
+    }
+
+    // 读取
+    let item: MemoryItem = ctx.client.get_as(&key_path).await?;
     if !out.json {
         println!("{}", item.value);
     }

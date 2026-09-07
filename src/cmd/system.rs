@@ -15,7 +15,7 @@ use crate::output::Out;
 /// 参数缺省且 stdin 为 TTY 时交互询问；非交互环境（CI/--json）必须直接传参。
 /// 保存前做连通性探测（任何 HTTP 响应含 401 均视为可达），不可达仅警告不阻断。
 pub async fn init(cfg: &mut Config, url: Option<&str>, out: &Out) -> Result<()> {
-    let server = match url {
+    let input = match url {
         Some(u) => u.trim().trim_end_matches('/').to_string(),
         None => {
             if !std::io::stdin().is_terminal() {
@@ -23,11 +23,15 @@ pub async fn init(cfg: &mut Config, url: Option<&str>, out: &Out) -> Result<()> 
                     "非交互环境请直接传参：bcode init <server_url>（如 http://127.0.0.1:8000/api）"
                 );
             }
-            prompt("平台地址（含 /api 前缀）", "http://127.0.0.1:8000/api")?
+            prompt("平台地址（缺省自动补 /api 前缀）", "http://127.0.0.1:8000")?
         }
     };
-    if !server.starts_with("http://") && !server.starts_with("https://") {
-        bail!("地址需以 http:// 或 https:// 开头：{server}");
+    if !input.starts_with("http://") && !input.starts_with("https://") {
+        bail!("地址需以 http:// 或 https:// 开头：{input}");
+    }
+    let server = normalize_server_url(&input);
+    if server != input {
+        out.line(&format!("（未带路径，已自动补全为 {server}）"));
     }
 
     let reachable = match BcodeClient::anonymous(server.clone(), cfg.insecure)?
@@ -131,4 +135,41 @@ fn open_browser(url: &str) {
     #[cfg(all(unix, not(target_os = "macos")))]
     let spawned = std::process::Command::new("xdg-open").arg(url).spawn();
     let _ = spawned.map(|_| ()); // spawn 失败不影响命令结果
+}
+
+/// 地址归一：纯 host[:port]（无路径）自动补 /api 前缀（v1 反馈：新用户必踩）
+fn normalize_server_url(input: &str) -> String {
+    let trimmed = input.trim_end_matches('/');
+    let (_, rest) = trimmed.split_once("://").unwrap_or(("", trimmed));
+    if rest.contains('/') {
+        trimmed.to_string()
+    } else {
+        format!("{trimmed}/api")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn normalize_appends_api_only_for_bare_host() {
+        assert_eq!(
+            normalize_server_url("http://localhost:8000"),
+            "http://localhost:8000/api"
+        );
+        assert_eq!(
+            normalize_server_url("http://localhost:8000/"),
+            "http://localhost:8000/api"
+        );
+        assert_eq!(normalize_server_url("https://x.io/api"), "https://x.io/api");
+        assert_eq!(
+            normalize_server_url("https://x.io/api/"),
+            "https://x.io/api"
+        );
+        assert_eq!(
+            normalize_server_url("https://x.io/custom"),
+            "https://x.io/custom"
+        );
+    }
 }
