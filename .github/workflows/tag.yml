@@ -55,12 +55,19 @@ jobs:
           echo "VERSION=$V" >> $GITHUB_OUTPUT
           echo "下一版本：v$V"
 
-      - name: Create and push tag
+      # Cargo.toml 的 version 必须与 tag 同步（binstall 从 git HEAD 的
+      # Cargo.toml 解析版本决定下载哪个 release——不 bump 会永远装旧版）。
+      # 先提交 bump 再打 tag，tag 指向 bump 提交。
+      - name: Bump Cargo.toml and tag
         run: |
+          V="${{ steps.ver.outputs.VERSION }}"
+          sed -i "s/^version = \".*\"/version = \"$V\"/" Cargo.toml
           git config user.name "release-bot"
           git config user.email "release-bot@users.noreply.github.com"
-          git tag -a "v${{ steps.ver.outputs.VERSION }}" -m "release v${{ steps.ver.outputs.VERSION }}"
-          git push origin "v${{ steps.ver.outputs.VERSION }}"
+          git commit -am "chore(release): bump version to $V"
+          git push origin HEAD:master
+          git tag -a "v$V" -m "release v$V"
+          git push origin "v$V"
 
       # GITHUB_TOKEN 推送的 tag 不会触发其他工作流（防递归限制，workflow_dispatch 除外）
       # ——必须在此显式 dispatch Release

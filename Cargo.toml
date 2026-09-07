@@ -1,6 +1,6 @@
 [package]
 name = "bcode"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2024"
 description = "ByteCode CLI — 外部 coding agent 与 ByteCode 平台之间的本地桥"
 license = "MIT"
