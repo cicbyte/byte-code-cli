@@ -52,12 +52,23 @@ pub async fn feedback(cfg: &Config, profile: &str, a: &FeedbackArgs, out: &Out) 
         if let Some(t) = a.title.as_deref() {
             body["title"] = json!(t);
         }
-        let created: crate::model::task::CreatedId = ctx
+        // 响应字段是 taskId（FeedbackConvertRes），非通用 {id}——曾用 CreatedId
+        // 解析致 serde default 0 显示「任务 #0」（平台反馈 #2 报告，任务 #15 修复）
+        #[derive(serde::Deserialize)]
+        #[serde(rename_all = "camelCase")]
+        struct ConvertResult {
+            #[serde(default)]
+            task_id: i64,
+        }
+        let created: ConvertResult = ctx
             .client
             .post_as(&format!("/v1/projects/{pid}/feedbacks/{id}/convert"), body)
             .await?;
-        out.kv("已转任务", &format!("反馈 #{id} → 任务 #{}", created.id));
-        out.emit_value(&json!({ "converted_feedback": id, "task_id": created.id }));
+        out.kv(
+            "已转任务",
+            &format!("反馈 #{id} → 任务 #{}", created.task_id),
+        );
+        out.emit_value(&json!({ "converted_feedback": id, "task_id": created.task_id }));
         return Ok(());
     }
 

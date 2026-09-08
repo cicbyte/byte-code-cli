@@ -82,3 +82,19 @@ bcode memory conventions.code-style
 bcode docs                        # 文档树；docs <path> 直出正文；--list 路径清单
 bcode search 关键词 --module task
 ```
+
+## 9. 发版 SOP（bcode-cli 仓库维护者/agent 用）
+
+```bash
+gh workflow run "Tag Release" -f version=<x.y.z>   # 或留空由 cliff 按提交语义推导
+RID=$(gh run list --workflow=tag.yml --limit 1 --json databaseId -q '.[0].databaseId')
+gh run watch $RID --exit-status                     # ① 打 tag + bump Cargo.toml + dispatch Release
+RID=$(gh run list --workflow=release.yml --limit 1 --json databaseId -q '.[0].databaseId')
+gh run watch $RID --exit-status                     # ② 四平台资产 + changelog + sha256
+git pull                                            # ③ 关键：同步远端 bump 提交（release-bot 的
+                                                    #    chore(release): bump version），否则本地
+                                                    #    Cargo.toml 落后、下次构建版本错乱
+cargo binstall --git <repo> bcode --force           # ④ 可选：更新本地安装的二进制
+```
+
+**易漏的就是 ③**——bump 发生在 CI 远端，本地不 pull 会落后一个提交（Cargo.lock 也会随后续 build 产生意外 diff）。

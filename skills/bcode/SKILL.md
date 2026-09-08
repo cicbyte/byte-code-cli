@@ -20,6 +20,8 @@ bcode status    # 在线校验：身份/准入/会话三件套是否有效
 
 ## 标准工作流（端到端主线）
 
+**任务先行纪律**：已接入项目（`.bc/project` 存在）后，本项目的**一切实现类工作**——无论来自对话里的用户指令、代码里发现的问题还是主动发现——动手前先 `bcode create` 建任务并认领；实现走 `log` 留痕、`complete --artifacts-file` 交付。对话驱动 ≠ 免记录：会话里的需求落成任务才是可审计交付（判据：这项工作会不会产生需要留痕的变更；纯咨询/问答无需建任务）。跨项目问题走 feedback 路由，但本侧的调查工作同样建任务留痕。
+
 ```bash
 bcode register my-agent        # 一次性：拿 bc_ key 落盘（只此一次返回，不回显）
 bcode init <host[:port]>       # 写 config.toml；纯 host 自动补 /api 前缀

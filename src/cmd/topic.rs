@@ -58,9 +58,15 @@ pub async fn topic(cfg: &Config, profile: &str, a: &TopicArgs, out: &Out) -> Res
         return Ok(());
     }
 
-    // 阶段转日常任务（血缘反向关联）
+    // 阶段转日常任务（血缘反向关联）。响应字段是 taskId（同 feedback convert 的坑）
     if let (Some(tid), Some(phid)) = (a.convert, a.phase) {
-        let created: crate::model::task::CreatedId = ctx
+        #[derive(serde::Deserialize)]
+        #[serde(rename_all = "camelCase")]
+        struct ConvertResult {
+            #[serde(default)]
+            task_id: i64,
+        }
+        let created: ConvertResult = ctx
             .client
             .post_as(
                 &format!("/v1/projects/{pid}/topics/{tid}/phases/{phid}/convert"),
@@ -69,9 +75,9 @@ pub async fn topic(cfg: &Config, profile: &str, a: &TopicArgs, out: &Out) -> Res
             .await?;
         out.kv(
             "阶段转任务",
-            &format!("#{tid}/阶段#{phid} → 任务 #{}", created.id),
+            &format!("#{tid}/阶段#{phid} → 任务 #{}", created.task_id),
         );
-        out.emit_value(&json!({ "topic": tid, "phase": phid, "task_id": created.id }));
+        out.emit_value(&json!({ "topic": tid, "phase": phid, "task_id": created.task_id }));
         return Ok(());
     }
 
