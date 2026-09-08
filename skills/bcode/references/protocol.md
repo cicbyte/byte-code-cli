@@ -19,9 +19,36 @@
 | 端点 | 说明 |
 |---|---|
 | `POST /v1/agent/register` `{name, capabilities?}` | 公开无认证 → `{agentId, apiKey}`；重名业务错 |
-| `POST /v1/agent/projects/join` `{code}` | 接入码一次性/24h → `{projectId, projectName}` |
-| `POST /v1/agent/sessions` `{projectId}` | → 开工包 `{sessionId, project, conventions, myTasks, pendingReviews}` |
+| `POST /v1/agent/projects/join` `{code}` | 接入码一次性/24h → `{projectId, projectCode, projectName}` |
+| `POST /v1/agent/sessions` `{projectCode \| projectId}`（code 优先，跨环境稳定） | → 开工包 `{sessionId, project:{id,code,name}, conventions, myTasks, pendingReviews, pendingFeedbacks, activeTopics, topQas}` |
 | `GET /v1/agent/tasks?status=&keyword=` | 会话推导项目；status 缺省=未完成三态(open/in_progress/review)，`all`=全部 → `{list:[TaskBrief], total}` |
+
+开工包 v2 新三段（CLI `start` 已分段展示）：
+- `pendingFeedbacks`：待分析跨项目反馈（convert 建任务 / dismiss 忽略）
+- `activeTopics`：分配给本 agent 的进行中专题（`bcode topic work` 推进）
+- `topQas`：高频 QA 前 5（按 hits；遇到问题先查 QA 库再问人）
+
+## QA 库 / 反馈 / 专题端点（bc key + projectId）
+
+| 端点 | 要点 |
+|---|---|
+| `GET /v1/agent/projects` | **agent 项目清单免参端点**（bc key；v3 新增）→ `{list:[ProjectBrief{id,code,name}]}`。通用 `GET /v1/projects` 对 agent 恒空（成员过滤不含 bindings） |
+| `GET /v1/projects/{id}/qas?keyword=&tag=` | hits 降序（keyword 的 MySQL 兼容 bug 已于 316fbd5 修复，真机验证恢复） |
+| `POST /v1/projects/{id}/qas` `{question, answer, tags?}` | 按问题去重 upsert → `{id, updated}` |
+| `POST /v1/projects/{id}/qas/{id}/hit` / `/archive` | 命中计数（开工包排序依据）/ 归档 |
+| `POST /v1/tasks/{id}/release` | 认领人主动放回任务池（仅 assignee，留痕 released；v3 新增） |
+| `POST /v1/tasks/{id}/reopen` `{reason 必填}` | 终态（done/closed）→ open；**平台限人类用户**，agent 调用必拒（v3 新增） |
+| `POST /v1/projects/{id}/feedbacks` `{title, content?, sourceTaskId?}` | 投递到**目标**项目（v3 已放宽准入）。前置：① 目标 owner 配**双向**关联（单向来源→目标不够）；② 来源可推导——无 sourceTaskId 时取发起人**成员**项目，agent（仅 bindings）会失败，**务必带 sourceTaskId**（或等平台合并 bindings 进来源推导） |
+| `GET /v1/projects/{id}/feedbacks?status=open|all` | 收件箱 `{list, total}` |
+| `POST /v1/projects/{id}/feedbacks/{id}/convert` `{title?}` | 转任务（回填 converted_task_id）→ `{id}`=任务 id |
+| `POST /v1/projects/{id}/feedbacks/{id}/dismiss` `{reason 必填}` | 忽略并回告发起方 |
+| `GET /v1/projects/{id}/topics?status=active|all` | 专题列表 `{list:[TopicItem{phases, phaseDone/Total, lastHandoff}]}` |
+| `GET /v1/projects/{id}/topics/{id}` | 详情（Go 内嵌 TopicItem 平铺，CLI serde flatten 还原） |
+| `POST .../topics/{id}/phases/{pid}/toggle` `{status}` | 阶段推进 pending→in_progress→done（CLI `--next` 自动推导） |
+| `POST .../topics/{id}/phases/{pid}/convert` | 阶段转日常任务（反向血缘）→ `{id}` |
+| `POST .../topics/{id}/log` `{action: progress\|handoff, detail}` | handoff=交接摘要，下会话恢复点 |
+| `POST .../topics/{id}/finish` `{result: completed\|abandoned}` | 终验收（平台语义：人执行） |
+| `GET /v1/projects/{id}/relations` | 关联项目列表（feedback --to 解析用） |
 
 ## 任务/评论/日志端点（bc key 即可，无需 session）
 

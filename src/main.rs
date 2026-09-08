@@ -63,6 +63,8 @@ async fn main() {
         Command::Create(a) => cmd::tasks::create(&cfg, &profile, &a, &out).await,
         Command::Update(a) => cmd::tasks::update(&cfg, &profile, &a, &out).await,
         Command::Claim(a) => cmd::tasks::claim(&cfg, &profile, a.id, &out).await,
+        Command::Release(a) => cmd::tasks::release(&cfg, &profile, a.id, &out).await,
+        Command::Reopen(a) => cmd::tasks::reopen(&cfg, &profile, a.id, &a.reason, &out).await,
         Command::Complete(a) => {
             cmd::tasks::complete(
                 &cfg,
@@ -105,6 +107,9 @@ async fn main() {
         Command::Open(a) => cmd::system::open(&cfg, &a.target, a.id, &out),
         Command::Completion(a) => cmd::system::completion(a.shell),
         Command::Man => cmd::system::man(),
+        Command::Qa(a) => cmd::qa::qa(&cfg, &profile, &a, &out).await,
+        Command::Feedback(a) => cmd::feedback::feedback(&cfg, &profile, &a, &out).await,
+        Command::Topic(a) => cmd::topic::topic(&cfg, &profile, &a, &out).await,
     };
 
     if let Err(e) = result {

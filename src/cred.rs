@@ -27,10 +27,14 @@ impl std::fmt::Debug for Credential {
     }
 }
 
-/// 项目指向：<repo>/.bc/project（无身份信息，可进 git）
+/// 项目指向：<repo>/.bc/project（无身份信息，可进 git）。
+/// code 为项目短码（跨环境稳定，新平台字段）；旧指针无此字段时空串，
+/// 会话建立自动退回 projectId——两代指针兼容
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct ProjectPointer {
     pub project_id: i64,
+    #[serde(default)]
+    pub project_code: String,
     pub project_name: String,
 }
 

@@ -27,6 +27,8 @@ impl std::fmt::Debug for RegisterCreated {
 #[serde(rename_all = "camelCase")]
 pub struct JoinResult {
     pub project_id: i64,
+    #[serde(default)]
+    pub project_code: String,
     pub project_name: String,
 }
 
@@ -42,13 +44,74 @@ pub struct SessionCreated {
     pub my_tasks: Vec<TaskBrief>,
     #[serde(default, deserialize_with = "null_to_default")]
     pub pending_reviews: Vec<TaskBrief>,
+    /// 待分析跨项目反馈（阅读后 convert 建任务或 dismiss）
+    #[serde(default, deserialize_with = "null_to_default")]
+    pub pending_feedbacks: Vec<FeedbackBrief>,
+    /// 分配给本 agent 的进行中专题
+    #[serde(default, deserialize_with = "null_to_default")]
+    pub active_topics: Vec<TopicBrief>,
+    /// 高频 QA（按命中数前 5——遇到问题先查 QA 库再问人）
+    #[serde(default, deserialize_with = "null_to_default")]
+    pub top_qas: Vec<QaBrief>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ProjectBrief {
     pub id: i64,
+    #[serde(default)]
+    pub code: String,
     pub name: String,
+}
+
+/// 跨项目反馈摘要（开工包）
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FeedbackBrief {
+    #[serde(default)]
+    pub id: i64,
+    #[serde(default)]
+    pub title: String,
+    #[serde(default)]
+    pub content: String,
+    #[serde(default)]
+    pub source_project_name: String,
+    #[serde(default)]
+    pub source_task_id: i64,
+}
+
+/// 专题摘要（开工包）
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TopicBrief {
+    #[serde(default)]
+    pub id: i64,
+    #[serde(default)]
+    pub title: String,
+    #[serde(default)]
+    pub goal: String,
+    #[serde(default)]
+    pub doc_path: String,
+    #[serde(default)]
+    pub phase_total: i64,
+    #[serde(default)]
+    pub phase_done: i64,
+    #[serde(default)]
+    pub last_handoff: String,
+}
+
+/// QA 摘要（开工包 TopQas）
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct QaBrief {
+    #[serde(default)]
+    pub id: i64,
+    #[serde(default)]
+    pub question: String,
+    #[serde(default)]
+    pub answer: String,
+    #[serde(default)]
+    pub hits: i64,
 }
 
 /// 约定条目（scope = global / project，项目侧优先）
@@ -70,7 +133,7 @@ pub struct AgentTasks {
     pub list: Vec<TaskBrief>,
 }
 
-/// 任务摘要（开工包与免参列表共用）
+/// 任务摘要（开工包与免参列表共用；v3 起平台补 type/tags/updatedAt）
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TaskBrief {
@@ -81,14 +144,25 @@ pub struct TaskBrief {
     #[serde(default)]
     pub status: String,
     #[serde(default)]
+    pub r#type: String,
+    #[serde(default)]
     pub priority: i64,
+    #[serde(default, deserialize_with = "null_to_default")]
+    pub tags: Vec<String>,
     #[serde(default)]
     pub due_date: Option<String>,
+    #[serde(default)]
+    pub updated_at: String,
 }
 
 impl TaskBrief {
     /// 单行摘要：#id [status] title
     pub fn one_line(&self) -> String {
-        format!("#{} [{}] {}", self.id, self.status, self.title)
+        let typ = if self.r#type.is_empty() {
+            String::new()
+        } else {
+            format!("{}/", self.r#type)
+        };
+        format!("#{} [{}{typ}] {}", self.id, self.status, self.title)
     }
 }

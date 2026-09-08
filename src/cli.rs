@@ -26,7 +26,9 @@ const GROUPED_CATALOG: &str = "\
   task <id>          单任务详情：描述/artifacts/执行日志/评论
   create             建任务（--title/--description/--file JSON 绕开编码坑；实验性）
   update <id>        改字段（--title/--type/--priority/--due；状态流转走 claim/complete）
-  claim <id>         原子认领（租约 2h 无主动释放，周期 log 保活）
+  claim <id>         原子认领（租约 2h，周期 log 保活）
+  release <id>       释放任务（认领人放回任务池，不必等 2h 租约）
+  reopen <id>        重开终态任务（--reason 必填；平台限人类用户）
   complete <id>      完成 → review（--artifacts-file/--note；上限 1 MiB）
   log <id> <msg>     过程留痕（执行日志；刷新租约；failed=记录失败，非放弃）
 
@@ -40,6 +42,16 @@ const GROUPED_CATALOG: &str = "\
   memory <key>       项目记忆（读；--set/--file 写；--delete 删）
   memories           记忆列表（--prefix 前缀过滤）
   search <kw>        全局搜索（已获读权的项目范围）
+
+QA 库与反馈
+  qa [kw]            问答检索（--add 沉淀 / --hit 计数 / --archive 归档）
+  feedback           跨项目反馈（--send 投递 / 缺省收件箱 / convert 转任务）
+
+专题（长期任务阶段化）
+  topic              专题列表（--detail <id> 详情含阶段）
+  topic work         推进阶段（--work <tid> --phase <pid> --next 自动下一态）
+  topic log          专题留痕（--log <id> --detail-text；handoff=交接摘要）
+  topic convert      阶段转日常任务（--convert <tid> --phase <pid>）
 
 配置与工具
   init [url]         引导写配置（TTY 交互；纯 host 自动补 /api）
@@ -113,8 +125,12 @@ pub enum Command {
     Create(CreateArgs),
     /// 更新任务字段（agent 可改：标题/描述/类型/优先级/截止；状态流转走 claim/complete）
     Update(UpdateArgs),
-    /// 认领任务（原子；被抢则失败）。租约 2h，周期 log 保活；无主动释放（平台侧待补）
+    /// 认领任务（原子；被抢则失败）。租约 2h，周期 log 保活；认错用 release 即时放回
     Claim(TaskIdArg),
+    /// 释放任务（认领人放回任务池，即刻可被他人认领；不必等 2h 租约）
+    Release(TaskIdArg),
+    /// 重开终态任务（done/closed → open；--reason 必填留痕。平台限人类用户，agent 身份会被拒）
+    Reopen(ReopenArgs),
     /// 完成任务进 review（artifacts 为 markdown 产出，上限 1 MiB）
     Complete(CompleteArgs),
     /// 过程留痕（执行日志；同时刷新认领租约）。--status failed=记录一次失败事件，非放弃
@@ -141,6 +157,12 @@ pub enum Command {
     Completion(CompletionArgs),
     /// 生成 man 手册（roff）到 stdout
     Man,
+    /// QA 库：缺省搜索；add 沉淀 / hit 命中计数 / archive 归档
+    Qa(QaArgs),
+    /// 跨项目反馈：send 投递 / list 收件箱 / convert 转任务 / dismiss 忽略
+    Feedback(FeedbackArgs),
+    /// 专题：list 详情 / work 推进阶段 / log 留痕 / convert 阶段转任务 / finish 终验收
+    Topic(TopicArgs),
 }
 
 // 子命令参数体（main 以 Command::X(Args { .. }) 模式匹配）
@@ -208,6 +230,14 @@ pub struct CreateArgs {
 #[derive(clap::Args)]
 pub struct TaskIdArg {
     pub id: i64,
+}
+
+#[derive(clap::Args)]
+pub struct ReopenArgs {
+    pub id: i64,
+    /// 重开原因（必填，留痕）
+    #[arg(long)]
+    pub reason: String,
 }
 
 #[derive(clap::Args)]
@@ -356,6 +386,101 @@ pub enum OpenTarget {
     Task,
     /// 项目看板
     Board,
+}
+
+#[derive(clap::Args)]
+pub struct QaArgs {
+    /// 搜索关键词（缺省列出全部，按命中数降序）
+    pub keyword: Option<String>,
+    /// 沉淀 QA：问题（同问题存在则更新答案；配合 --answer）
+    #[arg(long, requires = "answer")]
+    pub question: Option<String>,
+    /// 答案（markdown）
+    #[arg(long)]
+    pub answer: Option<String>,
+    /// 逗号分隔标签
+    #[arg(long)]
+    pub tags: Option<String>,
+    /// 按标签过滤
+    #[arg(long)]
+    pub tag: Option<String>,
+    /// 命中计数（查阅某条 QA 后调用，影响开工包 Top 排序）
+    #[arg(long)]
+    pub hit: Option<i64>,
+    /// 归档（过期/失效条目）
+    #[arg(long)]
+    pub archive: Option<i64>,
+}
+
+#[derive(clap::Args)]
+pub struct FeedbackArgs {
+    /// 投递反馈到关联项目（code/名称/id）
+    #[arg(long)]
+    pub send: Option<String>,
+    /// 反馈标题
+    #[arg(long)]
+    pub title: Option<String>,
+    /// 反馈正文（markdown：现象/线索/怀疑点）
+    #[arg(long)]
+    pub content: Option<String>,
+    /// 正文从本地 UTF-8 文件读取
+    #[arg(long)]
+    pub file: Option<String>,
+    /// 来源任务 id（血缘可溯）
+    #[arg(long)]
+    pub task: Option<i64>,
+    /// 收件箱状态：open（缺省）/ all
+    #[arg(long)]
+    pub status: Option<String>,
+    /// 反馈转任务（缺省标题用反馈标题）
+    #[arg(long)]
+    pub convert: Option<i64>,
+    /// 忽略反馈（id）
+    #[arg(long)]
+    pub dismiss: Option<i64>,
+    /// 忽略理由（必填，回告发起方）
+    #[arg(long, requires = "dismiss")]
+    pub reason: Option<String>,
+}
+
+#[derive(clap::Args)]
+pub struct TopicArgs {
+    /// 单专题详情（id）
+    #[arg(long)]
+    pub detail: Option<i64>,
+    /// 列出全部状态（缺省仅 active）
+    #[arg(long)]
+    pub all: bool,
+    /// 阶段推进（专题 id；配合 --phase 与 --next/--status）
+    #[arg(long, requires = "phase")]
+    pub work: Option<i64>,
+    /// 阶段转日常任务（专题 id；配合 --phase）
+    #[arg(long, requires = "phase")]
+    pub convert: Option<i64>,
+    /// 目标阶段 id（work/convert 用）
+    #[arg(long)]
+    pub phase: Option<i64>,
+    /// 自动推进到下一状态（pending→in_progress→done）
+    #[arg(long)]
+    pub next: bool,
+    /// 显式目标状态（pending/in_progress/done）
+    #[arg(long)]
+    pub status: Option<String>,
+    /// 专题留痕（id）
+    #[arg(long)]
+    pub log: Option<i64>,
+    /// 留痕类型：progress（缺省）/ handoff（交接摘要，下会话恢复点）
+    #[arg(long)]
+    pub action: Option<String>,
+    /// 留痕正文
+    #[arg(long)]
+    pub detail_text: Option<String>,
+    /// 终验收（id；平台语义为人执行）
+    #[arg(long)]
+    pub finish: Option<i64>,
+    /// 终验收结论：completed / abandoned
+    #[arg(long, requires = "finish")]
+    pub result: Option<String>,
 }
 
 #[cfg(test)]

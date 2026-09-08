@@ -4,8 +4,11 @@
 
 pub mod agent;
 pub mod docs;
+pub mod feedback;
 pub mod platform;
+pub mod qa;
 pub mod task;
+pub mod topic;
 
 use serde::Deserialize;
 

@@ -49,23 +49,40 @@ pub async fn tasks(
     if page.list.is_empty() {
         out.line(&format!("（无任务，共 {} 条记录）", page.total));
     } else {
+        // 列：id/状态/类型/优先/截止/标签/标题（type/tags 为 v3 平台新增字段）
         let head = format!(
-            "  {} {} {} {} {}",
+            "  {} {} {} {} {} {} {}",
             pad_display("id", 7),
             pad_display("状态", 13),
+            pad_display("类型", 8),
             pad_display("优先", 4),
             pad_display("截止", 12),
+            pad_display("标签", 10),
             "标题"
         );
         out.line(&head);
         for t in &page.list {
             let due = t.due_date.as_deref().unwrap_or("—");
+            let tags = if t.tags.is_empty() {
+                "—".to_string()
+            } else {
+                t.tags.join(",")
+            };
             out.line(&format!(
-                "  {} {} {} {} {}",
+                "  {} {} {} {} {} {} {}",
                 pad_display(&t.id.to_string(), 7),
                 pad_display(&t.status, 13),
+                pad_display(
+                    if t.r#type.is_empty() {
+                        "—"
+                    } else {
+                        &t.r#type
+                    },
+                    8
+                ),
                 pad_display(&format!("P{}", t.priority), 4),
                 pad_display(due, 12),
+                pad_display(&tags, 10),
                 t.title
             ));
         }
@@ -192,6 +209,33 @@ pub async fn claim(cfg: &Config, profile: &str, id: i64, out: &Out) -> Result<()
         "2 小时无动作将自动释放，长任务请周期 bcode log 保活",
     );
     out.emit_value(&payload);
+    Ok(())
+}
+
+/// `bcode release <id>`（v3 新增，平台 316fbd5）：认领人主动放回任务池——
+/// 认领错了/依赖阻塞时即刻释出，不必干等 2h 租约；仅 assignee 本人，留痕 released。
+pub async fn release(cfg: &Config, profile: &str, id: i64, out: &Out) -> Result<()> {
+    let ctx = project_ctx(cfg, profile).await?;
+    ctx.client
+        .post(&format!("/v1/tasks/{id}/release"), json!({}))
+        .await?;
+    out.kv("已释放", &format!("#{id} → open（任务回池，他人可认领）"));
+    out.emit_value(&json!({ "released": true, "task_id": id }));
+    Ok(())
+}
+
+/// `bcode reopen <id> --reason <原因>`（v3 新增）：终态任务（done/closed）重开 → open，
+/// 原因必填（留痕）。复核不通过/回归问题时的回退路径。
+pub async fn reopen(cfg: &Config, profile: &str, id: i64, reason: &str, out: &Out) -> Result<()> {
+    let ctx = project_ctx(cfg, profile).await?;
+    ctx.client
+        .post(
+            &format!("/v1/tasks/{id}/reopen"),
+            json!({ "reason": reason }),
+        )
+        .await?;
+    out.kv("已重开", &format!("#{id} → open（原因已留痕）"));
+    out.emit_value(&json!({ "reopened": true, "task_id": id, "reason": reason }));
     Ok(())
 }
 
@@ -387,8 +431,11 @@ mod tests {
             id,
             title: format!("t{id}"),
             status: "open".into(),
+            r#type: "chore".into(),
             priority,
+            tags: vec![],
             due_date: None,
+            updated_at: String::new(),
         }
     }
 

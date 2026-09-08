@@ -3,10 +3,13 @@
 //! system（init/open/completion/man 便利命令）。
 
 pub mod comms;
+pub mod feedback;
 pub mod identity;
 pub mod project;
+pub mod qa;
 pub mod system;
 pub mod tasks;
+pub mod topic;
 pub mod vault;
 
 use anyhow::{Result, anyhow};
@@ -46,7 +49,7 @@ impl Ctx {
                     &self.server,
                     &self.profile,
                     &self.credential,
-                    self.project.project_id,
+                    &self.project,
                     self.insecure,
                 )
                 .await?;
@@ -75,17 +78,24 @@ fn is_stale_session(e: &anyhow::Error) -> bool {
     )
 }
 
-/// 建立/续期工作会话并落盘（start 显式调用；其余命令缺会话时懒建立，F04）
+/// 建立/续期工作会话并落盘（start 显式调用；其余命令缺会话时懒建立，F04）。
+/// 项目标识 code 优先（跨环境稳定），id 兼容旧指针
 pub(crate) async fn ensure_session(
     server: &str,
     profile: &str,
     credential: &Credential,
-    project_id: i64,
+    project: &cred::ProjectPointer,
     insecure: bool,
 ) -> Result<SessionCreated> {
     let client = BcodeClient::new(server.to_string(), credential.clone(), None, insecure)?;
+    let mut body = json!({});
+    if !project.project_code.is_empty() {
+        body["projectCode"] = json!(project.project_code);
+    } else {
+        body["projectId"] = json!(project.project_id);
+    }
     let boot = client
-        .post_as::<SessionCreated>("/v1/agent/sessions", json!({ "projectId": project_id }))
+        .post_as::<SessionCreated>("/v1/agent/sessions", body)
         .await?;
     // 会话记录以服务端返回为准（--project 传纯 id 时本地无名称）
     cred::save_session(
@@ -111,15 +121,9 @@ pub(crate) async fn project_ctx(cfg: &Config, profile: &str) -> Result<Ctx> {
     let session_id = match cred::load_session(profile, project.project_id) {
         Some(s) => s.session_id,
         None => {
-            ensure_session(
-                &server,
-                profile,
-                &credential,
-                project.project_id,
-                cfg.insecure,
-            )
-            .await?
-            .session_id
+            ensure_session(&server, profile, &credential, &project, cfg.insecure)
+                .await?
+                .session_id
         }
     };
     let client = BcodeClient::new(
