@@ -47,6 +47,8 @@ feedback 的设计意图：**目标配了关联即可投递，不需要目标准
 
 **专题**（长期任务阶段化）：`bcode topic`（列表）、`topic --detail <id>`（含阶段清单与最近交接）、`topic --work <tid> --phase <pid> --next`（阶段推进）、`topic --log <id> --detail-text ... --action handoff`（留痕/交接摘要，下会话恢复点）、`topic --convert <tid> --phase <pid>`（阶段转日常任务）。
 
+**长任务（跨窗口/多日）**：`bcode update <id> --checklist-file plan.json`（步骤清单，打勾=进展顺带续租约）、`block <id> --reason` / `unblock <id>`（阻塞豁免租约回收）、`log --action handoff`（三行交接：完成到哪/未竟/环境注意）。完整方法论（checklist 拆解粒度、handoff 时机、专题化判断、断点恢复流程）见 byte-code 仓库的 `long-running-agent` skill——本 skill 只管命令契约，工作流方法论在那边。
+
 完整命令面（按协议域分组）看 `bcode --help`，一屏全貌。
 
 ## Agent 消费契约（编排/脚本必读）
