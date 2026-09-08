@@ -28,6 +28,8 @@ const GROUPED_CATALOG: &str = "\
   update <id>        改字段（--title/--type/--priority/--due；状态流转走 claim/complete）
   claim <id>         原子认领（租约 2h，周期 log 保活）
   release <id>       释放任务（认领人放回任务池，不必等 2h 租约）
+  block <id>         上报阻塞（豁免租约回收；等 CI/等人时用，--reason 必填）
+  unblock <id>       解除阻塞（恢复执行）
   reopen <id>        重开终态任务（--reason 必填；平台限人类用户）
   complete <id>      完成 → review（--artifacts-file/--note；上限 1 MiB）
   log <id> <msg>     过程留痕（执行日志；刷新租约；failed=记录失败，非放弃）
@@ -129,6 +131,10 @@ pub enum Command {
     Claim(TaskIdArg),
     /// 释放任务（认领人放回任务池，即刻可被他人认领；不必等 2h 租约）
     Release(TaskIdArg),
+    /// 上报阻塞（in_progress→blocked，豁免租约回收；等 CI/等人/等环境时用）
+    Block(BlockArgs),
+    /// 解除阻塞（blocked→in_progress，恢复执行）
+    Unblock(TaskIdArg),
     /// 重开终态任务（done/closed → open；--reason 必填留痕。平台限人类用户，agent 身份会被拒）
     Reopen(ReopenArgs),
     /// 完成任务进 review（artifacts 为 markdown 产出，上限 1 MiB）
@@ -241,6 +247,14 @@ pub struct ReopenArgs {
 }
 
 #[derive(clap::Args)]
+pub struct BlockArgs {
+    pub id: i64,
+    /// 阻塞原因（必填，留痕）
+    #[arg(long)]
+    pub reason: String,
+}
+
+#[derive(clap::Args)]
 pub struct UpdateArgs {
     pub id: i64,
     /// 新标题
@@ -258,6 +272,9 @@ pub struct UpdateArgs {
     /// 截止日期（Y-m-d）；空串=清除
     #[arg(long)]
     pub due: Option<String>,
+    /// 步骤清单 JSON 文件（[{text,done}]；打勾=进展，顺带续租约——长任务工作流）
+    #[arg(long)]
+    pub checklist_file: Option<String>,
 }
 
 #[derive(clap::Args)]

@@ -37,6 +37,9 @@ pub struct TaskDetail {
     pub creator_name: String,
     #[serde(default)]
     pub artifacts: String,
+    /// 步骤清单 JSON 字符串 [{text,done}]——长任务工作流的进度载体（打勾=续租约）
+    #[serde(default)]
+    pub checklist: String,
     #[serde(default)]
     pub due_date: String,
     #[serde(default, deserialize_with = "null_to_default")]

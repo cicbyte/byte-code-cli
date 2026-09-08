@@ -137,6 +137,25 @@ pub async fn task(cfg: &Config, profile: &str, id: i64, out: &Out) -> Result<()>
     if !detail.tags.is_empty() {
         out.kv("标签", &detail.tags.join(", "));
     }
+    // 步骤清单（长任务工作流：恢复上下文时据此知道做到第几步）
+    if let Ok(steps) = serde_json::from_str::<Vec<serde_json::Value>>(&detail.checklist)
+        && !steps.is_empty()
+    {
+        let done = steps
+            .iter()
+            .filter(|s| s.get("done").and_then(|d| d.as_bool()).unwrap_or(false))
+            .count();
+        out.kv("步骤", &format!("{}/{} 已完成", done, steps.len()));
+        for s in &steps {
+            let mark = if s.get("done").and_then(|d| d.as_bool()).unwrap_or(false) {
+                "✓"
+            } else {
+                "·"
+            };
+            let text = s.get("text").and_then(|t| t.as_str()).unwrap_or("");
+            out.line(&format!("    {mark} {text}"));
+        }
+    }
     if !detail.description.is_empty() {
         out.line("");
         out.line("── 描述 ──");
@@ -221,6 +240,35 @@ pub async fn release(cfg: &Config, profile: &str, id: i64, out: &Out) -> Result<
         .await?;
     out.kv("已释放", &format!("#{id} → open（任务回池，他人可认领）"));
     out.emit_value(&json!({ "released": true, "task_id": id }));
+    Ok(())
+}
+
+/// `bcode block <id> --reason <原因>`：上报阻塞（in_progress→blocked）。
+/// blocked 豁免租约回收——等 CI/等人/等环境时主动举手，不会被 2h 超时误回收。
+pub async fn block(cfg: &Config, profile: &str, id: i64, reason: &str, out: &Out) -> Result<()> {
+    let ctx = project_ctx(cfg, profile).await?;
+    ctx.client
+        .post(
+            &format!("/v1/tasks/{id}/block"),
+            json!({ "reason": reason }),
+        )
+        .await?;
+    out.kv(
+        "已阻塞",
+        &format!("#{id} → blocked（豁免租约回收；原因已留痕）"),
+    );
+    out.emit_value(&json!({ "blocked": true, "task_id": id, "reason": reason }));
+    Ok(())
+}
+
+/// `bcode unblock <id>`：解除阻塞（blocked→in_progress，恢复执行）。
+pub async fn unblock(cfg: &Config, profile: &str, id: i64, out: &Out) -> Result<()> {
+    let ctx = project_ctx(cfg, profile).await?;
+    ctx.client
+        .post(&format!("/v1/tasks/{id}/unblock"), json!({}))
+        .await?;
+    out.kv("已解除", &format!("#{id} → in_progress（恢复执行）"));
+    out.emit_value(&json!({ "unblocked": true, "task_id": id }));
     Ok(())
 }
 
@@ -370,8 +418,9 @@ pub async fn create(
 }
 
 /// `bcode update <id>`（v2 反馈新增）：改任务字段。平台门禁：agent 禁改
-/// status/assigneeId（状态流转必须走 claim/complete），CLI 不暴露这两项。
-/// 指针语义：只提交出现的字段，其余不动；--due "" 传空串=清除截止。
+/// status/assigneeId（状态流转必须走 claim/complete/block），CLI 不暴露这两项。
+/// 指针语义：只提交出现的字段，其余不动；--due "" 传空串=清除截止；
+/// --checklist-file 传步骤清单 JSON（[{text,done}]，打勾=进展顺带续租约）。
 pub async fn update(cfg: &Config, profile: &str, a: &UpdateArgs, out: &Out) -> Result<()> {
     let mut body = json!({});
     if let Some(t) = a.title.as_deref() {
@@ -389,9 +438,16 @@ pub async fn update(cfg: &Config, profile: &str, a: &UpdateArgs, out: &Out) -> R
     if let Some(d) = a.due.as_deref() {
         body["dueDate"] = json!(d);
     }
+    if let Some(f) = a.checklist_file.as_deref() {
+        let raw = std::fs::read_to_string(f).with_context(|| format!("读取 {f} 失败"))?;
+        // 校验为 JSON 数组即透传（平台解析 [{text,done}]），坏文件在联网前报错
+        serde_json::from_str::<Vec<serde_json::Value>>(&raw)
+            .with_context(|| format!("{f} 不是合法的 JSON 数组（应为 [{{text,done}}]）"))?;
+        body["checklist"] = json!(raw);
+    }
     if body.as_object().is_none_or(|m| m.is_empty()) {
         bail!(
-            "未指定修改项：--title/--description/--type/--priority/--due 至少一个（状态流转走 claim/complete，改派是 owner 权限）"
+            "未指定修改项：--title/--description/--type/--priority/--due/--checklist-file 至少一个（状态流转走 claim/complete/block，改派是 owner 权限）"
         );
     }
 
