@@ -40,7 +40,7 @@ const GROUPED_CATALOG: &str = "\
   notify               通知（--unread / --read <id> / --read-all / --watch SSE 实时流）
 
 上下文消费
-  docs [path]        文档中枢（读正文 / --list；--write-file 写入，设计沉淀）
+  docs [path]        文档中枢（读正文 / --list / --search；--write-file 写入）
   memory <key>       项目记忆（读；--set/--file 写；--delete 删）
   memories           记忆列表（--prefix 前缀过滤）
   search <kw>        全局搜索（已获读权的项目范围）
@@ -339,6 +339,9 @@ pub struct NotifyArgs {
 pub struct DocsArgs {
     /// 文件路径（vault 内相对路径；--write-file 时为写入目标）
     pub path: Option<String>,
+    /// vault 内搜索文档（标题/标签/路径 + md 正文）
+    #[arg(long)]
+    pub search: Option<String>,
     /// 只列文件路径清单
     #[arg(long)]
     pub list: bool,
@@ -446,6 +449,9 @@ pub struct FeedbackArgs {
     /// 来源任务 id（血缘可溯）
     #[arg(long)]
     pub task: Option<i64>,
+    /// 显式来源项目 id（多项目 agent 场景；优先于任务/成员/bindings 推导）
+    #[arg(long)]
+    pub source: Option<i64>,
     /// 收件箱状态：open（缺省）/ all
     #[arg(long)]
     pub status: Option<String>,

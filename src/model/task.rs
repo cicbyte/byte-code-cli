@@ -40,6 +40,9 @@ pub struct TaskDetail {
     /// 步骤清单 JSON 字符串 [{text,done}]——长任务工作流的进度载体（打勾=续租约）
     #[serde(default)]
     pub checklist: String,
+    /// 直接子任务（父子关系回填，v4 平台新增）
+    #[serde(default, deserialize_with = "super::null_to_default")]
+    pub sub_tasks: Vec<TaskBriefRef>,
     #[serde(default)]
     pub due_date: String,
     #[serde(default, deserialize_with = "null_to_default")]
@@ -100,4 +103,18 @@ pub struct AiLogItem {
     pub status: String,
     #[serde(default)]
     pub created_at: String,
+}
+
+/// TaskDetail.subTasks 元素（TaskItem 精简视图）
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TaskBriefRef {
+    #[serde(default)]
+    pub id: i64,
+    #[serde(default)]
+    pub title: String,
+    #[serde(default)]
+    pub status: String,
+    #[serde(default)]
+    pub priority: i64,
 }

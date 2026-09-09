@@ -8,28 +8,45 @@ use super::{identity_client, project_ctx};
 use crate::cli::MemoryArgs;
 use crate::client::encode_query;
 use crate::config::Config;
-use crate::model::docs::{DocFile, DocWriteResult, MemoryItem, MemoryList, VaultNode, VaultTree};
+use crate::model::docs::{
+    DocFile, DocWriteResult, MemoryItem, MemoryList, VaultNode, VaultSearchItem, VaultTree,
+};
 use crate::model::platform::SearchResults;
 use crate::output::Out;
 
-/// `bcode docs [path] [--list] [--write-file f]`：缺省展示目录树；给 path 输出
-/// 文件正文；`--write-file` 将本地文件写入 vault（整文件覆盖，写前平台自动
-/// .history 快照）——agent 设计文档/方案沉淀进平台的通道。
-/// 平台无免参别名，从 .bc/project 取项目 id 调 /v1/projects/{id}/docs/*。
-pub async fn docs(
-    cfg: &Config,
-    profile: &str,
-    path: Option<&str>,
-    list: bool,
-    write_file: Option<&str>,
-    out: &Out,
-) -> Result<()> {
+/// `bcode docs [path] [--list] [--write-file f] [--search kw]`：缺省目录树；
+/// 给 path 读正文；`--write-file` 写入（写前自动 .history 快照）；
+/// `--search` vault 内搜索。v4 起全部走平台免参别名（/agent/docs/*，
+/// 会话推导项目，X-Session 即上下文）。
+pub async fn docs(cfg: &Config, profile: &str, a: &crate::cli::DocsArgs, out: &Out) -> Result<()> {
     let ctx = project_ctx(cfg, profile).await?;
-    let pid = ctx.project.project_id;
 
-    // 写通道优先分流（v2 反馈新增）：本地文件 → vault 路径
-    if let Some(local) = write_file {
-        let target = path.ok_or_else(|| {
+    // vault 内搜索（免参别名）
+    if let Some(kw) = &a.search {
+        #[derive(serde::Serialize, serde::Deserialize)]
+        struct DocsSearchRes {
+            #[serde(default, deserialize_with = "crate::model::null_to_default")]
+            list: Vec<VaultSearchItem>,
+        }
+        let res: DocsSearchRes = ctx
+            .sessioned_get(&format!(
+                "/v1/agent/docs/search?keyword={}",
+                encode_query(kw)
+            ))
+            .await?;
+        if res.list.is_empty() {
+            out.line("（vault 内无命中）");
+        }
+        for it in &res.list {
+            out.line(&format!("  {} {}", it.path, it.title));
+        }
+        out.emit_value(&serde_json::to_value(&res)?);
+        return Ok(());
+    }
+
+    // 写通道：本地文件 → vault 路径（免参别名）
+    if let Some(local) = &a.write_file {
+        let target = a.path.as_deref().ok_or_else(|| {
             anyhow!(
                 "docs --write-file 需要目标路径：bcode docs <vault 路径> --write-file <本地文件>"
             )
@@ -39,7 +56,7 @@ pub async fn docs(
         let res: DocWriteResult = ctx
             .client
             .put_as(
-                &format!("/v1/projects/{pid}/docs/file"),
+                "/v1/agent/docs/file",
                 json!({ "path": target, "content": content }),
             )
             .await?;
@@ -54,16 +71,13 @@ pub async fn docs(
         return Ok(());
     }
 
-    match path {
+    match &a.path {
         None => {
-            let tree: VaultTree = ctx
-                .client
-                .get_as(&format!("/v1/projects/{pid}/docs/tree"))
-                .await?;
+            let tree: VaultTree = ctx.sessioned_get("/v1/agent/docs/tree").await?;
             if tree.tree.is_empty() {
                 out.line("（文档树为空）");
             }
-            if list {
+            if a.list {
                 for n in flatten_tree(&tree.tree) {
                     if !n.is_dir {
                         out.line(&n.path);
@@ -82,16 +96,11 @@ pub async fn docs(
         }
         Some(p) => {
             let file: DocFile = ctx
-                .client
-                .get_as(&format!(
-                    "/v1/projects/{pid}/docs/file?path={}",
-                    encode_query(p)
-                ))
+                .sessioned_get(&format!("/v1/agent/docs/file?path={}", encode_query(p)))
                 .await?;
             if file.binary {
                 bail!(
-                    "「{}」是二进制文件（{} 字节），CLI 仅支持文本读取",
-                    p,
+                    "「{p}」是二进制文件（{} 字节），CLI 仅支持文本读取",
                     file.size
                 );
             }

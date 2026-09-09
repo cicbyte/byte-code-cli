@@ -52,6 +52,22 @@ pub struct DocWriteResult {
     pub size: i64,
 }
 
+/// vault 搜索命中项（GET /v1/agent/docs/search 免参别名，v4）
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct VaultSearchItem {
+    #[serde(default)]
+    pub path: String,
+    #[serde(default)]
+    pub title: String,
+    #[serde(default)]
+    pub space: String,
+    #[serde(default)]
+    pub r#type: String,
+    #[serde(default, deserialize_with = "null_to_default")]
+    pub tags: Vec<String>,
+}
+
 /// GET /v1/projects/{id}/memories 响应（单条记忆为同构内嵌）
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MemoryList {

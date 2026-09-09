@@ -35,6 +35,9 @@ pub async fn feedback(cfg: &Config, profile: &str, a: &FeedbackArgs, out: &Out) 
         if let Some(t) = a.task {
             body["sourceTaskId"] = json!(t);
         }
+        if let Some(sp) = a.source {
+            body["sourceProjectId"] = json!(sp);
+        }
         let created: crate::model::task::CreatedId = ctx
             .client
             .post_as(&format!("/v1/projects/{}/feedbacks", target), body)

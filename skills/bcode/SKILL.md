@@ -41,7 +41,7 @@ bcode complete 42 --artifacts-file out.md   # 完成 → review，artifacts=mark
 **跨项目反馈**：`bcode feedback --send byte-code --title ... --file f.md`（投递；正文写 UTF-8 文件走 --file）、`bcode feedback`（收件箱）、`--convert <id>`（转任务，血缘回填）、`--dismiss <id> --reason`（忽略并回告）。
 
 **⚠️ 问题上报的路由决策**：发现**平台自身或其他项目**的问题 → feedback 通道（`--send <对方项目>`），**不要**在自己项目 `create` 建任务——任务只进本项目看板，对方看不到。本项目自己的缺陷才用 create。
-feedback 的设计意图：**目标配了关联即可投递，不需要目标准入**——准入是「直接操作对方项目」的权限，反馈通道就是给无准入方的唯一口子（v3 平台已放宽原「起步口径」校验）。前置仍需：① 目标项目 owner 配置**双向**关联；② 来源可推导——agent 投递带 `--task <来源任务id>` 最稳（陷阱 12）。
+feedback 的设计意图：**目标配了关联即可投递，不需要目标准入**——准入是「直接操作对方项目」的权限，反馈通道就是给无准入方的唯一口子（v3 平台已放宽原「起步口径」校验）。前置：目标项目 owner 配**双向**关联。来源三选一最稳：`--source <来源项目id>`（显式，多项目 agent）/ `--task <来源任务id>` / 无参走 bindings 兜底（多项目时兜底取最早一条，可能不准）。
 
 **建错了怎么改道（标准流程）**：任务误建在本项目、实属其他项目时——① `bcode feedback --send <对方> --task <误建任务id> --title ... --file ...`（`--task` 携带血缘，对方可反查本侧讨论）；② 原任务 `complete --note "转反馈（sourceTaskId 血缘）"`。语义上「处理方式=转出」就是该任务在本项目的完成态，不必等平台加 convert 端点（对称性意见已记录）。
 

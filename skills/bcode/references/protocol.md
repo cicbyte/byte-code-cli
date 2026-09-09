@@ -33,12 +33,15 @@
 | 端点 | 要点 |
 |---|---|
 | `GET /v1/agent/projects` | **agent 项目清单免参端点**（bc key；v3 新增）→ `{list:[ProjectBrief{id,code,name}]}`。通用 `GET /v1/projects` 对 agent 恒空（成员过滤不含 bindings） |
+| `GET /v1/agent/docs/tree?space=` / `GET /v1/agent/docs/file?path=` | 文档免参别名（v4，会话推导项目；CLI docs 已切换） |
+| `PUT /v1/agent/docs/file` `{path, content}` | 免参写（写前 .history 快照）。**响应为空壳 `{}`**（AgentDocsWriteRes 丢弃底层 Path/Size，已反馈平台），写成功以无错为准 |
+| `GET /v1/agent/docs/search?keyword=&space=` | vault 内搜索 → `{list:[{path,title,space,type,tags}]}`（CLI `docs --search`） |
 | `GET /v1/projects/{id}/qas?keyword=&tag=` | hits 降序（keyword 的 MySQL 兼容 bug 已于 316fbd5 修复，真机验证恢复） |
 | `POST /v1/projects/{id}/qas` `{question, answer, tags?}` | 按问题去重 upsert → `{id, updated}` |
 | `POST /v1/projects/{id}/qas/{id}/hit` / `/archive` | 命中计数（开工包排序依据）/ 归档 |
 | `POST /v1/tasks/{id}/release` | 认领人主动放回任务池（仅 assignee，留痕 released；v3 新增） |
 | `POST /v1/tasks/{id}/reopen` `{reason 必填}` | 终态（done/closed）→ open；**平台限人类用户**，agent 调用必拒（v3 新增） |
-| `POST /v1/projects/{id}/feedbacks` `{title, content?, sourceTaskId?}` | 投递到**目标**项目（v3 已放宽准入）。前置：① 目标 owner 配**双向**关联（单向来源→目标不够）；② 来源可推导——无 sourceTaskId 时取发起人**成员**项目，agent（仅 bindings）会失败，**务必带 sourceTaskId**（或等平台合并 bindings 进来源推导） |
+| `POST /v1/projects/{id}/feedbacks` `{title, content?, sourceTaskId?, sourceProjectId?}` | 投递到**目标**项目（v3 放宽广入）。前置：目标 owner 配**双向**关联。来源推导链：**sourceProjectId（显式，v4 新增，多项目 agent 用）> sourceTaskId 所属 > 成员项目 > bindings 兜底**（7f408e0）；CLI `--source <pid>` / `--task <tid>` |
 | `GET /v1/projects/{id}/feedbacks?status=open|all` | 收件箱 `{list, total}` |
 | `POST /v1/projects/{id}/feedbacks/{id}/convert` `{title?}` | 转任务（回填 converted_task_id）→ `{id}`=任务 id |
 | `POST /v1/projects/{id}/feedbacks/{id}/dismiss` `{reason 必填}` | 忽略并回告发起方 |

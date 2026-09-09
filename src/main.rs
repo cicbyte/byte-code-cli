@@ -87,17 +87,7 @@ async fn main() {
             cmd::comms::comments(&cfg, &profile, a.task_id, a.follow, a.interval, &out).await
         }
         Command::Notify(a) => cmd::comms::notify(&cfg, &profile, &a, &out).await,
-        Command::Docs(a) => {
-            cmd::vault::docs(
-                &cfg,
-                &profile,
-                a.path.as_deref(),
-                a.list,
-                a.write_file.as_deref(),
-                &out,
-            )
-            .await
-        }
+        Command::Docs(a) => cmd::vault::docs(&cfg, &profile, &a, &out).await,
         Command::Memory(a) => cmd::vault::memory(&cfg, &profile, &a, &out).await,
         Command::Memories(a) => {
             cmd::vault::memories(&cfg, &profile, a.prefix.as_deref(), &out).await

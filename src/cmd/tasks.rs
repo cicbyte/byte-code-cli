@@ -166,6 +166,16 @@ pub async fn task(cfg: &Config, profile: &str, id: i64, out: &Out) -> Result<()>
         out.line("── Artifacts ──");
         out.line(&detail.artifacts);
     }
+    if !detail.sub_tasks.is_empty() {
+        out.line("");
+        out.line(&format!("── 子任务（{}）──", detail.sub_tasks.len()));
+        for st in &detail.sub_tasks {
+            out.line(&format!(
+                "  #{} [{}] {}（P{}）",
+                st.id, st.status, st.title, st.priority
+            ));
+        }
+    }
     out.line("");
     out.line(&format!(
         "── 执行日志（最近 {} / 共 {}）──",
