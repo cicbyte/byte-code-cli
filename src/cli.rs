@@ -222,7 +222,7 @@ pub struct CreateArgs {
     /// 完整请求体 JSON 文件（UTF-8；字段即平台 TaskCreateReq，Windows 下推荐）
     #[arg(long)]
     pub file: Option<String>,
-    /// 类型（feature / bug / chore …）
+    /// 类型（务必按语义传：bug/chore/test/feature；缺省 feature 会使统计失真）
     #[arg(long)]
     pub r#type: Option<String>,
     /// 优先级（1-5，1 最高；缺省 3）

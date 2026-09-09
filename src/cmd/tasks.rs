@@ -412,6 +412,15 @@ pub async fn create(
         .and_then(|v| v.as_str())
         .filter(|s| !s.trim().is_empty())
         .ok_or_else(|| anyhow::anyhow!("title 必填：--title <标题> 或 --file JSON 内提供"))?;
+    // 类型纪律（平台反馈 #4）：缺省 feature 会让类型统计失真——stderr 提示，不污染 --json 契约
+    if body
+        .get("type")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .is_empty()
+    {
+        eprintln!("bcode: ⚠ 未指定 --type，默认 feature（按实际语义传 feature/bug/chore/test）");
+    }
 
     let ctx = project_ctx(cfg, profile).await?;
     let created: CreatedId = ctx
