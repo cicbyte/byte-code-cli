@@ -144,6 +144,19 @@ pub async fn memories(cfg: &Config, profile: &str, prefix: Option<&str>, out: &O
 /// `--delete` 删除。记忆是 agent 间经验传递的载体，写通道补齐后
 /// 「踩坑→沉淀为记忆→下一个 agent 消费」闭环成立。
 pub async fn memory(cfg: &Config, profile: &str, a: &MemoryArgs, out: &Out) -> Result<()> {
+    // 全局记忆：跨项目通用约定（全员可读；写/删平台限管理员，CLI 只读）
+    if a.global {
+        let client = identity_client(cfg, profile)?;
+        let item: MemoryItem = client
+            .get_as(&format!("/v1/global-memories/{}", encode_query(&a.key)))
+            .await?;
+        if !out.json {
+            println!("{}", item.value);
+        }
+        out.emit_value(&serde_json::to_value(&item)?);
+        return Ok(());
+    }
+
     let ctx = project_ctx(cfg, profile).await?;
     let pid = ctx.project.project_id;
     let key_path = format!("/v1/projects/{pid}/memories/{}", encode_query(&a.key));

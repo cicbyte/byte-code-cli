@@ -18,33 +18,71 @@ use crate::output::{Out, pad_display};
 pub async fn tasks(
     cfg: &Config,
     profile: &str,
-    status: Option<&str>,
-    keyword: Option<&str>,
-    priority: Option<i64>,
-    sort: &str,
+    a: &crate::cli::TasksArgs,
     out: &Out,
 ) -> Result<()> {
+    // 跨项目聚合（identity 即可，不依赖目录指向；多项目 agent 的高频视角）
+    if a.mine {
+        let client = super::identity_client(cfg, profile)?;
+        #[derive(serde::Serialize, serde::Deserialize)]
+        #[serde(rename_all = "camelCase")]
+        struct MyTask {
+            #[serde(default)]
+            id: i64,
+            #[serde(default)]
+            title: String,
+            #[serde(default)]
+            status: String,
+            #[serde(default)]
+            priority: i64,
+            #[serde(default)]
+            project_name: String,
+        }
+        #[derive(serde::Serialize, serde::Deserialize)]
+        struct MyTasks {
+            #[serde(default)]
+            total: i64,
+            #[serde(default, deserialize_with = "crate::model::null_to_default")]
+            list: Vec<MyTask>,
+        }
+        let res: MyTasks = client.get_as("/v1/my-tasks?size=100").await?;
+        if res.list.is_empty() {
+            out.line("（跨项目无进行中任务）");
+        }
+        for t in &res.list {
+            out.line(&format!(
+                "  {} {} [{}] {}",
+                crate::output::pad_display(&format!("#{}", t.id), 7),
+                crate::output::pad_display(&t.project_name, 16),
+                t.status,
+                t.title
+            ));
+        }
+        out.emit_value(&serde_json::to_value(&res)?);
+        return Ok(());
+    }
+
     let ctx = project_ctx(cfg, profile).await?;
 
     let mut path = String::from("/v1/agent/tasks");
     let mut sep = '?';
-    if let Some(s) = status {
+    if let Some(s) = a.status.as_deref() {
         path.push(sep);
         path.push_str(&format!("status={}", encode_query(s)));
         sep = '&';
     }
-    if let Some(kw) = keyword {
+    if let Some(kw) = a.keyword.as_deref() {
         path.push(sep);
         path.push_str(&format!("keyword={}", encode_query(kw)));
     }
     // 免参端点走 sessioned_get：缓存会话失效时自愈重建（见 Ctx::sessioned_get）
     let mut page: AgentTasks = ctx.sessioned_get(&path).await?;
 
-    if let Some(p) = priority {
+    if let Some(p) = a.priority {
         page.list.retain(|t| t.priority == p);
         page.total = page.list.len() as i64;
     }
-    sort_tasks(&mut page.list, sort);
+    sort_tasks(&mut page.list, &a.sort);
 
     if page.list.is_empty() {
         out.line(&format!("（无任务，共 {} 条记录）", page.total));
@@ -407,6 +445,12 @@ pub async fn create(
     if let Some(d) = a.due.as_deref() {
         body["dueDate"] = json!(d);
     }
+    if let Some(p) = a.parent {
+        body["parentTaskId"] = json!(p);
+    }
+    if let Some(sp) = a.sprint {
+        body["sprintId"] = json!(sp);
+    }
     let title = body
         .get("title")
         .and_then(|v| v.as_str())
@@ -456,6 +500,12 @@ pub async fn update(cfg: &Config, profile: &str, a: &UpdateArgs, out: &Out) -> R
     }
     if let Some(d) = a.due.as_deref() {
         body["dueDate"] = json!(d);
+    }
+    if let Some(p) = a.parent {
+        body["parentTaskId"] = json!(p);
+    }
+    if let Some(sp) = a.sprint {
+        body["sprintId"] = json!(sp);
     }
     if let Some(f) = a.checklist_file.as_deref() {
         let raw = std::fs::read_to_string(f).with_context(|| format!("读取 {f} 失败"))?;

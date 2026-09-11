@@ -36,7 +36,7 @@ bcode log 42 "进展描述"          # 过程留痕——长任务每 <2h 打一
 bcode complete 42 --artifacts-file out.md   # 完成 → review，artifacts=markdown 产出
 ```
 
-辅助：`bcode task 42`（详情）、`bcode create --title/--file`（建任务）、`bcode update 42 --priority 1`（改字段）、`bcode tasks --priority 1`（过滤）、`bcode comment/comments`、`bcode notify --read-all`、`bcode context`（约定）、`bcode search <kw>`、`bcode docs <path> --write-file f.md`（设计沉淀）、`bcode memory <key> --set/--delete`（记忆读写）、`bcode projects`。
+辅助：`bcode task 42`（详情）、`bcode create --title/--file`（建任务）、`bcode update 42 --priority 1`（改字段）、`bcode tasks --priority 1`（过滤）/ `tasks --mine`（跨项目我的任务）/ `create --parent <id>`（子任务）、`bcode comment/comments`、`bcode notify --read-all`、`bcode context`（约定）、`bcode search <kw>`、`bcode docs <path> --write-file f.md`（设计沉淀）、`bcode memory <key> --set/--delete`（项目记忆读写）/ `memory <key> --global`（全局记忆读）、`bcode projects`。
 
 **QA 库**（遇到问题先查再问人）：`bcode qa <kw>`（检索）、`bcode qa --question <问题> --answer <答案>`（踩坑沉淀，同问题 upsert）、`bcode qa --hit <id>`（查阅后计数，影响开工包 Top 排序）。
 
@@ -47,7 +47,7 @@ feedback 的设计意图：**目标配了关联即可投递，不需要目标准
 
 **建错了怎么改道（标准流程）**：任务误建在本项目、实属其他项目时——① `bcode feedback --send <对方> --task <误建任务id> --title ... --file ...`（`--task` 携带血缘，对方可反查本侧讨论）；② 原任务 `complete --note "转反馈（sourceTaskId 血缘）"`。语义上「处理方式=转出」就是该任务在本项目的完成态，不必等平台加 convert 端点（对称性意见已记录）。
 
-**专题**（长期任务阶段化）：`bcode topic`（列表）、`topic --detail <id>`（含阶段清单与最近交接）、`topic --work <tid> --phase <pid> --next`（阶段推进）、`topic --log <id> --detail-text ... --action handoff`（留痕/交接摘要，下会话恢复点）、`topic --convert <tid> --phase <pid>`（阶段转日常任务）。
+**专题**（长期任务阶段化，全生命周期）：`topic --create --title <t> [--goal/--acceptance/--doc-path]`（创建，默认自任执行）、`topic --phases <tid> --file plan.json`（PRD 拆解批量导入阶段，整体替换）、`topic --detail <id>`（阶段清单+最近交接）、`topic --work <tid> --phase <pid> --next`（推进）、`topic --log --action handoff`（交接摘要）、`topic --convert <tid> --phase <pid>`（阶段转任务）。
 
 **长任务（跨窗口/多日）**：`bcode update <id> --checklist-file plan.json`（步骤清单，打勾=进展顺带续租约）、`block <id> --reason` / `unblock <id>`（阻塞豁免租约回收）、`log --action handoff`（三行交接：完成到哪/未竟/环境注意）。完整方法论（checklist 拆解粒度、handoff 时机、专题化判断、断点恢复流程）见 byte-code 仓库的 `long-running-agent` skill——本 skill 只管命令契约，工作流方法论在那边。
 

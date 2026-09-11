@@ -47,18 +47,7 @@ async fn main() {
         Command::Projects => cmd::project::projects(&cfg, &profile, &out).await,
         Command::Start(a) => cmd::project::start(&cfg, &profile, a.project.as_deref(), &out).await,
         Command::Context => cmd::project::context(&cfg, &profile, &out).await,
-        Command::Tasks(a) => {
-            cmd::tasks::tasks(
-                &cfg,
-                &profile,
-                a.status.as_deref(),
-                a.keyword.as_deref(),
-                a.priority,
-                &a.sort,
-                &out,
-            )
-            .await
-        }
+        Command::Tasks(a) => cmd::tasks::tasks(&cfg, &profile, &a, &out).await,
         Command::Task(a) => cmd::tasks::task(&cfg, &profile, a.id, &out).await,
         Command::Create(a) => cmd::tasks::create(&cfg, &profile, &a, &out).await,
         Command::Update(a) => cmd::tasks::update(&cfg, &profile, &a, &out).await,

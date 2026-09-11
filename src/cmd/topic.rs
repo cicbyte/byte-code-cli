@@ -11,13 +11,68 @@ use crate::config::Config;
 use crate::model::topic::{TopicDetailRes, TopicList};
 use crate::output::{Out, pad_display};
 
-/// `bcode topic list [--all]` / `topic <id>` 详情 /
-/// `topic work <tid> <pid> [--next|--status s]` 阶段推进 /
-/// `topic log <id> <detail> [--action progress|handoff]` 留痕 /
-/// `topic convert <tid> <pid>` 阶段转任务 / `topic finish <id> --result` 终验收（人）
+/// `bcode topic`（专题域全生命周期）：缺省列表 / `--create` 创建（默认自任执行）/
+/// `--phases <tid> --file f` PRD 拆解批量导入阶段（整体替换）/
+/// `--detail <id>` 详情 / `--work --phase --next` 推进 /
+/// `--log --action handoff` 留痕 / `--convert` 阶段转任务 / `--finish` 终验收（人）
 pub async fn topic(cfg: &Config, profile: &str, a: &TopicArgs, out: &Out) -> Result<()> {
     let ctx = project_ctx(cfg, profile).await?;
     let pid = ctx.project.project_id;
+
+    // 创建专题（v5：平台 assigneeId 语义即执行 agent，默认自任）
+    if a.create {
+        let title = a
+            .title
+            .as_deref()
+            .ok_or_else(|| anyhow!("创建专题需要 --title"))?;
+        let mut body = json!({ "title": title });
+        if let Some(g) = a.goal.as_deref() {
+            body["goal"] = json!(g);
+        }
+        if let Some(ac) = a.acceptance.as_deref() {
+            body["acceptance"] = json!(ac);
+        }
+        if let Some(d) = a.doc_path.as_deref() {
+            body["docPath"] = json!(d);
+        }
+        body["assigneeId"] = json!(a.assignee.unwrap_or(ctx.credential.agent_id));
+        let created: crate::model::task::CreatedId = ctx
+            .client
+            .post_as(&format!("/v1/projects/{pid}/topics"), body)
+            .await?;
+        out.kv(
+            "已创建专题",
+            &format!(
+                "#{} {title}（执行 agent 已按 --assignee/自任 设置）",
+                created.id
+            ),
+        );
+        out.emit_value(&json!({ "created": true, "topic_id": created.id, "title": title }));
+        return Ok(());
+    }
+
+    // 阶段批量导入（PRD 拆解 → 整体替换写入；平台注释明确此为 agent 职责）
+    if let Some(tid) = a.phases {
+        let f = a
+            .file
+            .as_deref()
+            .ok_or_else(|| anyhow!("--phases 需要 --file <阶段清单 JSON 文件>"))?;
+        let raw = std::fs::read_to_string(f).map_err(|e| anyhow!("读取 {f} 失败：{e}"))?;
+        let parsed: Vec<serde_json::Value> =
+            serde_json::from_str(&raw).map_err(|e| anyhow!("{f} 不是合法 JSON 数组：{e}"))?;
+        ctx.client
+            .post(
+                &format!("/v1/projects/{pid}/topics/{tid}/phases"),
+                json!({ "phases": parsed }),
+            )
+            .await?;
+        out.kv(
+            "已导入阶段",
+            &format!("专题 #{tid} ← {} 个阶段（整体替换）", parsed.len()),
+        );
+        out.emit_value(&json!({ "topic": tid, "phases": parsed.len() }));
+        return Ok(());
+    }
 
     // 阶段推进（平台注释点名的 agent 入口）
     if let (Some(tid), Some(phid)) = (a.work, a.phase) {

@@ -50,7 +50,9 @@ QA 库与反馈
   feedback           跨项目反馈（--send 投递 / 缺省收件箱 / convert 转任务）
 
 专题（长期任务阶段化）
-  topic              专题列表（--detail <id> 详情含阶段）
+  topic --create     创建专题（--title/--goal/--acceptance；默认自任执行）
+  topic --phases <tid> --file f   PRD 拆解批量导入阶段（整体替换）
+  topic --detail <id>  详情（阶段清单 + 最近交接）
   topic work         推进阶段（--work <tid> --phase <pid> --next 自动下一态）
   topic log          专题留痕（--log <id> --detail-text；handoff=交接摘要）
   topic convert      阶段转日常任务（--convert <tid> --phase <pid>）
@@ -209,6 +211,9 @@ pub struct TasksArgs {
     /// 排序：priority（默认，升序 P1 在前）/ id（平台原始顺序）
     #[arg(long, default_value = "priority")]
     pub sort: String,
+    /// 跨项目聚合「我的任务」（GET /my-tasks，不依赖当前目录指向）
+    #[arg(long)]
+    pub mine: bool,
 }
 
 #[derive(clap::Args)]
@@ -231,6 +236,12 @@ pub struct CreateArgs {
     /// 截止日期（Y-m-d）
     #[arg(long)]
     pub due: Option<String>,
+    /// 父任务 id（建子任务；详情侧 SubTasks 已支持展示）
+    #[arg(long)]
+    pub parent: Option<i64>,
+    /// 归属 sprint id
+    #[arg(long)]
+    pub sprint: Option<i64>,
 }
 
 #[derive(clap::Args)]
@@ -272,6 +283,12 @@ pub struct UpdateArgs {
     /// 截止日期（Y-m-d）；空串=清除
     #[arg(long)]
     pub due: Option<String>,
+    /// 父任务 id（0=解除父子）
+    #[arg(long)]
+    pub parent: Option<i64>,
+    /// 归属 sprint id（0=移出 sprint）
+    #[arg(long)]
+    pub sprint: Option<i64>,
     /// 步骤清单 JSON 文件（[{text,done}]；打勾=进展，顺带续租约——长任务工作流）
     #[arg(long)]
     pub checklist_file: Option<String>,
@@ -353,6 +370,9 @@ pub struct DocsArgs {
 #[derive(clap::Args)]
 pub struct MemoryArgs {
     pub key: String,
+    /// 读全局记忆（跨项目通用约定；项目记忆缺省）
+    #[arg(long)]
+    pub global: bool,
     /// 写入值（与 --file 互斥；均缺省为读取）
     #[arg(long, conflicts_with = "file")]
     pub set: Option<String>,
@@ -468,6 +488,30 @@ pub struct FeedbackArgs {
 
 #[derive(clap::Args)]
 pub struct TopicArgs {
+    /// 创建专题（--title 必填；--goal/--acceptance/--doc-path 可选，默认自任执行）
+    #[arg(long)]
+    pub create: bool,
+    /// 专题标题（--create 必填）
+    #[arg(long)]
+    pub title: Option<String>,
+    /// 目标与范围（markdown）
+    #[arg(long)]
+    pub goal: Option<String>,
+    /// 完成判据（人验收依据）
+    #[arg(long)]
+    pub acceptance: Option<String>,
+    /// 关联文档路径（通常是 PRD）
+    #[arg(long)]
+    pub doc_path: Option<String>,
+    /// 执行 agent id（缺省自任）
+    #[arg(long)]
+    pub assignee: Option<i64>,
+    /// 批量写入阶段（目标专题 id；整体替换，配合 --file）
+    #[arg(long, requires = "file")]
+    pub phases: Option<i64>,
+    /// 阶段清单 JSON 文件（[{title, detail?}]，PRD 拆解导入）
+    #[arg(long)]
+    pub file: Option<String>,
     /// 单专题详情（id）
     #[arg(long)]
     pub detail: Option<i64>,
