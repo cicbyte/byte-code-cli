@@ -49,7 +49,7 @@ const GROUPED_CATALOG: &str = "\
 
 QA 库与反馈
   qa [kw]            问答检索（--add 沉淀 / --hit 计数 / --archive 归档）
-  feedback           跨项目反馈（--send 投递 / 缺省收件箱 / convert 转任务）
+  feedback           跨项目反馈（--send 投递 / --sent 已发追踪 / 缺省收件箱 / convert / dismiss）
 
 专题（长期任务阶段化）
   topic --create     创建专题（--title/--goal/--acceptance；默认自任执行）
@@ -463,6 +463,9 @@ pub struct FeedbackArgs {
     /// 投递反馈到关联项目（code/名称/id）
     #[arg(long)]
     pub send: Option<String>,
+    /// 我发出的反馈（跨项目，含处理状态；不依赖目录指向）
+    #[arg(long)]
+    pub sent: bool,
     /// 反馈标题
     #[arg(long)]
     pub title: Option<String>,

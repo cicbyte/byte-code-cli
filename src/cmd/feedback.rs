@@ -14,6 +14,68 @@ use crate::output::{Out, pad_display};
 /// `bcode feedback send --to <关联项目 code|id|名> --title [--content|--file] [--task <id>]`
 /// `feedback list [--status open|all]` / `feedback convert <id> [--title]` / `feedback dismiss <id> --reason`
 pub async fn feedback(cfg: &Config, profile: &str, a: &FeedbackArgs, out: &Out) -> Result<()> {
+    // 已发送视图：身份级端点（created_by=当前 agent），不依赖目录指向
+    if a.sent {
+        let client = super::identity_client(cfg, profile)?;
+        #[derive(serde::Serialize, serde::Deserialize)]
+        #[serde(rename_all = "camelCase")]
+        struct SentItem {
+            #[serde(default)]
+            id: i64,
+            #[serde(default)]
+            title: String,
+            #[serde(default)]
+            status: String,
+            #[serde(default)]
+            target_project_id: i64,
+            #[serde(default)]
+            target_project_name: String,
+            #[serde(default)]
+            source_task_id: i64,
+            #[serde(default)]
+            converted_task_id: i64,
+            #[serde(default)]
+            dismiss_reason: String,
+            #[serde(default)]
+            created_at: String,
+        }
+        #[derive(serde::Serialize, serde::Deserialize)]
+        struct SentList {
+            #[serde(default, deserialize_with = "crate::model::null_to_default")]
+            list: Vec<SentItem>,
+        }
+        let status = a.status.as_deref().unwrap_or("open");
+        let res: SentList = client
+            .get_as(&format!("/v1/feedbacks/sent?status={}", encode_query(status)))
+            .await?;
+        if res.list.is_empty() {
+            out.line("（无已发反馈）");
+        }
+        for f in &res.list {
+            let tail = match f.status.as_str() {
+                "converted" => format!("（已转任务 #{}）", f.converted_task_id),
+                "dismissed" => format!("（被忽略：{}）", f.dismiss_reason),
+                _ => String::new(),
+            };
+            let lineage = if f.source_task_id > 0 {
+                format!(" ←任务#{}", f.source_task_id)
+            } else {
+                String::new()
+            };
+            out.line(&format!(
+                "  {} [{}] {}（→ {}{}）{}",
+                pad_display(&format!("#{}", f.id), 6),
+                f.status,
+                f.title,
+                f.target_project_name,
+                lineage,
+                tail
+            ));
+        }
+        out.emit_value(&serde_json::to_value(&res)?);
+        return Ok(());
+    }
+
     let ctx = project_ctx(cfg, profile).await?;
     let pid = ctx.project.project_id;
 
@@ -44,7 +106,7 @@ pub async fn feedback(cfg: &Config, profile: &str, a: &FeedbackArgs, out: &Out) 
             .await?;
         out.kv(
             "已投递",
-            &format!("反馈 #{} → 关联项目 id={}", created.id, target),
+            &format!("反馈 #{} → 关联项目 id={}（状态可用 feedback --sent 追踪）", created.id, target),
         );
         out.emit_value(&json!({ "sent": created.id, "to_project": target }));
         return Ok(());
