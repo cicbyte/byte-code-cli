@@ -254,6 +254,18 @@ pub async fn task(cfg: &Config, profile: &str, id: i64, out: &Out) -> Result<()>
 /// 租约契约：认领后 2 小时无平台侧动作自动释放——长任务周期 `bcode log` 保活。
 pub async fn claim(cfg: &Config, profile: &str, id: i64, out: &Out) -> Result<()> {
     let ctx = project_ctx(cfg, profile).await?;
+    // 归属预检（#443）：不属于当前指向项目的任务直接早失败给明确文案——
+    // 平台侧会话门禁是最终裁决，这里只求错误体验（免一次注定失败的业务错）
+    if let Ok(d) = ctx.client.get_as::<TaskDetail>(&format!("/v1/tasks/{id}")).await
+        && d.project_id != 0
+        && d.project_id != ctx.project.project_id
+    {
+        bail!(
+            "任务 #{id} 属于其它项目（当前指向 {} #{})：请在对应该项目的目录执行",
+            ctx.project.project_name,
+            ctx.project.project_id
+        );
+    }
     ctx.client
         .post(&format!("/v1/tasks/{id}/claim"), json!({}))
         .await?;
