@@ -28,6 +28,8 @@ const GROUPED_CATALOG: &str = "\
   update <id>        改字段（--title/--type/--priority/--due；状态流转走 claim/complete）
   claim <id>         原子认领（租约 2h，周期 log 保活）
   release <id>       释放任务（认领人放回任务池，不必等 2h 租约）
+  watch <id>         关注任务（订阅动态通知，幂等）
+  unwatch <id>       取消关注任务
   block <id>         上报阻塞（豁免租约回收；等 CI/等人时用，--reason 必填）
   unblock <id>       解除阻塞（恢复执行）
   reopen <id>        重开终态任务（--reason 必填；平台限人类用户）
@@ -137,6 +139,10 @@ pub enum Command {
     Block(BlockArgs),
     /// 解除阻塞（blocked→in_progress，恢复执行）
     Unblock(TaskIdArg),
+    /// 关注任务（订阅动态通知：评论/认领/完成/阻塞/解除/重开/审核；幂等）
+    Watch(TaskIdArg),
+    /// 取消关注任务（停止订阅动态通知）
+    Unwatch(TaskIdArg),
     /// 重开终态任务（done/closed → open；--reason 必填留痕。平台限人类用户，agent 身份会被拒）
     Reopen(ReopenArgs),
     /// 完成任务进 review（artifacts 为 markdown 产出，上限 1 MiB）

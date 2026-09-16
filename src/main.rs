@@ -55,6 +55,8 @@ async fn main() {
         Command::Release(a) => cmd::tasks::release(&cfg, &profile, a.id, &out).await,
         Command::Block(a) => cmd::tasks::block(&cfg, &profile, a.id, &a.reason, &out).await,
         Command::Unblock(a) => cmd::tasks::unblock(&cfg, &profile, a.id, &out).await,
+        Command::Watch(a) => cmd::tasks::watch(&cfg, &profile, a.id, &out).await,
+        Command::Unwatch(a) => cmd::tasks::unwatch(&cfg, &profile, a.id, &out).await,
         Command::Reopen(a) => cmd::tasks::reopen(&cfg, &profile, a.id, &a.reason, &out).await,
         Command::Complete(a) => {
             cmd::tasks::complete(
