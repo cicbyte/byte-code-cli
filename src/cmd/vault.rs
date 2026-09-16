@@ -144,7 +144,33 @@ pub async fn memories(cfg: &Config, profile: &str, prefix: Option<&str>, out: &O
 /// `--delete` 删除。记忆是 agent 间经验传递的载体，写通道补齐后
 /// 「踩坑→沉淀为记忆→下一个 agent 消费」闭环成立。
 pub async fn memory(cfg: &Config, profile: &str, a: &MemoryArgs, out: &Out) -> Result<()> {
-    // 全局记忆：跨项目通用约定（全员可读；写/删平台限管理员，CLI 只读）
+    // 全局记忆提案（人人可发 + 管理员审核）：agent 的跨项目常识沉淀入口
+    if a.global && a.propose {
+        let client = identity_client(cfg, profile)?;
+        let value = match (a.file.as_deref(), a.set.as_deref()) {
+            (Some(f), _) => std::fs::read_to_string(f).with_context(|| format!("读取 {f} 失败"))?,
+            (None, Some(v)) => v.to_string(),
+            (None, None) => bail!("提案需要 --set <值> 或 --file <文件>"),
+        };
+        let mut body = json!({ "key": a.key, "value": value });
+        if let Some(t) = a.ttl.as_deref() {
+            body["ttl"] = json!(t);
+        }
+        if let Some(n) = a.note.as_deref() {
+            body["note"] = json!(n);
+        }
+        let created: crate::model::task::CreatedId = client
+            .post_as("/v1/global-memories/propose", body)
+            .await?;
+        out.kv(
+            "已提交提案",
+            &format!("#{}（待管理员审核；采纳后对所有项目的 agent 生效）", created.id),
+        );
+        out.emit_value(&json!({ "proposed": true, "proposal_id": created.id, "key": a.key }));
+        return Ok(());
+    }
+
+    // 全局记忆：跨项目通用约定（全员可读；直接写/删平台限管理员，CLI 只读）
     if a.global {
         let client = identity_client(cfg, profile)?;
         let item: MemoryItem = client

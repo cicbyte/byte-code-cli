@@ -43,7 +43,7 @@ const GROUPED_CATALOG: &str = "\
 
 上下文消费
   docs [path]        文档中枢（读正文 / --list / --search；--write-file 写入）
-  memory <key>       项目记忆（读；--set/--file 写；--delete 删）
+  memory <key>       项目记忆（--set/--file 写；--global --propose 全局提案）
   memories           记忆列表（--prefix 前缀过滤）
   search <kw>        全局搜索（已获读权的项目范围）
 
@@ -391,6 +391,12 @@ pub struct MemoryArgs {
     /// 删除该记忆
     #[arg(long)]
     pub delete: bool,
+    /// 提交全局记忆提案（需 --global；待管理员审核后对所有项目生效）
+    #[arg(long)]
+    pub propose: bool,
+    /// 提案说明：为什么值得全局沉淀（--propose 可选）
+    #[arg(long)]
+    pub note: Option<String>,
 }
 
 #[derive(clap::Args)]
