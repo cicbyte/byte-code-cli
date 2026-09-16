@@ -1,0 +1,4144 @@
+{
+  "edges": [
+    {
+      "dst": "src/client::BcodeClient.build",
+      "kind": "heuristic",
+      "line": 27,
+      "src": "src/client::BcodeClient.new"
+    },
+    {
+      "dst": "src/client::BcodeClient.build",
+      "kind": "heuristic",
+      "line": 32,
+      "src": "src/client::BcodeClient.anonymous"
+    },
+    {
+      "dst": "src/client::BcodeClient.build",
+      "kind": "heuristic",
+      "line": 49,
+      "src": "src/client::BcodeClient.build"
+    },
+    {
+      "dst": "src/client::BcodeClient.request",
+      "kind": "heuristic",
+      "line": 67,
+      "src": "src/client::BcodeClient.request"
+    },
+    {
+      "dst": "src/cmd/project::status",
+      "kind": "heuristic",
+      "line": 83,
+      "src": "src/client::BcodeClient.request"
+    },
+    {
+      "dst": "src/model/mod::ApiEnvelope.into_data",
+      "kind": "heuristic",
+      "line": 95,
+      "src": "src/client::BcodeClient.request"
+    },
+    {
+      "dst": "src/client::BcodeClient.request",
+      "kind": "heuristic",
+      "line": 99,
+      "src": "src/client::BcodeClient.get"
+    },
+    {
+      "dst": "src/client::BcodeClient.get",
+      "kind": "heuristic",
+      "line": 104,
+      "src": "src/client::BcodeClient.get_as"
+    },
+    {
+      "dst": "src/client::BcodeClient.request",
+      "kind": "heuristic",
+      "line": 110,
+      "src": "src/client::BcodeClient.post"
+    },
+    {
+      "dst": "src/client::BcodeClient.request",
+      "kind": "heuristic",
+      "line": 115,
+      "src": "src/client::BcodeClient.put"
+    },
+    {
+      "dst": "src/client::BcodeClient.put",
+      "kind": "heuristic",
+      "line": 120,
+      "src": "src/client::BcodeClient.put_as"
+    },
+    {
+      "dst": "src/client::BcodeClient.request",
+      "kind": "heuristic",
+      "line": 127,
+      "src": "src/client::BcodeClient.delete"
+    },
+    {
+      "dst": "src/client::BcodeClient.post",
+      "kind": "heuristic",
+      "line": 132,
+      "src": "src/client::BcodeClient.post_as"
+    },
+    {
+      "dst": "src/client::BcodeClient.get",
+      "kind": "heuristic",
+      "line": 140,
+      "src": "src/client::BcodeClient.open_stream"
+    },
+    {
+      "dst": "src/cmd/project::status",
+      "kind": "heuristic",
+      "line": 148,
+      "src": "src/client::BcodeClient.open_stream"
+    },
+    {
+      "dst": "src/cmd/mod::project_ctx",
+      "kind": "heuristic",
+      "line": 22,
+      "src": "src/cmd/comms::comment"
+    },
+    {
+      "dst": "src/client::BcodeClient.post_as",
+      "kind": "heuristic",
+      "line": 23,
+      "src": "src/cmd/comms::comment"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 30,
+      "src": "src/cmd/comms::comment"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 31,
+      "src": "src/cmd/comms::comment"
+    },
+    {
+      "dst": "src/cmd/mod::project_ctx",
+      "kind": "heuristic",
+      "line": 45,
+      "src": "src/cmd/comms::comments"
+    },
+    {
+      "dst": "src/client::BcodeClient.get_as",
+      "kind": "heuristic",
+      "line": 49,
+      "src": "src/cmd/comms::comments"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 51,
+      "src": "src/cmd/comms::comments"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 61,
+      "src": "src/cmd/comms::comments"
+    },
+    {
+      "dst": "src/output::Out.emit_event",
+      "kind": "heuristic",
+      "line": 78,
+      "src": "src/cmd/comms::comments"
+    },
+    {
+      "dst": "src/cmd/mod::identity_client",
+      "kind": "heuristic",
+      "line": 94,
+      "src": "src/cmd/comms::notify"
+    },
+    {
+      "dst": "src/client::BcodeClient.put",
+      "kind": "heuristic",
+      "line": 98,
+      "src": "src/cmd/comms::notify"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 101,
+      "src": "src/cmd/comms::notify"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 102,
+      "src": "src/cmd/comms::notify"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 107,
+      "src": "src/cmd/comms::notify"
+    },
+    {
+      "dst": "src/client::BcodeClient.get_as",
+      "kind": "heuristic",
+      "line": 118,
+      "src": "src/cmd/comms::notify"
+    },
+    {
+      "dst": "src/model/platform::NotificationItem.unread",
+      "kind": "heuristic",
+      "line": 123,
+      "src": "src/cmd/comms::notify"
+    },
+    {
+      "dst": "src/client::BcodeClient.open_stream",
+      "kind": "heuristic",
+      "line": 136,
+      "src": "src/cmd/comms::notify"
+    },
+    {
+      "dst": "src/cmd/comms::consume_sse",
+      "kind": "local",
+      "line": 139,
+      "src": "src/cmd/comms::notify"
+    },
+    {
+      "dst": "src/cmd/comms::parse_sse_event",
+      "kind": "local",
+      "line": 167,
+      "src": "src/cmd/comms::consume_sse"
+    },
+    {
+      "dst": "src/client::BcodeClient.get",
+      "kind": "heuristic",
+      "line": 169,
+      "src": "src/cmd/comms::consume_sse"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 173,
+      "src": "src/cmd/comms::consume_sse"
+    },
+    {
+      "dst": "src/output::Out.emit_event",
+      "kind": "heuristic",
+      "line": 178,
+      "src": "src/cmd/comms::consume_sse"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 194,
+      "src": "src/cmd/comms::parse_sse_event"
+    },
+    {
+      "dst": "src/cmd/comms::parse_sse_event",
+      "kind": "local",
+      "line": 211,
+      "src": "src/cmd/comms::sse_data_event_parses"
+    },
+    {
+      "dst": "src/cmd/mod::project_ctx",
+      "kind": "heuristic",
+      "line": 17,
+      "src": "src/cmd/feedback::feedback"
+    },
+    {
+      "dst": "src/cmd/feedback::resolve_relation",
+      "kind": "local",
+      "line": 22,
+      "src": "src/cmd/feedback::feedback"
+    },
+    {
+      "dst": "src/client::BcodeClient.post_as",
+      "kind": "heuristic",
+      "line": 41,
+      "src": "src/cmd/feedback::feedback"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 45,
+      "src": "src/cmd/feedback::feedback"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 49,
+      "src": "src/cmd/feedback::feedback"
+    },
+    {
+      "dst": "src/client::BcodeClient.post",
+      "kind": "heuristic",
+      "line": 83,
+      "src": "src/cmd/feedback::feedback"
+    },
+    {
+      "dst": "src/cmd/mod::Ctx.sessioned_get",
+      "kind": "heuristic",
+      "line": 96,
+      "src": "src/cmd/feedback::feedback"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 103,
+      "src": "src/cmd/feedback::feedback"
+    },
+    {
+      "dst": "src/client::BcodeClient.get_as",
+      "kind": "heuristic",
+      "line": 127,
+      "src": "src/cmd/feedback::resolve_relation"
+    },
+    {
+      "dst": "src/config::effective_server_url",
+      "kind": "heuristic",
+      "line": 21,
+      "src": "src/cmd/identity::register"
+    },
+    {
+      "dst": "src/cred::load_credential",
+      "kind": "heuristic",
+      "line": 22,
+      "src": "src/cmd/identity::register"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 24,
+      "src": "src/cmd/identity::register"
+    },
+    {
+      "dst": "src/client::BcodeClient.anonymous",
+      "kind": "heuristic",
+      "line": 33,
+      "src": "src/cmd/identity::register"
+    },
+    {
+      "dst": "src/client::BcodeClient.post_as",
+      "kind": "heuristic",
+      "line": 34,
+      "src": "src/cmd/identity::register"
+    },
+    {
+      "dst": "src/cred::credential_path",
+      "kind": "heuristic",
+      "line": 41,
+      "src": "src/cmd/identity::register"
+    },
+    {
+      "dst": "src/cred::save_credential",
+      "kind": "heuristic",
+      "line": 42,
+      "src": "src/cmd/identity::register"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 44,
+      "src": "src/cmd/identity::register"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 49,
+      "src": "src/cmd/identity::register"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 63,
+      "src": "src/cmd/identity::whoami"
+    },
+    {
+      "dst": "src/cred::load_credential",
+      "kind": "heuristic",
+      "line": 65,
+      "src": "src/cmd/identity::whoami"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 67,
+      "src": "src/cmd/identity::whoami"
+    },
+    {
+      "dst": "src/config::find_project_pointer",
+      "kind": "heuristic",
+      "line": 93,
+      "src": "src/cmd/identity::whoami"
+    },
+    {
+      "dst": "src/cred::load_session",
+      "kind": "heuristic",
+      "line": 99,
+      "src": "src/cmd/identity::whoami"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 114,
+      "src": "src/cmd/identity::whoami"
+    },
+    {
+      "dst": "src/config::effective_profile",
+      "kind": "heuristic",
+      "line": 120,
+      "src": "src/cmd/identity::profiles"
+    },
+    {
+      "dst": "src/cred::list_profiles",
+      "kind": "heuristic",
+      "line": 121,
+      "src": "src/cmd/identity::profiles"
+    },
+    {
+      "dst": "src/cred::load_credential",
+      "kind": "heuristic",
+      "line": 136,
+      "src": "src/cmd/identity::profiles"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 139,
+      "src": "src/cmd/identity::profiles"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 145,
+      "src": "src/cmd/identity::profiles"
+    },
+    {
+      "dst": "src/cmd/mod::is_auth",
+      "kind": "local",
+      "line": 44,
+      "src": "src/cmd/mod::Ctx.sessioned_get"
+    },
+    {
+      "dst": "src/cmd/mod::is_stale_session",
+      "kind": "local",
+      "line": 44,
+      "src": "src/cmd/mod::Ctx.sessioned_get"
+    },
+    {
+      "dst": "src/cmd/mod::ensure_session",
+      "kind": "local",
+      "line": 48,
+      "src": "src/cmd/mod::Ctx.sessioned_get"
+    },
+    {
+      "dst": "src/cred::save_session",
+      "kind": "heuristic",
+      "line": 101,
+      "src": "src/cmd/mod::ensure_session"
+    },
+    {
+      "dst": "src/config::effective_server_url",
+      "kind": "heuristic",
+      "line": 114,
+      "src": "src/cmd/mod::project_ctx"
+    },
+    {
+      "dst": "src/cred::load_credential",
+      "kind": "heuristic",
+      "line": 115,
+      "src": "src/cmd/mod::project_ctx"
+    },
+    {
+      "dst": "src/config::find_project_pointer",
+      "kind": "heuristic",
+      "line": 117,
+      "src": "src/cmd/mod::project_ctx"
+    },
+    {
+      "dst": "src/cred::load_session",
+      "kind": "heuristic",
+      "line": 121,
+      "src": "src/cmd/mod::project_ctx"
+    },
+    {
+      "dst": "src/cmd/mod::ensure_session",
+      "kind": "local",
+      "line": 124,
+      "src": "src/cmd/mod::project_ctx"
+    },
+    {
+      "dst": "src/config::effective_server_url",
+      "kind": "heuristic",
+      "line": 147,
+      "src": "src/cmd/mod::identity_client"
+    },
+    {
+      "dst": "src/cred::load_credential",
+      "kind": "heuristic",
+      "line": 148,
+      "src": "src/cmd/mod::identity_client"
+    },
+    {
+      "dst": "src/cmd/mod::identity_client",
+      "kind": "heuristic",
+      "line": 18,
+      "src": "src/cmd/project::projects"
+    },
+    {
+      "dst": "src/client::BcodeClient.get_as",
+      "kind": "heuristic",
+      "line": 24,
+      "src": "src/cmd/project::projects"
+    },
+    {
+      "dst": "src/config::find_project_pointer",
+      "kind": "heuristic",
+      "line": 27,
+      "src": "src/cmd/project::projects"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 30,
+      "src": "src/cmd/project::projects"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 49,
+      "src": "src/cmd/project::projects"
+    },
+    {
+      "dst": "src/cmd/mod::identity_client",
+      "kind": "heuristic",
+      "line": 55,
+      "src": "src/cmd/project::join"
+    },
+    {
+      "dst": "src/client::BcodeClient.post_as",
+      "kind": "heuristic",
+      "line": 56,
+      "src": "src/cmd/project::join"
+    },
+    {
+      "dst": "src/config::find_project_pointer",
+      "kind": "heuristic",
+      "line": 67,
+      "src": "src/cmd/project::join"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 70,
+      "src": "src/cmd/project::join"
+    },
+    {
+      "dst": "src/config::save_project_pointer",
+      "kind": "heuristic",
+      "line": 78,
+      "src": "src/cmd/project::join"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 90,
+      "src": "src/cmd/project::join"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 92,
+      "src": "src/cmd/project::join"
+    },
+    {
+      "dst": "src/config::effective_server_url",
+      "kind": "heuristic",
+      "line": 106,
+      "src": "src/cmd/project::start"
+    },
+    {
+      "dst": "src/cred::load_credential",
+      "kind": "heuristic",
+      "line": 107,
+      "src": "src/cmd/project::start"
+    },
+    {
+      "dst": "src/cmd/project::resolve_project",
+      "kind": "local",
+      "line": 113,
+      "src": "src/cmd/project::start"
+    },
+    {
+      "dst": "src/config::find_project_pointer",
+      "kind": "heuristic",
+      "line": 128,
+      "src": "src/cmd/project::start"
+    },
+    {
+      "dst": "src/cmd/mod::ensure_session",
+      "kind": "heuristic",
+      "line": 134,
+      "src": "src/cmd/project::start"
+    },
+    {
+      "dst": "src/config::save_project_pointer",
+      "kind": "heuristic",
+      "line": 140,
+      "src": "src/cmd/project::start"
+    },
+    {
+      "dst": "src/cmd/project::display_kickoff",
+      "kind": "local",
+      "line": 142,
+      "src": "src/cmd/project::start"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 143,
+      "src": "src/cmd/project::start"
+    },
+    {
+      "dst": "src/config::effective_server_url",
+      "kind": "heuristic",
+      "line": 150,
+      "src": "src/cmd/project::context"
+    },
+    {
+      "dst": "src/cred::load_credential",
+      "kind": "heuristic",
+      "line": 151,
+      "src": "src/cmd/project::context"
+    },
+    {
+      "dst": "src/config::find_project_pointer",
+      "kind": "heuristic",
+      "line": 153,
+      "src": "src/cmd/project::context"
+    },
+    {
+      "dst": "src/cmd/mod::ensure_session",
+      "kind": "heuristic",
+      "line": 157,
+      "src": "src/cmd/project::context"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 159,
+      "src": "src/cmd/project::context"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 164,
+      "src": "src/cmd/project::context"
+    },
+    {
+      "dst": "src/config::effective_server_url",
+      "kind": "heuristic",
+      "line": 171,
+      "src": "src/cmd/project::status"
+    },
+    {
+      "dst": "src/cred::load_credential",
+      "kind": "heuristic",
+      "line": 172,
+      "src": "src/cmd/project::status"
+    },
+    {
+      "dst": "src/config::find_project_pointer",
+      "kind": "heuristic",
+      "line": 176,
+      "src": "src/cmd/project::status"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 185,
+      "src": "src/cmd/project::status"
+    },
+    {
+      "dst": "src/cred::load_session",
+      "kind": "heuristic",
+      "line": 193,
+      "src": "src/cmd/project::status"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 197,
+      "src": "src/cmd/project::status"
+    },
+    {
+      "dst": "src/client::BcodeClient.get_as",
+      "kind": "heuristic",
+      "line": 222,
+      "src": "src/cmd/project::resolve_project"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 240,
+      "src": "src/cmd/project::display_kickoff"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 253,
+      "src": "src/cmd/project::display_kickoff"
+    },
+    {
+      "dst": "src/cmd/mod::project_ctx",
+      "kind": "heuristic",
+      "line": 19,
+      "src": "src/cmd/qa::qa"
+    },
+    {
+      "dst": "src/client::BcodeClient.post_as",
+      "kind": "heuristic",
+      "line": 31,
+      "src": "src/cmd/qa::qa"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 40,
+      "src": "src/cmd/qa::qa"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 41,
+      "src": "src/cmd/qa::qa"
+    },
+    {
+      "dst": "src/client::BcodeClient.post",
+      "kind": "heuristic",
+      "line": 46,
+      "src": "src/cmd/qa::qa"
+    },
+    {
+      "dst": "src/cmd/mod::Ctx.sessioned_get",
+      "kind": "heuristic",
+      "line": 71,
+      "src": "src/cmd/qa::qa"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 73,
+      "src": "src/cmd/qa::qa"
+    },
+    {
+      "dst": "src/cmd/system::prompt",
+      "kind": "local",
+      "line": 26,
+      "src": "src/cmd/system::init"
+    },
+    {
+      "dst": "src/cmd/system::normalize_server_url",
+      "kind": "local",
+      "line": 32,
+      "src": "src/cmd/system::init"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 34,
+      "src": "src/cmd/system::init"
+    },
+    {
+      "dst": "src/client::BcodeClient.get",
+      "kind": "heuristic",
+      "line": 37,
+      "src": "src/cmd/system::init"
+    },
+    {
+      "dst": "src/client::BcodeClient.anonymous",
+      "kind": "heuristic",
+      "line": 37,
+      "src": "src/cmd/system::init"
+    },
+    {
+      "dst": "src/config::save_config",
+      "kind": "heuristic",
+      "line": 50,
+      "src": "src/cmd/system::init"
+    },
+    {
+      "dst": "src/config::config_path",
+      "kind": "heuristic",
+      "line": 52,
+      "src": "src/cmd/system::init"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 53,
+      "src": "src/cmd/system::init"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 55,
+      "src": "src/cmd/system::init"
+    },
+    {
+      "dst": "src/config::effective_server_url",
+      "kind": "heuristic",
+      "line": 65,
+      "src": "src/cmd/system::open"
+    },
+    {
+      "dst": "src/config::find_project_pointer",
+      "kind": "heuristic",
+      "line": 70,
+      "src": "src/cmd/system::open"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 86,
+      "src": "src/cmd/system::open"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 88,
+      "src": "src/cmd/system::open"
+    },
+    {
+      "dst": "src/cmd/system::open_browser",
+      "kind": "local",
+      "line": 90,
+      "src": "src/cmd/system::open"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 91,
+      "src": "src/cmd/system::open"
+    },
+    {
+      "dst": "src/cmd/mod::identity_client",
+      "kind": "heuristic",
+      "line": 26,
+      "src": "src/cmd/tasks::tasks"
+    },
+    {
+      "dst": "src/client::BcodeClient.get_as",
+      "kind": "heuristic",
+      "line": 48,
+      "src": "src/cmd/tasks::tasks"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 50,
+      "src": "src/cmd/tasks::tasks"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 61,
+      "src": "src/cmd/tasks::tasks"
+    },
+    {
+      "dst": "src/cmd/mod::project_ctx",
+      "kind": "heuristic",
+      "line": 65,
+      "src": "src/cmd/tasks::tasks"
+    },
+    {
+      "dst": "src/cmd/mod::Ctx.sessioned_get",
+      "kind": "heuristic",
+      "line": 79,
+      "src": "src/cmd/tasks::tasks"
+    },
+    {
+      "dst": "src/cmd/tasks::sort_tasks",
+      "kind": "local",
+      "line": 85,
+      "src": "src/cmd/tasks::tasks"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 107,
+      "src": "src/cmd/tasks::tasks"
+    },
+    {
+      "dst": "src/cmd/mod::project_ctx",
+      "kind": "heuristic",
+      "line": 135,
+      "src": "src/cmd/tasks::task"
+    },
+    {
+      "dst": "src/client::BcodeClient.get_as",
+      "kind": "heuristic",
+      "line": 136,
+      "src": "src/cmd/tasks::task"
+    },
+    {
+      "dst": "src/client::BcodeClient.get_as",
+      "kind": "heuristic",
+      "line": 137,
+      "src": "src/cmd/tasks::task"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 146,
+      "src": "src/cmd/tasks::task"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 151,
+      "src": "src/cmd/tasks::task"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 176,
+      "src": "src/cmd/tasks::task"
+    },
+    {
+      "dst": "src/client::BcodeClient.get",
+      "kind": "heuristic",
+      "line": 184,
+      "src": "src/cmd/tasks::task"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 245,
+      "src": "src/cmd/tasks::task"
+    },
+    {
+      "dst": "src/cmd/mod::project_ctx",
+      "kind": "heuristic",
+      "line": 256,
+      "src": "src/cmd/tasks::claim"
+    },
+    {
+      "dst": "src/client::BcodeClient.post",
+      "kind": "heuristic",
+      "line": 257,
+      "src": "src/cmd/tasks::claim"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 269,
+      "src": "src/cmd/tasks::claim"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 278,
+      "src": "src/cmd/tasks::claim"
+    },
+    {
+      "dst": "src/cmd/mod::project_ctx",
+      "kind": "heuristic",
+      "line": 285,
+      "src": "src/cmd/tasks::release"
+    },
+    {
+      "dst": "src/client::BcodeClient.post",
+      "kind": "heuristic",
+      "line": 286,
+      "src": "src/cmd/tasks::release"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 289,
+      "src": "src/cmd/tasks::release"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 290,
+      "src": "src/cmd/tasks::release"
+    },
+    {
+      "dst": "src/cmd/mod::project_ctx",
+      "kind": "heuristic",
+      "line": 297,
+      "src": "src/cmd/tasks::block"
+    },
+    {
+      "dst": "src/client::BcodeClient.post",
+      "kind": "heuristic",
+      "line": 298,
+      "src": "src/cmd/tasks::block"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 304,
+      "src": "src/cmd/tasks::block"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 308,
+      "src": "src/cmd/tasks::block"
+    },
+    {
+      "dst": "src/cmd/mod::project_ctx",
+      "kind": "heuristic",
+      "line": 314,
+      "src": "src/cmd/tasks::unblock"
+    },
+    {
+      "dst": "src/client::BcodeClient.post",
+      "kind": "heuristic",
+      "line": 315,
+      "src": "src/cmd/tasks::unblock"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 318,
+      "src": "src/cmd/tasks::unblock"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 319,
+      "src": "src/cmd/tasks::unblock"
+    },
+    {
+      "dst": "src/cmd/mod::project_ctx",
+      "kind": "heuristic",
+      "line": 326,
+      "src": "src/cmd/tasks::reopen"
+    },
+    {
+      "dst": "src/client::BcodeClient.post",
+      "kind": "heuristic",
+      "line": 327,
+      "src": "src/cmd/tasks::reopen"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 333,
+      "src": "src/cmd/tasks::reopen"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 334,
+      "src": "src/cmd/tasks::reopen"
+    },
+    {
+      "dst": "src/cmd/mod::project_ctx",
+      "kind": "heuristic",
+      "line": 369,
+      "src": "src/cmd/tasks::complete"
+    },
+    {
+      "dst": "src/client::BcodeClient.post",
+      "kind": "heuristic",
+      "line": 370,
+      "src": "src/cmd/tasks::complete"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 377,
+      "src": "src/cmd/tasks::complete"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 378,
+      "src": "src/cmd/tasks::complete"
+    },
+    {
+      "dst": "src/cmd/mod::project_ctx",
+      "kind": "heuristic",
+      "line": 397,
+      "src": "src/cmd/tasks::log"
+    },
+    {
+      "dst": "src/client::BcodeClient.post_as",
+      "kind": "heuristic",
+      "line": 398,
+      "src": "src/cmd/tasks::log"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 411,
+      "src": "src/cmd/tasks::log"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 412,
+      "src": "src/cmd/tasks::log"
+    },
+    {
+      "dst": "src/client::BcodeClient.get",
+      "kind": "heuristic",
+      "line": 454,
+      "src": "src/cmd/tasks::create"
+    },
+    {
+      "dst": "src/cmd/mod::project_ctx",
+      "kind": "heuristic",
+      "line": 469,
+      "src": "src/cmd/tasks::create"
+    },
+    {
+      "dst": "src/client::BcodeClient.post_as",
+      "kind": "heuristic",
+      "line": 470,
+      "src": "src/cmd/tasks::create"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 478,
+      "src": "src/cmd/tasks::create"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 479,
+      "src": "src/cmd/tasks::create"
+    },
+    {
+      "dst": "src/cmd/mod::project_ctx",
+      "kind": "heuristic",
+      "line": 523,
+      "src": "src/cmd/tasks::update"
+    },
+    {
+      "dst": "src/client::BcodeClient.put",
+      "kind": "heuristic",
+      "line": 524,
+      "src": "src/cmd/tasks::update"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 533,
+      "src": "src/cmd/tasks::update"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 538,
+      "src": "src/cmd/tasks::update"
+    },
+    {
+      "dst": "src/cmd/tasks::sort_tasks",
+      "kind": "local",
+      "line": 570,
+      "src": "src/cmd/tasks::sort_puts_low_priority_number_first"
+    },
+    {
+      "dst": "src/cmd/mod::project_ctx",
+      "kind": "heuristic",
+      "line": 19,
+      "src": "src/cmd/topic::topic"
+    },
+    {
+      "dst": "src/client::BcodeClient.post_as",
+      "kind": "heuristic",
+      "line": 39,
+      "src": "src/cmd/topic::topic"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 43,
+      "src": "src/cmd/topic::topic"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 50,
+      "src": "src/cmd/topic::topic"
+    },
+    {
+      "dst": "src/client::BcodeClient.post",
+      "kind": "heuristic",
+      "line": 63,
+      "src": "src/cmd/topic::topic"
+    },
+    {
+      "dst": "src/client::BcodeClient.get_as",
+      "kind": "heuristic",
+      "line": 83,
+      "src": "src/cmd/topic::topic"
+    },
+    {
+      "dst": "src/client::BcodeClient.get_as",
+      "kind": "heuristic",
+      "line": 182,
+      "src": "src/cmd/topic::topic"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 187,
+      "src": "src/cmd/topic::topic"
+    },
+    {
+      "dst": "src/cmd/mod::Ctx.sessioned_get",
+      "kind": "heuristic",
+      "line": 220,
+      "src": "src/cmd/topic::topic"
+    },
+    {
+      "dst": "src/cmd/mod::project_ctx",
+      "kind": "heuristic",
+      "line": 22,
+      "src": "src/cmd/vault::docs"
+    },
+    {
+      "dst": "src/cmd/mod::Ctx.sessioned_get",
+      "kind": "heuristic",
+      "line": 31,
+      "src": "src/cmd/vault::docs"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 38,
+      "src": "src/cmd/vault::docs"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 43,
+      "src": "src/cmd/vault::docs"
+    },
+    {
+      "dst": "src/client::BcodeClient.put_as",
+      "kind": "heuristic",
+      "line": 56,
+      "src": "src/cmd/vault::docs"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 63,
+      "src": "src/cmd/vault::docs"
+    },
+    {
+      "dst": "src/cmd/vault::flatten_tree",
+      "kind": "local",
+      "line": 81,
+      "src": "src/cmd/vault::docs"
+    },
+    {
+      "dst": "src/cmd/vault::render_tree",
+      "kind": "local",
+      "line": 93,
+      "src": "src/cmd/vault::docs"
+    },
+    {
+      "dst": "src/cmd/mod::project_ctx",
+      "kind": "heuristic",
+      "line": 119,
+      "src": "src/cmd/vault::memories"
+    },
+    {
+      "dst": "src/client::BcodeClient.get_as",
+      "kind": "heuristic",
+      "line": 125,
+      "src": "src/cmd/vault::memories"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 128,
+      "src": "src/cmd/vault::memories"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 138,
+      "src": "src/cmd/vault::memories"
+    },
+    {
+      "dst": "src/cmd/mod::identity_client",
+      "kind": "heuristic",
+      "line": 149,
+      "src": "src/cmd/vault::memory"
+    },
+    {
+      "dst": "src/client::BcodeClient.get_as",
+      "kind": "heuristic",
+      "line": 150,
+      "src": "src/cmd/vault::memory"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 156,
+      "src": "src/cmd/vault::memory"
+    },
+    {
+      "dst": "src/cmd/mod::project_ctx",
+      "kind": "heuristic",
+      "line": 160,
+      "src": "src/cmd/vault::memory"
+    },
+    {
+      "dst": "src/client::BcodeClient.delete",
+      "kind": "heuristic",
+      "line": 165,
+      "src": "src/cmd/vault::memory"
+    },
+    {
+      "dst": "src/output::Out.kv",
+      "kind": "heuristic",
+      "line": 166,
+      "src": "src/cmd/vault::memory"
+    },
+    {
+      "dst": "src/client::BcodeClient.put",
+      "kind": "heuristic",
+      "line": 181,
+      "src": "src/cmd/vault::memory"
+    },
+    {
+      "dst": "src/client::BcodeClient.get_as",
+      "kind": "heuristic",
+      "line": 188,
+      "src": "src/cmd/vault::memory"
+    },
+    {
+      "dst": "src/cmd/mod::identity_client",
+      "kind": "heuristic",
+      "line": 204,
+      "src": "src/cmd/vault::search"
+    },
+    {
+      "dst": "src/client::BcodeClient.get_as",
+      "kind": "heuristic",
+      "line": 209,
+      "src": "src/cmd/vault::search"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 212,
+      "src": "src/cmd/vault::search"
+    },
+    {
+      "dst": "src/output::Out.emit_value",
+      "kind": "heuristic",
+      "line": 220,
+      "src": "src/cmd/vault::search"
+    },
+    {
+      "dst": "src/cmd/vault::flatten_tree",
+      "kind": "local",
+      "line": 229,
+      "src": "src/cmd/vault::flatten_tree"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 238,
+      "src": "src/cmd/vault::render_tree"
+    },
+    {
+      "dst": "src/cmd/vault::render_tree",
+      "kind": "local",
+      "line": 240,
+      "src": "src/cmd/vault::render_tree"
+    },
+    {
+      "dst": "src/cmd/vault::flatten_tree",
+      "kind": "local",
+      "line": 281,
+      "src": "src/cmd/vault::flatten_tree_walks_depth_first"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 35,
+      "src": "src/config::bc_root"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 42,
+      "src": "src/config::config_path"
+    },
+    {
+      "dst": "src/config::bc_root",
+      "kind": "local",
+      "line": 42,
+      "src": "src/config::config_path"
+    },
+    {
+      "dst": "src/config::config_path",
+      "kind": "local",
+      "line": 46,
+      "src": "src/config::load_config"
+    },
+    {
+      "dst": "src/config::config_path",
+      "kind": "local",
+      "line": 57,
+      "src": "src/config::save_config"
+    },
+    {
+      "dst": "src/config::bc_root",
+      "kind": "local",
+      "line": 58,
+      "src": "src/config::save_config"
+    },
+    {
+      "dst": "src/config::config_path",
+      "kind": "local",
+      "line": 68,
+      "src": "src/config::effective_server_url"
+    },
+    {
+      "dst": "src/config::resolve_profile",
+      "kind": "local",
+      "line": 83,
+      "src": "src/config::effective_profile"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 120,
+      "src": "src/config::find_project_pointer"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 138,
+      "src": "src/config::save_project_pointer"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 185,
+      "src": "src/config::project_pointer_walks_up_ancestors"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 187,
+      "src": "src/config::project_pointer_walks_up_ancestors"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 191,
+      "src": "src/config::project_pointer_walks_up_ancestors"
+    },
+    {
+      "dst": "src/config::find_project_pointer",
+      "kind": "local",
+      "line": 193,
+      "src": "src/config::project_pointer_walks_up_ancestors"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 204,
+      "src": "src/config::project_pointer_rejects_malformed_marker"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 205,
+      "src": "src/config::project_pointer_rejects_malformed_marker"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 214,
+      "src": "src/config::project_pointer_stops_at_git_boundary"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 216,
+      "src": "src/config::project_pointer_stops_at_git_boundary"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 221,
+      "src": "src/config::project_pointer_stops_at_git_boundary"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 232,
+      "src": "src/config::project_pointer_finds_marker_in_repo_root"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 233,
+      "src": "src/config::project_pointer_finds_marker_in_repo_root"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 236,
+      "src": "src/config::project_pointer_finds_marker_in_repo_root"
+    },
+    {
+      "dst": "src/config::find_project_pointer",
+      "kind": "local",
+      "line": 242,
+      "src": "src/config::project_pointer_finds_marker_in_repo_root"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 50,
+      "src": "src/cred::credential_path"
+    },
+    {
+      "dst": "src/config::bc_root",
+      "kind": "heuristic",
+      "line": 50,
+      "src": "src/cred::credential_path"
+    },
+    {
+      "dst": "src/cred::credential_path",
+      "kind": "local",
+      "line": 54,
+      "src": "src/cred::load_credential"
+    },
+    {
+      "dst": "src/cred::credential_path",
+      "kind": "local",
+      "line": 74,
+      "src": "src/cred::save_credential"
+    },
+    {
+      "dst": "src/cred::set_private",
+      "kind": "local",
+      "line": 80,
+      "src": "src/cred::save_credential"
+    },
+    {
+      "dst": "src/config::bc_root",
+      "kind": "heuristic",
+      "line": 86,
+      "src": "src/cred::list_profiles"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 86,
+      "src": "src/cred::list_profiles"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 94,
+      "src": "src/cred::list_profiles"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 102,
+      "src": "src/cred::session_path"
+    },
+    {
+      "dst": "src/config::bc_root",
+      "kind": "heuristic",
+      "line": 102,
+      "src": "src/cred::session_path"
+    },
+    {
+      "dst": "src/cred::session_path",
+      "kind": "local",
+      "line": 109,
+      "src": "src/cred::load_session"
+    },
+    {
+      "dst": "src/cred::session_path",
+      "kind": "local",
+      "line": 115,
+      "src": "src/cred::save_session"
+    },
+    {
+      "dst": "src/cred::set_private",
+      "kind": "local",
+      "line": 121,
+      "src": "src/cred::save_session"
+    },
+    {
+      "dst": "src/error::BcodeError.exit_code",
+      "kind": "heuristic",
+      "line": 36,
+      "src": "src/error::exit_code_of"
+    },
+    {
+      "dst": "src/config::load_config",
+      "kind": "heuristic",
+      "line": 18,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/config::effective_profile",
+      "kind": "heuristic",
+      "line": 32,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/config::validate_profile_name",
+      "kind": "heuristic",
+      "line": 34,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/identity::register",
+      "kind": "heuristic",
+      "line": 41,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/identity::whoami",
+      "kind": "heuristic",
+      "line": 43,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/project::status",
+      "kind": "heuristic",
+      "line": 44,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/identity::profiles",
+      "kind": "heuristic",
+      "line": 45,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 46,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/project::projects",
+      "kind": "heuristic",
+      "line": 47,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/project::start",
+      "kind": "heuristic",
+      "line": 48,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/project::context",
+      "kind": "heuristic",
+      "line": 49,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/tasks::tasks",
+      "kind": "heuristic",
+      "line": 50,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/tasks::task",
+      "kind": "heuristic",
+      "line": 51,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/tasks::create",
+      "kind": "heuristic",
+      "line": 52,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/tasks::update",
+      "kind": "heuristic",
+      "line": 53,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/tasks::claim",
+      "kind": "heuristic",
+      "line": 54,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/tasks::release",
+      "kind": "heuristic",
+      "line": 55,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/tasks::block",
+      "kind": "heuristic",
+      "line": 56,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/tasks::unblock",
+      "kind": "heuristic",
+      "line": 57,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/tasks::reopen",
+      "kind": "heuristic",
+      "line": 58,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/tasks::complete",
+      "kind": "heuristic",
+      "line": 60,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/tasks::log",
+      "kind": "heuristic",
+      "line": 72,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/comms::comment",
+      "kind": "heuristic",
+      "line": 74,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/comms::comments",
+      "kind": "heuristic",
+      "line": 76,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/comms::notify",
+      "kind": "heuristic",
+      "line": 78,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/vault::docs",
+      "kind": "heuristic",
+      "line": 79,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/vault::memory",
+      "kind": "heuristic",
+      "line": 80,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/vault::memories",
+      "kind": "heuristic",
+      "line": 82,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/vault::search",
+      "kind": "heuristic",
+      "line": 85,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/system::init",
+      "kind": "heuristic",
+      "line": 87,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/system::open",
+      "kind": "heuristic",
+      "line": 88,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/system::completion",
+      "kind": "heuristic",
+      "line": 89,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/system::man",
+      "kind": "heuristic",
+      "line": 90,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/qa::qa",
+      "kind": "heuristic",
+      "line": 91,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/feedback::feedback",
+      "kind": "heuristic",
+      "line": 92,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/cmd/topic::topic",
+      "kind": "heuristic",
+      "line": 93,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/error::exit_code_of",
+      "kind": "heuristic",
+      "line": 97,
+      "src": "src/main::main"
+    },
+    {
+      "dst": "src/output::Out.line",
+      "kind": "heuristic",
+      "line": 35,
+      "src": "src/output::Out.kv"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 28,
+      "src": "tests/cli::Sandbox.write_config"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 32,
+      "src": "tests/cli::Sandbox.write_credential"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 35,
+      "src": "tests/cli::Sandbox.write_credential"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 39,
+      "src": "tests/cli::Sandbox.write_project_pointer"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 41,
+      "src": "tests/cli::Sandbox.write_project_pointer"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 45,
+      "src": "tests/cli::Sandbox.write_session"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 50,
+      "src": "tests/cli::Sandbox.write_session"
+    },
+    {
+      "dst": "tests/cli::json_stdout",
+      "kind": "local",
+      "line": 63,
+      "src": "tests/cli::whoami_reports_empty_state_with_exit_zero"
+    },
+    {
+      "dst": "tests/cli::Sandbox.write_config",
+      "kind": "heuristic",
+      "line": 73,
+      "src": "tests/cli::whoami_aggregates_local_state"
+    },
+    {
+      "dst": "tests/cli::Sandbox.write_credential",
+      "kind": "heuristic",
+      "line": 74,
+      "src": "tests/cli::whoami_aggregates_local_state"
+    },
+    {
+      "dst": "tests/cli::Sandbox.write_project_pointer",
+      "kind": "heuristic",
+      "line": 75,
+      "src": "tests/cli::whoami_aggregates_local_state"
+    },
+    {
+      "dst": "tests/cli::Sandbox.write_session",
+      "kind": "heuristic",
+      "line": 76,
+      "src": "tests/cli::whoami_aggregates_local_state"
+    },
+    {
+      "dst": "tests/cli::json_stdout",
+      "kind": "local",
+      "line": 78,
+      "src": "tests/cli::whoami_aggregates_local_state"
+    },
+    {
+      "dst": "tests/cli::Sandbox.write_credential",
+      "kind": "heuristic",
+      "line": 102,
+      "src": "tests/cli::profiles_lists_local_identities"
+    },
+    {
+      "dst": "tests/cli::json_stdout",
+      "kind": "local",
+      "line": 105,
+      "src": "tests/cli::profiles_lists_local_identities"
+    },
+    {
+      "dst": "tests/cli::Sandbox.write_credential",
+      "kind": "heuristic",
+      "line": 116,
+      "src": "tests/cli::profile_flag_overrides_bc_agent_env"
+    },
+    {
+      "dst": "tests/cli::json_stdout",
+      "kind": "local",
+      "line": 119,
+      "src": "tests/cli::profile_flag_overrides_bc_agent_env"
+    },
+    {
+      "dst": "tests/cli::Sandbox.write_credential",
+      "kind": "heuristic",
+      "line": 126,
+      "src": "tests/cli::bc_agent_env_selects_profile"
+    },
+    {
+      "dst": "tests/cli::json_stdout",
+      "kind": "local",
+      "line": 128,
+      "src": "tests/cli::bc_agent_env_selects_profile"
+    },
+    {
+      "dst": "tests/cli::Sandbox.write_credential",
+      "kind": "heuristic",
+      "line": 136,
+      "src": "tests/cli::status_exits_2_without_server_url"
+    },
+    {
+      "dst": "tests/cli::Sandbox.write_config",
+      "kind": "heuristic",
+      "line": 147,
+      "src": "tests/cli::status_exits_2_outside_any_project"
+    },
+    {
+      "dst": "tests/cli::Sandbox.write_credential",
+      "kind": "heuristic",
+      "line": 148,
+      "src": "tests/cli::status_exits_2_outside_any_project"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 175,
+      "src": "tests/cli::init_writes_config_in_noninteractive_mode"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 216,
+      "src": "tests/cli::complete_rejects_oversized_artifacts_before_network"
+    },
+    {
+      "dst": "src/cmd/project::join",
+      "kind": "heuristic",
+      "line": 241,
+      "src": "tests/cli::init_auto_appends_api_prefix"
+    }
+  ],
+  "langs": {
+    "rust": 28
+  },
+  "modules": {
+    "build": {
+      "file": "build.rs",
+      "funcs": 2
+    },
+    "src/cli": {
+      "file": "src/cli.rs",
+      "funcs": 1
+    },
+    "src/client": {
+      "file": "src/client.rs",
+      "funcs": 14
+    },
+    "src/cmd/comms": {
+      "file": "src/cmd/comms.rs",
+      "funcs": 8
+    },
+    "src/cmd/feedback": {
+      "file": "src/cmd/feedback.rs",
+      "funcs": 2
+    },
+    "src/cmd/identity": {
+      "file": "src/cmd/identity.rs",
+      "funcs": 3
+    },
+    "src/cmd/mod": {
+      "file": "src/cmd/mod.rs",
+      "funcs": 6
+    },
+    "src/cmd/project": {
+      "file": "src/cmd/project.rs",
+      "funcs": 7
+    },
+    "src/cmd/qa": {
+      "file": "src/cmd/qa.rs",
+      "funcs": 1
+    },
+    "src/cmd/system": {
+      "file": "src/cmd/system.rs",
+      "funcs": 8
+    },
+    "src/cmd/tasks": {
+      "file": "src/cmd/tasks.rs",
+      "funcs": 14
+    },
+    "src/cmd/topic": {
+      "file": "src/cmd/topic.rs",
+      "funcs": 1
+    },
+    "src/cmd/vault": {
+      "file": "src/cmd/vault.rs",
+      "funcs": 10
+    },
+    "src/config": {
+      "file": "src/config.rs",
+      "funcs": 16
+    },
+    "src/cred": {
+      "file": "src/cred.rs",
+      "funcs": 10
+    },
+    "src/error": {
+      "file": "src/error.rs",
+      "funcs": 4
+    },
+    "src/lib": {
+      "file": "src/lib.rs",
+      "funcs": 0
+    },
+    "src/main": {
+      "file": "src/main.rs",
+      "funcs": 1
+    },
+    "src/model/agent": {
+      "file": "src/model/agent.rs",
+      "funcs": 2
+    },
+    "src/model/docs": {
+      "file": "src/model/docs.rs",
+      "funcs": 0
+    },
+    "src/model/feedback": {
+      "file": "src/model/feedback.rs",
+      "funcs": 0
+    },
+    "src/model/mod": {
+      "file": "src/model/mod.rs",
+      "funcs": 7
+    },
+    "src/model/platform": {
+      "file": "src/model/platform.rs",
+      "funcs": 1
+    },
+    "src/model/qa": {
+      "file": "src/model/qa.rs",
+      "funcs": 0
+    },
+    "src/model/task": {
+      "file": "src/model/task.rs",
+      "funcs": 1
+    },
+    "src/model/topic": {
+      "file": "src/model/topic.rs",
+      "funcs": 0
+    },
+    "src/output": {
+      "file": "src/output.rs",
+      "funcs": 6
+    },
+    "tests/cli": {
+      "file": "tests/cli.rs",
+      "funcs": 22
+    }
+  },
+  "nodes": [
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 20,
+      "file": "build.rs",
+      "id": "build::main",
+      "is_entry": false,
+      "lineno": 8,
+      "module": "build",
+      "name": "main",
+      "qualname": "main",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 34,
+      "file": "build.rs",
+      "id": "build::git_describe_version",
+      "is_entry": false,
+      "lineno": 23,
+      "module": "build",
+      "name": "git_describe_version",
+      "qualname": "git_describe_version",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 571,
+      "file": "src/cli.rs",
+      "id": "src/cli::grouped_catalog_covers_every_subcommand",
+      "is_entry": false,
+      "lineno": 560,
+      "module": "src/cli",
+      "name": "grouped_catalog_covers_every_subcommand",
+      "qualname": "grouped_catalog_covers_every_subcommand",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 0,
+      "end_lineno": 28,
+      "file": "src/client.rs",
+      "id": "src/client::BcodeClient.new",
+      "is_entry": false,
+      "lineno": 21,
+      "module": "src/client",
+      "name": "new",
+      "qualname": "BcodeClient.new",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 2,
+      "end_lineno": 33,
+      "file": "src/client.rs",
+      "id": "src/client::BcodeClient.anonymous",
+      "is_entry": false,
+      "lineno": 31,
+      "module": "src/client",
+      "name": "anonymous",
+      "qualname": "BcodeClient.anonymous",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 3,
+      "end_lineno": 58,
+      "file": "src/client.rs",
+      "id": "src/client::BcodeClient.build",
+      "is_entry": false,
+      "lineno": 35,
+      "module": "src/client",
+      "name": "build",
+      "qualname": "BcodeClient.build",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 3,
+      "callers": 5,
+      "end_lineno": 96,
+      "file": "src/client.rs",
+      "id": "src/client::BcodeClient.request",
+      "is_entry": false,
+      "lineno": 60,
+      "module": "src/client",
+      "name": "request",
+      "qualname": "BcodeClient.request",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 6,
+      "end_lineno": 100,
+      "file": "src/client.rs",
+      "id": "src/client::BcodeClient.get",
+      "is_entry": false,
+      "lineno": 98,
+      "module": "src/client",
+      "name": "get",
+      "qualname": "BcodeClient.get",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 14,
+      "end_lineno": 107,
+      "file": "src/client.rs",
+      "id": "src/client::BcodeClient.get_as",
+      "is_entry": false,
+      "lineno": 103,
+      "module": "src/client",
+      "name": "get_as",
+      "qualname": "BcodeClient.get_as",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 10,
+      "end_lineno": 111,
+      "file": "src/client.rs",
+      "id": "src/client::BcodeClient.post",
+      "is_entry": false,
+      "lineno": 109,
+      "module": "src/client",
+      "name": "post",
+      "qualname": "BcodeClient.post",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 4,
+      "end_lineno": 116,
+      "file": "src/client.rs",
+      "id": "src/client::BcodeClient.put",
+      "is_entry": false,
+      "lineno": 114,
+      "module": "src/client",
+      "name": "put",
+      "qualname": "BcodeClient.put",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 1,
+      "end_lineno": 123,
+      "file": "src/client.rs",
+      "id": "src/client::BcodeClient.put_as",
+      "is_entry": false,
+      "lineno": 119,
+      "module": "src/client",
+      "name": "put_as",
+      "qualname": "BcodeClient.put_as",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 1,
+      "end_lineno": 128,
+      "file": "src/client.rs",
+      "id": "src/client::BcodeClient.delete",
+      "is_entry": false,
+      "lineno": 126,
+      "module": "src/client",
+      "name": "delete",
+      "qualname": "BcodeClient.delete",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 8,
+      "end_lineno": 135,
+      "file": "src/client.rs",
+      "id": "src/client::BcodeClient.post_as",
+      "is_entry": false,
+      "lineno": 131,
+      "module": "src/client",
+      "name": "post_as",
+      "qualname": "BcodeClient.post_as",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 2,
+      "callers": 1,
+      "end_lineno": 153,
+      "file": "src/client.rs",
+      "id": "src/client::BcodeClient.open_stream",
+      "is_entry": false,
+      "lineno": 138,
+      "module": "src/client",
+      "name": "open_stream",
+      "qualname": "BcodeClient.open_stream",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 168,
+      "file": "src/client.rs",
+      "id": "src/client::encode_query",
+      "is_entry": false,
+      "lineno": 157,
+      "module": "src/client",
+      "name": "encode_query",
+      "qualname": "encode_query",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 179,
+      "file": "src/client.rs",
+      "id": "src/client::encode_query_keeps_unreserved_and_encodes_rest",
+      "is_entry": false,
+      "lineno": 175,
+      "module": "src/client",
+      "name": "encode_query_keeps_unreserved_and_encodes_rest",
+      "qualname": "encode_query_keeps_unreserved_and_encodes_rest",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 4,
+      "callers": 1,
+      "end_lineno": 33,
+      "file": "src/cmd/comms.rs",
+      "id": "src/cmd/comms::comment",
+      "is_entry": false,
+      "lineno": 15,
+      "module": "src/cmd/comms",
+      "name": "comment",
+      "qualname": "comment",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 5,
+      "callers": 1,
+      "end_lineno": 83,
+      "file": "src/cmd/comms.rs",
+      "id": "src/cmd/comms::comments",
+      "is_entry": false,
+      "lineno": 37,
+      "module": "src/cmd/comms",
+      "name": "comments",
+      "qualname": "comments",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 9,
+      "callers": 1,
+      "end_lineno": 146,
+      "file": "src/cmd/comms.rs",
+      "id": "src/cmd/comms::notify",
+      "is_entry": false,
+      "lineno": 88,
+      "module": "src/cmd/comms",
+      "name": "notify",
+      "qualname": "notify",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 4,
+      "callers": 1,
+      "end_lineno": 182,
+      "file": "src/cmd/comms.rs",
+      "id": "src/cmd/comms::consume_sse",
+      "is_entry": false,
+      "lineno": 150,
+      "module": "src/cmd/comms",
+      "name": "consume_sse",
+      "qualname": "consume_sse",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 2,
+      "end_lineno": 195,
+      "file": "src/cmd/comms.rs",
+      "id": "src/cmd/comms::parse_sse_event",
+      "is_entry": false,
+      "lineno": 185,
+      "module": "src/cmd/comms",
+      "name": "parse_sse_event",
+      "qualname": "parse_sse_event",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 203,
+      "file": "src/cmd/comms.rs",
+      "id": "src/cmd/comms::speaker",
+      "is_entry": false,
+      "lineno": 197,
+      "module": "src/cmd/comms",
+      "name": "speaker",
+      "qualname": "speaker",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 0,
+      "end_lineno": 213,
+      "file": "src/cmd/comms.rs",
+      "id": "src/cmd/comms::sse_data_event_parses",
+      "is_entry": false,
+      "lineno": 210,
+      "module": "src/cmd/comms",
+      "name": "sse_data_event_parses",
+      "qualname": "sse_data_event_parses",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 219,
+      "file": "src/cmd/comms.rs",
+      "id": "src/cmd/comms::sse_heartbeat_comment_yields_none",
+      "is_entry": false,
+      "lineno": 216,
+      "module": "src/cmd/comms",
+      "name": "sse_heartbeat_comment_yields_none",
+      "qualname": "sse_heartbeat_comment_yields_none",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 8,
+      "callers": 1,
+      "end_lineno": 116,
+      "file": "src/cmd/feedback.rs",
+      "id": "src/cmd/feedback::feedback",
+      "is_entry": false,
+      "lineno": 16,
+      "module": "src/cmd/feedback",
+      "name": "feedback",
+      "qualname": "feedback",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 1,
+      "end_lineno": 139,
+      "file": "src/cmd/feedback.rs",
+      "id": "src/cmd/feedback::resolve_relation",
+      "is_entry": false,
+      "lineno": 119,
+      "module": "src/cmd/feedback",
+      "name": "resolve_relation",
+      "qualname": "resolve_relation",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 9,
+      "callers": 1,
+      "end_lineno": 56,
+      "file": "src/cmd/identity.rs",
+      "id": "src/cmd/identity::register",
+      "is_entry": false,
+      "lineno": 14,
+      "module": "src/cmd/identity",
+      "name": "register",
+      "qualname": "register",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 6,
+      "callers": 1,
+      "end_lineno": 116,
+      "file": "src/cmd/identity.rs",
+      "id": "src/cmd/identity::whoami",
+      "is_entry": false,
+      "lineno": 60,
+      "module": "src/cmd/identity",
+      "name": "whoami",
+      "qualname": "whoami",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 5,
+      "callers": 1,
+      "end_lineno": 147,
+      "file": "src/cmd/identity.rs",
+      "id": "src/cmd/identity::profiles",
+      "is_entry": false,
+      "lineno": 119,
+      "module": "src/cmd/identity",
+      "name": "profiles",
+      "qualname": "profiles",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 3,
+      "callers": 5,
+      "end_lineno": 65,
+      "file": "src/cmd/mod.rs",
+      "id": "src/cmd/mod::Ctx.sessioned_get",
+      "is_entry": false,
+      "lineno": 40,
+      "module": "src/cmd/mod",
+      "name": "sessioned_get",
+      "qualname": "Ctx.sessioned_get",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 1,
+      "end_lineno": 70,
+      "file": "src/cmd/mod.rs",
+      "id": "src/cmd/mod::is_auth",
+      "is_entry": false,
+      "lineno": 68,
+      "module": "src/cmd/mod",
+      "name": "is_auth",
+      "qualname": "is_auth",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 1,
+      "end_lineno": 79,
+      "file": "src/cmd/mod.rs",
+      "id": "src/cmd/mod::is_stale_session",
+      "is_entry": false,
+      "lineno": 74,
+      "module": "src/cmd/mod",
+      "name": "is_stale_session",
+      "qualname": "is_stale_session",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 4,
+      "end_lineno": 110,
+      "file": "src/cmd/mod.rs",
+      "id": "src/cmd/mod::ensure_session",
+      "is_entry": false,
+      "lineno": 83,
+      "module": "src/cmd/mod",
+      "name": "ensure_session",
+      "qualname": "ensure_session",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 5,
+      "callers": 19,
+      "end_lineno": 143,
+      "file": "src/cmd/mod.rs",
+      "id": "src/cmd/mod::project_ctx",
+      "is_entry": false,
+      "lineno": 113,
+      "module": "src/cmd/mod",
+      "name": "project_ctx",
+      "qualname": "project_ctx",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 2,
+      "callers": 6,
+      "end_lineno": 150,
+      "file": "src/cmd/mod.rs",
+      "id": "src/cmd/mod::identity_client",
+      "is_entry": false,
+      "lineno": 146,
+      "module": "src/cmd/mod",
+      "name": "identity_client",
+      "qualname": "identity_client",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 5,
+      "callers": 1,
+      "end_lineno": 51,
+      "file": "src/cmd/project.rs",
+      "id": "src/cmd/project::projects",
+      "is_entry": false,
+      "lineno": 17,
+      "module": "src/cmd/project",
+      "name": "projects",
+      "qualname": "projects",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 7,
+      "callers": 33,
+      "end_lineno": 97,
+      "file": "src/cmd/project.rs",
+      "id": "src/cmd/project::join",
+      "is_entry": false,
+      "lineno": 54,
+      "module": "src/cmd/project",
+      "name": "join",
+      "qualname": "join",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 8,
+      "callers": 1,
+      "end_lineno": 145,
+      "file": "src/cmd/project.rs",
+      "id": "src/cmd/project::start",
+      "is_entry": false,
+      "lineno": 100,
+      "module": "src/cmd/project",
+      "name": "start",
+      "qualname": "start",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 6,
+      "callers": 1,
+      "end_lineno": 166,
+      "file": "src/cmd/project.rs",
+      "id": "src/cmd/project::context",
+      "is_entry": false,
+      "lineno": 149,
+      "module": "src/cmd/project",
+      "name": "context",
+      "qualname": "context",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 6,
+      "callers": 3,
+      "end_lineno": 211,
+      "file": "src/cmd/project.rs",
+      "id": "src/cmd/project::status",
+      "is_entry": false,
+      "lineno": 170,
+      "module": "src/cmd/project",
+      "name": "status",
+      "qualname": "status",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 1,
+      "end_lineno": 236,
+      "file": "src/cmd/project.rs",
+      "id": "src/cmd/project::resolve_project",
+      "is_entry": false,
+      "lineno": 215,
+      "module": "src/cmd/project",
+      "name": "resolve_project",
+      "qualname": "resolve_project",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 2,
+      "callers": 1,
+      "end_lineno": 316,
+      "file": "src/cmd/project.rs",
+      "id": "src/cmd/project::display_kickoff",
+      "is_entry": false,
+      "lineno": 239,
+      "module": "src/cmd/project",
+      "name": "display_kickoff",
+      "qualname": "display_kickoff",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 7,
+      "callers": 1,
+      "end_lineno": 85,
+      "file": "src/cmd/qa.rs",
+      "id": "src/cmd/qa::qa",
+      "is_entry": false,
+      "lineno": 18,
+      "module": "src/cmd/qa",
+      "name": "qa",
+      "qualname": "qa",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 9,
+      "callers": 1,
+      "end_lineno": 60,
+      "file": "src/cmd/system.rs",
+      "id": "src/cmd/system::init",
+      "is_entry": false,
+      "lineno": 17,
+      "module": "src/cmd/system",
+      "name": "init",
+      "qualname": "init",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 6,
+      "callers": 1,
+      "end_lineno": 93,
+      "file": "src/cmd/system.rs",
+      "id": "src/cmd/system::open",
+      "is_entry": false,
+      "lineno": 64,
+      "module": "src/cmd/system",
+      "name": "open",
+      "qualname": "open",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 1,
+      "end_lineno": 103,
+      "file": "src/cmd/system.rs",
+      "id": "src/cmd/system::completion",
+      "is_entry": false,
+      "lineno": 97,
+      "module": "src/cmd/system",
+      "name": "completion",
+      "qualname": "completion",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 1,
+      "end_lineno": 111,
+      "file": "src/cmd/system.rs",
+      "id": "src/cmd/system::man",
+      "is_entry": false,
+      "lineno": 106,
+      "module": "src/cmd/system",
+      "name": "man",
+      "qualname": "man",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 1,
+      "end_lineno": 125,
+      "file": "src/cmd/system.rs",
+      "id": "src/cmd/system::prompt",
+      "is_entry": false,
+      "lineno": 114,
+      "module": "src/cmd/system",
+      "name": "prompt",
+      "qualname": "prompt",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 1,
+      "end_lineno": 138,
+      "file": "src/cmd/system.rs",
+      "id": "src/cmd/system::open_browser",
+      "is_entry": false,
+      "lineno": 128,
+      "module": "src/cmd/system",
+      "name": "open_browser",
+      "qualname": "open_browser",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 1,
+      "end_lineno": 149,
+      "file": "src/cmd/system.rs",
+      "id": "src/cmd/system::normalize_server_url",
+      "is_entry": false,
+      "lineno": 141,
+      "module": "src/cmd/system",
+      "name": "normalize_server_url",
+      "qualname": "normalize_server_url",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 174,
+      "file": "src/cmd/system.rs",
+      "id": "src/cmd/system::normalize_appends_api_only_for_bare_host",
+      "is_entry": false,
+      "lineno": 156,
+      "module": "src/cmd/system",
+      "name": "normalize_appends_api_only_for_bare_host",
+      "qualname": "normalize_appends_api_only_for_bare_host",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 8,
+      "callers": 1,
+      "end_lineno": 131,
+      "file": "src/cmd/tasks.rs",
+      "id": "src/cmd/tasks::tasks",
+      "is_entry": false,
+      "lineno": 18,
+      "module": "src/cmd/tasks",
+      "name": "tasks",
+      "qualname": "tasks",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 8,
+      "callers": 1,
+      "end_lineno": 251,
+      "file": "src/cmd/tasks.rs",
+      "id": "src/cmd/tasks::task",
+      "is_entry": false,
+      "lineno": 134,
+      "module": "src/cmd/tasks",
+      "name": "task",
+      "qualname": "task",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 4,
+      "callers": 1,
+      "end_lineno": 280,
+      "file": "src/cmd/tasks.rs",
+      "id": "src/cmd/tasks::claim",
+      "is_entry": false,
+      "lineno": 255,
+      "module": "src/cmd/tasks",
+      "name": "claim",
+      "qualname": "claim",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 4,
+      "callers": 1,
+      "end_lineno": 292,
+      "file": "src/cmd/tasks.rs",
+      "id": "src/cmd/tasks::release",
+      "is_entry": false,
+      "lineno": 284,
+      "module": "src/cmd/tasks",
+      "name": "release",
+      "qualname": "release",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 4,
+      "callers": 1,
+      "end_lineno": 310,
+      "file": "src/cmd/tasks.rs",
+      "id": "src/cmd/tasks::block",
+      "is_entry": false,
+      "lineno": 296,
+      "module": "src/cmd/tasks",
+      "name": "block",
+      "qualname": "block",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 4,
+      "callers": 1,
+      "end_lineno": 321,
+      "file": "src/cmd/tasks.rs",
+      "id": "src/cmd/tasks::unblock",
+      "is_entry": false,
+      "lineno": 313,
+      "module": "src/cmd/tasks",
+      "name": "unblock",
+      "qualname": "unblock",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 4,
+      "callers": 1,
+      "end_lineno": 336,
+      "file": "src/cmd/tasks.rs",
+      "id": "src/cmd/tasks::reopen",
+      "is_entry": false,
+      "lineno": 325,
+      "module": "src/cmd/tasks",
+      "name": "reopen",
+      "qualname": "reopen",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 4,
+      "callers": 1,
+      "end_lineno": 380,
+      "file": "src/cmd/tasks.rs",
+      "id": "src/cmd/tasks::complete",
+      "is_entry": false,
+      "lineno": 339,
+      "module": "src/cmd/tasks",
+      "name": "complete",
+      "qualname": "complete",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 4,
+      "callers": 1,
+      "end_lineno": 414,
+      "file": "src/cmd/tasks.rs",
+      "id": "src/cmd/tasks::log",
+      "is_entry": false,
+      "lineno": 384,
+      "module": "src/cmd/tasks",
+      "name": "log",
+      "qualname": "log",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 5,
+      "callers": 1,
+      "end_lineno": 481,
+      "file": "src/cmd/tasks.rs",
+      "id": "src/cmd/tasks::create",
+      "is_entry": false,
+      "lineno": 419,
+      "module": "src/cmd/tasks",
+      "name": "create",
+      "qualname": "create",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 4,
+      "callers": 1,
+      "end_lineno": 540,
+      "file": "src/cmd/tasks.rs",
+      "id": "src/cmd/tasks::update",
+      "is_entry": false,
+      "lineno": 487,
+      "module": "src/cmd/tasks",
+      "name": "update",
+      "qualname": "update",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 2,
+      "end_lineno": 548,
+      "file": "src/cmd/tasks.rs",
+      "id": "src/cmd/tasks::sort_tasks",
+      "is_entry": false,
+      "lineno": 543,
+      "module": "src/cmd/tasks",
+      "name": "sort_tasks",
+      "qualname": "sort_tasks",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 565,
+      "file": "src/cmd/tasks.rs",
+      "id": "src/cmd/tasks::brief",
+      "is_entry": false,
+      "lineno": 554,
+      "module": "src/cmd/tasks",
+      "name": "brief",
+      "qualname": "brief",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 0,
+      "end_lineno": 578,
+      "file": "src/cmd/tasks.rs",
+      "id": "src/cmd/tasks::sort_puts_low_priority_number_first",
+      "is_entry": false,
+      "lineno": 568,
+      "module": "src/cmd/tasks",
+      "name": "sort_puts_low_priority_number_first",
+      "qualname": "sort_puts_low_priority_number_first",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 9,
+      "callers": 1,
+      "end_lineno": 241,
+      "file": "src/cmd/topic.rs",
+      "id": "src/cmd/topic::topic",
+      "is_entry": false,
+      "lineno": 18,
+      "module": "src/cmd/topic",
+      "name": "topic",
+      "qualname": "topic",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 8,
+      "callers": 1,
+      "end_lineno": 115,
+      "file": "src/cmd/vault.rs",
+      "id": "src/cmd/vault::docs",
+      "is_entry": false,
+      "lineno": 21,
+      "module": "src/cmd/vault",
+      "name": "docs",
+      "qualname": "docs",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 4,
+      "callers": 1,
+      "end_lineno": 140,
+      "file": "src/cmd/vault.rs",
+      "id": "src/cmd/vault::memories",
+      "is_entry": false,
+      "lineno": 118,
+      "module": "src/cmd/vault",
+      "name": "memories",
+      "qualname": "memories",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 8,
+      "callers": 1,
+      "end_lineno": 194,
+      "file": "src/cmd/vault.rs",
+      "id": "src/cmd/vault::memory",
+      "is_entry": false,
+      "lineno": 146,
+      "module": "src/cmd/vault",
+      "name": "memory",
+      "qualname": "memory",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 4,
+      "callers": 1,
+      "end_lineno": 222,
+      "file": "src/cmd/vault.rs",
+      "id": "src/cmd/vault::search",
+      "is_entry": false,
+      "lineno": 197,
+      "module": "src/cmd/vault",
+      "name": "search",
+      "qualname": "search",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 3,
+      "end_lineno": 232,
+      "file": "src/cmd/vault.rs",
+      "id": "src/cmd/vault::flatten_tree",
+      "is_entry": false,
+      "lineno": 225,
+      "module": "src/cmd/vault",
+      "name": "flatten_tree",
+      "qualname": "flatten_tree",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 2,
+      "callers": 2,
+      "end_lineno": 243,
+      "file": "src/cmd/vault.rs",
+      "id": "src/cmd/vault::render_tree",
+      "is_entry": false,
+      "lineno": 235,
+      "module": "src/cmd/vault",
+      "name": "render_tree",
+      "qualname": "render_tree",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 253,
+      "file": "src/cmd/vault.rs",
+      "id": "src/cmd/vault::preview",
+      "is_entry": false,
+      "lineno": 246,
+      "module": "src/cmd/vault",
+      "name": "preview",
+      "qualname": "preview",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 268,
+      "file": "src/cmd/vault.rs",
+      "id": "src/cmd/vault::node",
+      "is_entry": false,
+      "lineno": 259,
+      "module": "src/cmd/vault",
+      "name": "node",
+      "qualname": "node",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 0,
+      "end_lineno": 286,
+      "file": "src/cmd/vault.rs",
+      "id": "src/cmd/vault::flatten_tree_walks_depth_first",
+      "is_entry": false,
+      "lineno": 271,
+      "module": "src/cmd/vault",
+      "name": "flatten_tree_walks_depth_first",
+      "qualname": "flatten_tree_walks_depth_first",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 294,
+      "file": "src/cmd/vault.rs",
+      "id": "src/cmd/vault::preview_truncates_long_first_line",
+      "is_entry": false,
+      "lineno": 289,
+      "module": "src/cmd/vault",
+      "name": "preview_truncates_long_first_line",
+      "qualname": "preview_truncates_long_first_line",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 5,
+      "end_lineno": 39,
+      "file": "src/config.rs",
+      "id": "src/config::bc_root",
+      "is_entry": false,
+      "lineno": 27,
+      "module": "src/config",
+      "name": "bc_root",
+      "qualname": "bc_root",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 2,
+      "callers": 4,
+      "end_lineno": 43,
+      "file": "src/config.rs",
+      "id": "src/config::config_path",
+      "is_entry": false,
+      "lineno": 41,
+      "module": "src/config",
+      "name": "config_path",
+      "qualname": "config_path",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 1,
+      "end_lineno": 52,
+      "file": "src/config.rs",
+      "id": "src/config::load_config",
+      "is_entry": false,
+      "lineno": 45,
+      "module": "src/config",
+      "name": "load_config",
+      "qualname": "load_config",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 2,
+      "callers": 1,
+      "end_lineno": 63,
+      "file": "src/config.rs",
+      "id": "src/config::save_config",
+      "is_entry": false,
+      "lineno": 56,
+      "module": "src/config",
+      "name": "save_config",
+      "qualname": "save_config",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 7,
+      "end_lineno": 75,
+      "file": "src/config.rs",
+      "id": "src/config::effective_server_url",
+      "is_entry": false,
+      "lineno": 67,
+      "module": "src/config",
+      "name": "effective_server_url",
+      "qualname": "effective_server_url",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 2,
+      "end_lineno": 84,
+      "file": "src/config.rs",
+      "id": "src/config::effective_profile",
+      "is_entry": false,
+      "lineno": 78,
+      "module": "src/config",
+      "name": "effective_profile",
+      "qualname": "effective_profile",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 1,
+      "end_lineno": 97,
+      "file": "src/config.rs",
+      "id": "src/config::resolve_profile",
+      "is_entry": false,
+      "lineno": 87,
+      "module": "src/config",
+      "name": "resolve_profile",
+      "qualname": "resolve_profile",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 1,
+      "end_lineno": 113,
+      "file": "src/config.rs",
+      "id": "src/config::validate_profile_name",
+      "is_entry": false,
+      "lineno": 102,
+      "module": "src/config",
+      "name": "validate_profile_name",
+      "qualname": "validate_profile_name",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 10,
+      "end_lineno": 134,
+      "file": "src/config.rs",
+      "id": "src/config::find_project_pointer",
+      "is_entry": false,
+      "lineno": 117,
+      "module": "src/config",
+      "name": "find_project_pointer",
+      "qualname": "find_project_pointer",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 2,
+      "end_lineno": 145,
+      "file": "src/config.rs",
+      "id": "src/config::save_project_pointer",
+      "is_entry": false,
+      "lineno": 137,
+      "module": "src/config",
+      "name": "save_project_pointer",
+      "qualname": "save_project_pointer",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 161,
+      "file": "src/config.rs",
+      "id": "src/config::profile_priority_flag_env_config_default",
+      "is_entry": false,
+      "lineno": 152,
+      "module": "src/config",
+      "name": "profile_priority_flag_env_config_default",
+      "qualname": "profile_priority_flag_env_config_default",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 179,
+      "file": "src/config.rs",
+      "id": "src/config::profile_name_rejects_path_escape_and_odd_chars",
+      "is_entry": false,
+      "lineno": 164,
+      "module": "src/config",
+      "name": "profile_name_rejects_path_escape_and_odd_chars",
+      "qualname": "profile_name_rejects_path_escape_and_odd_chars",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 4,
+      "callers": 0,
+      "end_lineno": 198,
+      "file": "src/config.rs",
+      "id": "src/config::project_pointer_walks_up_ancestors",
+      "is_entry": false,
+      "lineno": 182,
+      "module": "src/config",
+      "name": "project_pointer_walks_up_ancestors",
+      "qualname": "project_pointer_walks_up_ancestors",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 2,
+      "callers": 0,
+      "end_lineno": 207,
+      "file": "src/config.rs",
+      "id": "src/config::project_pointer_rejects_malformed_marker",
+      "is_entry": false,
+      "lineno": 201,
+      "module": "src/config",
+      "name": "project_pointer_rejects_malformed_marker",
+      "qualname": "project_pointer_rejects_malformed_marker",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 3,
+      "callers": 0,
+      "end_lineno": 226,
+      "file": "src/config.rs",
+      "id": "src/config::project_pointer_stops_at_git_boundary",
+      "is_entry": false,
+      "lineno": 210,
+      "module": "src/config",
+      "name": "project_pointer_stops_at_git_boundary",
+      "qualname": "project_pointer_stops_at_git_boundary",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 4,
+      "callers": 0,
+      "end_lineno": 244,
+      "file": "src/config.rs",
+      "id": "src/config::project_pointer_finds_marker_in_repo_root",
+      "is_entry": false,
+      "lineno": 229,
+      "module": "src/config",
+      "name": "project_pointer_finds_marker_in_repo_root",
+      "qualname": "project_pointer_finds_marker_in_repo_root",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 27,
+      "file": "src/cred.rs",
+      "id": "src/cred::Credential.fmt",
+      "is_entry": false,
+      "lineno": 21,
+      "module": "src/cred",
+      "name": "fmt",
+      "qualname": "Credential.fmt",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 2,
+      "callers": 3,
+      "end_lineno": 51,
+      "file": "src/cred.rs",
+      "id": "src/cred::credential_path",
+      "is_entry": false,
+      "lineno": 49,
+      "module": "src/cred",
+      "name": "credential_path",
+      "qualname": "credential_path",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 8,
+      "end_lineno": 58,
+      "file": "src/cred.rs",
+      "id": "src/cred::load_credential",
+      "is_entry": false,
+      "lineno": 53,
+      "module": "src/cred",
+      "name": "load_credential",
+      "qualname": "load_credential",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 2,
+      "end_lineno": 70,
+      "file": "src/cred.rs",
+      "id": "src/cred::set_private",
+      "is_entry": false,
+      "lineno": 61,
+      "module": "src/cred",
+      "name": "set_private",
+      "qualname": "set_private",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 2,
+      "callers": 1,
+      "end_lineno": 82,
+      "file": "src/cred.rs",
+      "id": "src/cred::save_credential",
+      "is_entry": false,
+      "lineno": 73,
+      "module": "src/cred",
+      "name": "save_credential",
+      "qualname": "save_credential",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 3,
+      "callers": 1,
+      "end_lineno": 99,
+      "file": "src/cred.rs",
+      "id": "src/cred::list_profiles",
+      "is_entry": false,
+      "lineno": 84,
+      "module": "src/cred",
+      "name": "list_profiles",
+      "qualname": "list_profiles",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 2,
+      "callers": 2,
+      "end_lineno": 106,
+      "file": "src/cred.rs",
+      "id": "src/cred::session_path",
+      "is_entry": false,
+      "lineno": 101,
+      "module": "src/cred",
+      "name": "session_path",
+      "qualname": "session_path",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 3,
+      "end_lineno": 112,
+      "file": "src/cred.rs",
+      "id": "src/cred::load_session",
+      "is_entry": false,
+      "lineno": 108,
+      "module": "src/cred",
+      "name": "load_session",
+      "qualname": "load_session",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 2,
+      "callers": 1,
+      "end_lineno": 123,
+      "file": "src/cred.rs",
+      "id": "src/cred::save_session",
+      "is_entry": false,
+      "lineno": 114,
+      "module": "src/cred",
+      "name": "save_session",
+      "qualname": "save_session",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 139,
+      "file": "src/cred.rs",
+      "id": "src/cred::debug_output_never_contains_plain_key",
+      "is_entry": false,
+      "lineno": 130,
+      "module": "src/cred",
+      "name": "debug_output_never_contains_plain_key",
+      "qualname": "debug_output_never_contains_plain_key",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 1,
+      "end_lineno": 30,
+      "file": "src/error.rs",
+      "id": "src/error::BcodeError.exit_code",
+      "is_entry": false,
+      "lineno": 23,
+      "module": "src/error",
+      "name": "exit_code",
+      "qualname": "BcodeError.exit_code",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 1,
+      "end_lineno": 39,
+      "file": "src/error.rs",
+      "id": "src/error::exit_code_of",
+      "is_entry": false,
+      "lineno": 34,
+      "module": "src/error",
+      "name": "exit_code_of",
+      "qualname": "exit_code_of",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 51,
+      "file": "src/error.rs",
+      "id": "src/error::exit_codes_follow_contract",
+      "is_entry": false,
+      "lineno": 46,
+      "module": "src/error",
+      "name": "exit_codes_follow_contract",
+      "qualname": "exit_codes_follow_contract",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 58,
+      "file": "src/error.rs",
+      "id": "src/error::exit_code_of_downcasts_otherwise_usage",
+      "is_entry": false,
+      "lineno": 54,
+      "module": "src/error",
+      "name": "exit_code_of_downcasts_otherwise_usage",
+      "qualname": "exit_code_of_downcasts_otherwise_usage",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 37,
+      "callers": 0,
+      "end_lineno": 101,
+      "file": "src/main.rs",
+      "id": "src/main::main",
+      "is_entry": false,
+      "lineno": 13,
+      "module": "src/main",
+      "name": "main",
+      "qualname": "main",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 22,
+      "file": "src/model/agent.rs",
+      "id": "src/model/agent::RegisterCreated.fmt",
+      "is_entry": false,
+      "lineno": 17,
+      "module": "src/model/agent",
+      "name": "fmt",
+      "qualname": "RegisterCreated.fmt",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 167,
+      "file": "src/model/agent.rs",
+      "id": "src/model/agent::TaskBrief.one_line",
+      "is_entry": false,
+      "lineno": 160,
+      "module": "src/model/agent",
+      "name": "one_line",
+      "qualname": "TaskBrief.one_line",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 26,
+      "file": "src/model/mod.rs",
+      "id": "src/model/mod::null_to_default",
+      "is_entry": false,
+      "lineno": 19,
+      "module": "src/model/mod",
+      "name": "null_to_default",
+      "qualname": "null_to_default",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 1,
+      "end_lineno": 56,
+      "file": "src/model/mod.rs",
+      "id": "src/model/mod::ApiEnvelope.into_data",
+      "is_entry": false,
+      "lineno": 40,
+      "module": "src/model/mod",
+      "name": "into_data",
+      "qualname": "ApiEnvelope.into_data",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 71,
+      "file": "src/model/mod.rs",
+      "id": "src/model/mod::envelope_zero_code_passes_data_through",
+      "is_entry": false,
+      "lineno": 64,
+      "module": "src/model/mod",
+      "name": "envelope_zero_code_passes_data_through",
+      "qualname": "envelope_zero_code_passes_data_through",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 92,
+      "file": "src/model/mod.rs",
+      "id": "src/model/mod::envelope_classifies_auth_forbidden_business",
+      "is_entry": false,
+      "lineno": 74,
+      "module": "src/model/mod",
+      "name": "envelope_classifies_auth_forbidden_business",
+      "qualname": "envelope_classifies_auth_forbidden_business",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 119,
+      "file": "src/model/mod.rs",
+      "id": "src/model/mod::envelope_prefers_numeric_code_over_message_text",
+      "is_entry": false,
+      "lineno": 95,
+      "module": "src/model/mod",
+      "name": "envelope_prefers_numeric_code_over_message_text",
+      "qualname": "envelope_prefers_numeric_code_over_message_text",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 134,
+      "file": "src/model/mod.rs",
+      "id": "src/model/mod::session_kickoff_decodes_camel_case",
+      "is_entry": false,
+      "lineno": 122,
+      "module": "src/model/mod",
+      "name": "session_kickoff_decodes_camel_case",
+      "qualname": "session_kickoff_decodes_camel_case",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 147,
+      "file": "src/model/mod.rs",
+      "id": "src/model/mod::go_nil_slice_null_decodes_to_empty",
+      "is_entry": false,
+      "lineno": 137,
+      "module": "src/model/mod",
+      "name": "go_nil_slice_null_decodes_to_empty",
+      "qualname": "go_nil_slice_null_decodes_to_empty",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 1,
+      "end_lineno": 41,
+      "file": "src/model/platform.rs",
+      "id": "src/model/platform::NotificationItem.unread",
+      "is_entry": false,
+      "lineno": 39,
+      "module": "src/model/platform",
+      "name": "unread",
+      "qualname": "NotificationItem.unread",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 59,
+      "file": "src/model/task.rs",
+      "id": "src/model/task::TaskDetail.one_line",
+      "is_entry": false,
+      "lineno": 57,
+      "module": "src/model/task",
+      "name": "one_line",
+      "qualname": "TaskDetail.one_line",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 31,
+      "end_lineno": 18,
+      "file": "src/output.rs",
+      "id": "src/output::Out.emit_value",
+      "is_entry": false,
+      "lineno": 14,
+      "module": "src/output",
+      "name": "emit_value",
+      "qualname": "Out.emit_value",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 2,
+      "end_lineno": 25,
+      "file": "src/output.rs",
+      "id": "src/output::Out.emit_event",
+      "is_entry": false,
+      "lineno": 21,
+      "module": "src/output",
+      "name": "emit_event",
+      "qualname": "Out.emit_event",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 22,
+      "end_lineno": 32,
+      "file": "src/output.rs",
+      "id": "src/output::Out.line",
+      "is_entry": false,
+      "lineno": 28,
+      "module": "src/output",
+      "name": "line",
+      "qualname": "Out.line",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 24,
+      "end_lineno": 36,
+      "file": "src/output.rs",
+      "id": "src/output::Out.kv",
+      "is_entry": false,
+      "lineno": 34,
+      "module": "src/output",
+      "name": "kv",
+      "qualname": "Out.kv",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 48,
+      "file": "src/output.rs",
+      "id": "src/output::pad_display",
+      "is_entry": false,
+      "lineno": 40,
+      "module": "src/output",
+      "name": "pad_display",
+      "qualname": "pad_display",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 60,
+      "file": "src/output.rs",
+      "id": "src/output::pad_display_accounts_for_cjk_width",
+      "is_entry": false,
+      "lineno": 55,
+      "module": "src/output",
+      "name": "pad_display_accounts_for_cjk_width",
+      "qualname": "pad_display_accounts_for_cjk_width",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 25,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::Sandbox.new",
+      "is_entry": false,
+      "lineno": 17,
+      "module": "tests/cli",
+      "name": "new",
+      "qualname": "Sandbox.new",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 2,
+      "end_lineno": 29,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::Sandbox.write_config",
+      "is_entry": false,
+      "lineno": 27,
+      "module": "tests/cli",
+      "name": "write_config",
+      "qualname": "Sandbox.write_config",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 2,
+      "callers": 6,
+      "end_lineno": 36,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::Sandbox.write_credential",
+      "is_entry": false,
+      "lineno": 31,
+      "module": "tests/cli",
+      "name": "write_credential",
+      "qualname": "Sandbox.write_credential",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 2,
+      "callers": 1,
+      "end_lineno": 42,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::Sandbox.write_project_pointer",
+      "is_entry": false,
+      "lineno": 38,
+      "module": "tests/cli",
+      "name": "write_project_pointer",
+      "qualname": "Sandbox.write_project_pointer",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 2,
+      "callers": 1,
+      "end_lineno": 51,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::Sandbox.write_session",
+      "is_entry": false,
+      "lineno": 44,
+      "module": "tests/cli",
+      "name": "write_session",
+      "qualname": "Sandbox.write_session",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 5,
+      "end_lineno": 57,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::json_stdout",
+      "is_entry": false,
+      "lineno": 54,
+      "module": "tests/cli",
+      "name": "json_stdout",
+      "qualname": "json_stdout",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 0,
+      "end_lineno": 68,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::whoami_reports_empty_state_with_exit_zero",
+      "is_entry": false,
+      "lineno": 60,
+      "module": "tests/cli",
+      "name": "whoami_reports_empty_state_with_exit_zero",
+      "qualname": "whoami_reports_empty_state_with_exit_zero",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 5,
+      "callers": 0,
+      "end_lineno": 87,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::whoami_aggregates_local_state",
+      "is_entry": false,
+      "lineno": 71,
+      "module": "tests/cli",
+      "name": "whoami_aggregates_local_state",
+      "qualname": "whoami_aggregates_local_state",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 97,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::whoami_human_mode_prints_kv_lines",
+      "is_entry": false,
+      "lineno": 90,
+      "module": "tests/cli",
+      "name": "whoami_human_mode_prints_kv_lines",
+      "qualname": "whoami_human_mode_prints_kv_lines",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 2,
+      "callers": 0,
+      "end_lineno": 111,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::profiles_lists_local_identities",
+      "is_entry": false,
+      "lineno": 100,
+      "module": "tests/cli",
+      "name": "profiles_lists_local_identities",
+      "qualname": "profiles_lists_local_identities",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 2,
+      "callers": 0,
+      "end_lineno": 121,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::profile_flag_overrides_bc_agent_env",
+      "is_entry": false,
+      "lineno": 114,
+      "module": "tests/cli",
+      "name": "profile_flag_overrides_bc_agent_env",
+      "qualname": "profile_flag_overrides_bc_agent_env",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 2,
+      "callers": 0,
+      "end_lineno": 131,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::bc_agent_env_selects_profile",
+      "is_entry": false,
+      "lineno": 124,
+      "module": "tests/cli",
+      "name": "bc_agent_env_selects_profile",
+      "qualname": "bc_agent_env_selects_profile",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 0,
+      "end_lineno": 142,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::status_exits_2_without_server_url",
+      "is_entry": false,
+      "lineno": 134,
+      "module": "tests/cli",
+      "name": "status_exits_2_without_server_url",
+      "qualname": "status_exits_2_without_server_url",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 2,
+      "callers": 0,
+      "end_lineno": 154,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::status_exits_2_outside_any_project",
+      "is_entry": false,
+      "lineno": 145,
+      "module": "tests/cli",
+      "name": "status_exits_2_outside_any_project",
+      "qualname": "status_exits_2_outside_any_project",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 166,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::help_lists_full_command_surface",
+      "is_entry": false,
+      "lineno": 157,
+      "module": "tests/cli",
+      "name": "help_lists_full_command_surface",
+      "qualname": "help_lists_full_command_surface",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 0,
+      "end_lineno": 180,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::init_writes_config_in_noninteractive_mode",
+      "is_entry": false,
+      "lineno": 169,
+      "module": "tests/cli",
+      "name": "init_writes_config_in_noninteractive_mode",
+      "qualname": "init_writes_config_in_noninteractive_mode",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 187,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::init_rejects_non_http_url",
+      "is_entry": false,
+      "lineno": 183,
+      "module": "tests/cli",
+      "name": "init_rejects_non_http_url",
+      "qualname": "init_rejects_non_http_url",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 201,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::completion_and_man_smoke",
+      "is_entry": false,
+      "lineno": 190,
+      "module": "tests/cli",
+      "name": "completion_and_man_smoke",
+      "qualname": "completion_and_man_smoke",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 211,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::profile_name_with_path_separator_is_rejected",
+      "is_entry": false,
+      "lineno": 204,
+      "module": "tests/cli",
+      "name": "profile_name_with_path_separator_is_rejected",
+      "qualname": "profile_name_with_path_separator_is_rejected",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 0,
+      "end_lineno": 224,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::complete_rejects_oversized_artifacts_before_network",
+      "is_entry": false,
+      "lineno": 214,
+      "module": "tests/cli",
+      "name": "complete_rejects_oversized_artifacts_before_network",
+      "qualname": "complete_rejects_oversized_artifacts_before_network",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 0,
+      "callers": 0,
+      "end_lineno": 234,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::create_requires_title_before_any_network",
+      "is_entry": false,
+      "lineno": 227,
+      "module": "tests/cli",
+      "name": "create_requires_title_before_any_network",
+      "qualname": "create_requires_title_before_any_network",
+      "routes": []
+    },
+    {
+      "async": false,
+      "callees": 1,
+      "callers": 0,
+      "end_lineno": 246,
+      "file": "tests/cli.rs",
+      "id": "tests/cli::init_auto_appends_api_prefix",
+      "is_entry": false,
+      "lineno": 237,
+      "module": "tests/cli",
+      "name": "init_auto_appends_api_prefix",
+      "qualname": "init_auto_appends_api_prefix",
+      "routes": []
+    }
+  ],
+  "root": "C:\\dev-data\\code\\cicbyte\\byte-code-cli"
+}

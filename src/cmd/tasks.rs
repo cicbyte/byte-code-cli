@@ -204,6 +204,21 @@ pub async fn task(cfg: &Config, profile: &str, id: i64, out: &Out) -> Result<()>
         out.line("── Artifacts ──");
         out.line(&detail.artifacts);
     }
+    if detail.watcher_count > 0 {
+        let self_mark = if detail.watching {
+            "（已关注）"
+        } else {
+            ""
+        };
+        out.kv(
+            "关注",
+            &format!(
+                "{} 人{self_mark}：{}",
+                detail.watcher_count,
+                detail.watchers.join("、")
+            ),
+        );
+    }
     if !detail.sub_tasks.is_empty() {
         out.line("");
         out.line(&format!("── 子任务（{}）──", detail.sub_tasks.len()));
@@ -256,7 +271,10 @@ pub async fn claim(cfg: &Config, profile: &str, id: i64, out: &Out) -> Result<()
     let ctx = project_ctx(cfg, profile).await?;
     // 归属预检（#443）：不属于当前指向项目的任务直接早失败给明确文案——
     // 平台侧会话门禁是最终裁决，这里只求错误体验（免一次注定失败的业务错）
-    if let Ok(d) = ctx.client.get_as::<TaskDetail>(&format!("/v1/tasks/{id}")).await
+    if let Ok(d) = ctx
+        .client
+        .get_as::<TaskDetail>(&format!("/v1/tasks/{id}"))
+        .await
         && d.project_id != 0
         && d.project_id != ctx.project.project_id
     {
@@ -337,7 +355,9 @@ pub async fn unblock(cfg: &Config, profile: &str, id: i64, out: &Out) -> Result<
 /// 幂等——重复关注无副作用；读语义，只读能力即可关注。
 pub async fn watch(cfg: &Config, profile: &str, id: i64, out: &Out) -> Result<()> {
     let ctx = project_ctx(cfg, profile).await?;
-    ctx.client.post(&format!("/v1/tasks/{id}/watch"), json!({})).await?;
+    ctx.client
+        .post(&format!("/v1/tasks/{id}/watch"), json!({}))
+        .await?;
     out.kv(
         "已关注",
         &format!("#{id}（动态将进通知中心：评论/认领/完成/阻塞/解除/重开/审核）"),
@@ -349,7 +369,9 @@ pub async fn watch(cfg: &Config, profile: &str, id: i64, out: &Out) -> Result<()
 /// `bcode unwatch <id>`：取消关注任务（停止订阅动态通知）。
 pub async fn unwatch(cfg: &Config, profile: &str, id: i64, out: &Out) -> Result<()> {
     let ctx = project_ctx(cfg, profile).await?;
-    ctx.client.post(&format!("/v1/tasks/{id}/unwatch"), json!({})).await?;
+    ctx.client
+        .post(&format!("/v1/tasks/{id}/unwatch"), json!({}))
+        .await?;
     out.kv("已取关", &format!("#{id}（不再接收该任务动态）"));
     out.emit_value(&json!({ "watching": false, "task_id": id }));
     Ok(())

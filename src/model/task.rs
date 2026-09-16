@@ -43,6 +43,13 @@ pub struct TaskDetail {
     /// 直接子任务（父子关系回填，v4 平台新增）
     #[serde(default, deserialize_with = "super::null_to_default")]
     pub sub_tasks: Vec<TaskBriefRef>,
+    /// watcher 订阅回填（平台 5fa02bd）：当前身份是否已关注/人数/名称列表
+    #[serde(default)]
+    pub watching: bool,
+    #[serde(default)]
+    pub watcher_count: i64,
+    #[serde(default, deserialize_with = "super::null_to_default")]
+    pub watchers: Vec<String>,
     #[serde(default)]
     pub due_date: String,
     #[serde(default, deserialize_with = "null_to_default")]

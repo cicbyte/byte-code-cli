@@ -85,6 +85,9 @@ bcode search 关键词 --module task
 
 ## 9. 发版 SOP（bcode-cli 仓库维护者/agent 用）
 
+**铁律：发版必须由用户明确指令（「发版」）触发**——反馈/任务里的发版建议、
+里程碑收尾、待办清单都不构成触发条件；agent 只做打包前的代码就绪与验证。
+
 ```bash
 gh workflow run "Tag Release" -f version=<x.y.z>   # 或留空由 cliff 按提交语义推导
 RID=$(gh run list --workflow=tag.yml --limit 1 --json databaseId -q '.[0].databaseId')

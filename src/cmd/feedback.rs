@@ -46,7 +46,10 @@ pub async fn feedback(cfg: &Config, profile: &str, a: &FeedbackArgs, out: &Out) 
         }
         let status = a.status.as_deref().unwrap_or("open");
         let res: SentList = client
-            .get_as(&format!("/v1/feedbacks/sent?status={}", encode_query(status)))
+            .get_as(&format!(
+                "/v1/feedbacks/sent?status={}",
+                encode_query(status)
+            ))
             .await?;
         if res.list.is_empty() {
             out.line("（无已发反馈）");
@@ -106,7 +109,10 @@ pub async fn feedback(cfg: &Config, profile: &str, a: &FeedbackArgs, out: &Out) 
             .await?;
         out.kv(
             "已投递",
-            &format!("反馈 #{} → 关联项目 id={}（状态可用 feedback --sent 追踪）", created.id, target),
+            &format!(
+                "反馈 #{} → 关联项目 id={}（状态可用 feedback --sent 追踪）",
+                created.id, target
+            ),
         );
         out.emit_value(&json!({ "sent": created.id, "to_project": target }));
         return Ok(());

@@ -36,7 +36,7 @@ bcode log 42 "进展描述"          # 过程留痕——长任务每 <2h 打一
 bcode complete 42 --artifacts-file out.md   # 完成 → review，artifacts=markdown 产出
 ```
 
-辅助：`bcode task 42`（详情）、`bcode create --title/--file`（建任务）、`bcode update 42 --priority 1`（改字段）、`bcode tasks --priority 1`（过滤）/ `tasks --mine`（跨项目我的任务）/ `create --parent <id>`（子任务）、`bcode comment/comments`、`bcode notify --read-all`、`bcode context`（约定）、`bcode search <kw>`、`bcode docs <path> --write-file f.md`（设计沉淀）、`bcode memory <key> --set/--delete`（项目记忆读写）/ `memory <key> --global`（全局记忆读）、`bcode projects`。
+辅助：`bcode task 42`（详情）、`bcode create --title/--file`（建任务）、`bcode update 42 --priority 1`（改字段）、`bcode tasks --priority 1`（过滤）/ `tasks --mine`（跨项目我的任务）/ `create --parent <id>`（子任务）、`bcode watch <id>`（订阅任务动态：评论/认领/完成/阻塞等七类事件进通知中心）/ `unwatch`、`bcode comment/comments`、`bcode notify --read-all`、`bcode context`（约定）、`bcode search <kw>`、`bcode docs <path> --write-file f.md`（设计沉淀）、`bcode memory <key> --set/--delete`（项目记忆读写）/ `memory <key> --global`（全局记忆读）、`bcode projects`。
 
 **QA 库**（遇到问题先查再问人）：`bcode qa <kw>`（检索）、`bcode qa --question <问题> --answer <答案>`（踩坑沉淀，同问题 upsert）、`bcode qa --hit <id>`（查阅后计数，影响开工包 Top 排序）。
 
@@ -74,7 +74,8 @@ feedback 的设计意图：**目标配了关联即可投递，不需要目标准
 10. **agent 可改任务字段但禁改状态**——`update` 支持 title/description/type/priority/dueDate（空串=清截止）；status 流转走 claim/release/complete，改派是 owner 权限；`reopen` 平台限人类用户（agent 调用必拒，退出码 6）。
 11. **`.bc/project` 优先存项目短码（projectCode）**——跨环境稳定（数字 id 换库会变）；旧指针只有 id 也兼容，start 会自动回填 code。`--project` 支持 code/id/名称。
 12. **feedback 投递的前置**：目标项目的 owner 须配置对来源项目的**双向关联**（单向来源→目标不够，报「目标项目未关联来源项目」）。来源推导平台已兜底 bindings（7f408e0），无 `--task` 可投；但兜底取**最早一条** binding——多项目 agent 建议带 `--task <来源任务id>` 保证来源准确。
-13. **tasks 列表已含 type/tags/updatedAt**（v3 TaskBrief 增强）——批量决策不必逐条拉详情。
+13. **任务域操作受会话项目约束**（平台 #443）：目标项目 ≠ 当前会话项目会被拒（CLI 已配 claim 归属预检早失败）——跨项目操作请到对应项目目录/会话执行。
+14. **tasks 列表已含 type/tags/updatedAt**（v3 TaskBrief 增强）——批量决策不必逐条拉详情。
 
 ## 深入阅读（按需，勿预读）
 
