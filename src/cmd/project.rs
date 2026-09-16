@@ -41,7 +41,13 @@ pub async fn projects(cfg: &Config, profile: &str, out: &Out) -> Result<()> {
         } else {
             format!(" code={}", p.code)
         };
-        out.line(&format!("  #{:<5} {}{code}{mark}", p.id, p.name));
+        // 能力集自查（平台 #415）：空=全部能力，受限时明示（受限操作会被门禁拒）
+        let caps = if p.capabilities.is_empty() {
+            String::new()
+        } else {
+            format!(" 能力[{}]", p.capabilities)
+        };
+        out.line(&format!("  #{:<5} {}{code}{caps}{mark}", p.id, p.name));
         arr.push(
             json!({ "id": p.id, "code": p.code, "name": p.name, "current": Some(p.id) == current }),
         );
