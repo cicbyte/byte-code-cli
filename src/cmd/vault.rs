@@ -172,8 +172,15 @@ pub async fn memory(cfg: &Config, profile: &str, a: &MemoryArgs, out: &Out) -> R
         return Ok(());
     }
 
-    // 全局记忆：跨项目通用约定（全员可读；直接写/删平台限管理员，CLI 只读）
+    // 全局记忆：跨项目通用约定。agent 直接写/删平台恒拒（403 限管理员）——
+    // 显式拦截并指路提案通道，不让写意图掉进读语义发出行为不符的请求
     if a.global {
+        if a.set.is_some() || a.file.is_some() || a.delete {
+            bail!(
+                "全局记忆直接写/删平台限管理员（agent 恒 403）。
+                 agent 沉淀全局知识走提案：bcode memory <key> --set <值> --global --propose --note <说明>"
+            );
+        }
         let client = identity_client(cfg, profile)?;
         let item: MemoryItem = client
             .get_as(&format!("/v1/global-memories/{}", encode_query(&a.key)))
