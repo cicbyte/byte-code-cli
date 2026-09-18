@@ -82,9 +82,15 @@ pub async fn feedback(cfg: &Config, profile: &str, a: &FeedbackArgs, out: &Out) 
     let ctx = project_ctx(cfg, profile).await?;
     let pid = ctx.project.project_id;
 
-    // 投递：目标必须是本项目的关联项目（owner 在 Web 配置关联）
+    // 投递：目标解析（名称→id 便捷层；解析不到时报错并指引——平台门禁对
+    // 关联/分组的判定以数字 id 到达后为准，CLI 不做比平台更严的预检）
     if let Some(to) = &a.send {
-        let target = resolve_relation(&ctx.client, pid, to).await?;
+        let target = resolve_target(&ctx.client, pid, to).await?.ok_or_else(|| {
+            anyhow!(
+                "无法解析目标「{to}」：不是数字 id，也不在关联列表/已加入项目中。\n\
+                     可用 bcode projects 查看已加入项目（名称/短码均可作 --send 值）"
+            )
+        })?;
         let content = match (a.file.as_deref(), a.content.as_deref()) {
             (Some(f), _) => {
                 std::fs::read_to_string(f).map_err(|e| anyhow!("读取 {f} 失败：{e}"))?
@@ -105,13 +111,13 @@ pub async fn feedback(cfg: &Config, profile: &str, a: &FeedbackArgs, out: &Out) 
         }
         let created: crate::model::task::CreatedId = ctx
             .client
-            .post_as(&format!("/v1/projects/{}/feedbacks", target), body)
+            .post_as(&format!("/v1/projects/{target}/feedbacks"), body)
             .await?;
         out.kv(
             "已投递",
             &format!(
-                "反馈 #{} → 关联项目 id={}（状态可用 feedback --sent 追踪）",
-                created.id, target
+                "反馈 #{} → 项目 id={target}（状态可用 feedback --sent 追踪）",
+                created.id
             ),
         );
         out.emit_value(&json!({ "sent": created.id, "to_project": target }));
@@ -183,25 +189,38 @@ pub async fn feedback(cfg: &Config, profile: &str, a: &FeedbackArgs, out: &Out) 
     Ok(())
 }
 
-/// 从关联项目列表解析目标（id / 名称模糊匹配；数字直通）
-async fn resolve_relation(
+/// 名称→目标项目 id 解析（预检降级版，反馈 #12）：数字直通；名称在
+/// 显式关联列表与**agent 已加入项目**里查——查不到返回 None 而非报错。平台
+/// 对反馈的权威判定是「显式关联 **或** ShareGroup 共组」，CLI 预检不该比
+/// 平台更严（曾因此误拦合法投递）；解析失败让平台门禁裁决。
+/// **显式关联列表**里查——查不到返回 None 而非报错。平台对反馈的权威判定
+/// 是「显式关联 **或** ShareGroup 共组」，分组项目不在 relations 里，CLI
+/// 预检不该比平台更严（曾因此误拦合法投递）；解析失败让平台门禁裁决。
+async fn resolve_target(
     client: &crate::client::BcodeClient,
     pid: i64,
     spec: &str,
-) -> Result<i64> {
+) -> Result<Option<i64>> {
     if let Ok(id) = spec.parse::<i64>() {
-        return Ok(id);
+        return Ok(Some(id));
     }
     let rels: RelationList = client
         .get_as(&format!("/v1/projects/{pid}/relations"))
         .await?;
-    rels.list
+    if let Some(r) = rels.list.iter().find(|r| r.name == spec) {
+        return Ok(Some(r.project_id));
+    }
+    // 兜底：agent 已加入项目清单（GET /agent/projects）——覆盖「已 join 但
+    // 未配显式关联」的目标（如分组伙伴），拿不到 id 时才放弃解析
+    #[derive(serde::Deserialize)]
+    struct AgentProjects {
+        #[serde(default, deserialize_with = "crate::model::null_to_default")]
+        list: Vec<crate::model::agent::ProjectBrief>,
+    }
+    let joined: AgentProjects = client.get_as("/v1/agent/projects").await?;
+    Ok(joined
+        .list
         .iter()
-        .find(|r| r.name == spec)
-        .map(|r| r.project_id)
-        .ok_or_else(|| {
-            anyhow!(
-                "「{spec}」不在本项目关联列表——反馈只能投递给关联项目（owner 在 Web 配置项目关联）"
-            )
-        })
+        .find(|p| p.name == spec || p.code == spec)
+        .map(|p| p.id))
 }
