@@ -101,3 +101,10 @@ cargo binstall --git <repo> bcode --force           # ④ 可选：更新本地�
 ```
 
 **易漏的就是 ③**——bump 发生在 CI 远端，本地不 pull 会落后一个提交（Cargo.lock 也会随后续 build 产生意外 diff）。
+
+## 10. CLI 开发验证环境（dev 实例）
+
+- **dev 实例**：`http://127.0.0.1:18020/api`（byte-code 仓库根 `./bytecode-dev.exe` 拉起；admin/admin1234；SQLite 可随意造删）。登录端点是 `/api/login`（无 v1 前缀）——生成接入码 `POST /v1/projects/{id}/agent-codes`
+- **BC_HOME 隔离配方**：`export BC_HOME=target/bc-dev` + 写 config.toml（server_url/default_profile）→ register → admin 发码 → join → 先跑一次任意业务命令懒建会话（join 不建会话）
+- **真实平台**（dx4600:18026）可能落后 master——watch/门禁类功能验证用 dev 实例；默认 profile 是真实身份，勿用于实验
+- 嵌套 `bcode test --run -- cargo ...` 会撞 target 锁（自编译）——验退出码用 `-- true` / `-- false` 即可

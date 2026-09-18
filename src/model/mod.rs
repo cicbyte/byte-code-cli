@@ -8,6 +8,7 @@ pub mod feedback;
 pub mod platform;
 pub mod qa;
 pub mod task;
+pub mod test;
 pub mod topic;
 
 use serde::Deserialize;

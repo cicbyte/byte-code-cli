@@ -9,6 +9,7 @@ pub mod project;
 pub mod qa;
 pub mod system;
 pub mod tasks;
+pub mod test;
 pub mod topic;
 pub mod vault;
 

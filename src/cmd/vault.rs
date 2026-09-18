@@ -159,12 +159,14 @@ pub async fn memory(cfg: &Config, profile: &str, a: &MemoryArgs, out: &Out) -> R
         if let Some(n) = a.note.as_deref() {
             body["note"] = json!(n);
         }
-        let created: crate::model::task::CreatedId = client
-            .post_as("/v1/global-memories/propose", body)
-            .await?;
+        let created: crate::model::task::CreatedId =
+            client.post_as("/v1/global-memories/propose", body).await?;
         out.kv(
             "已提交提案",
-            &format!("#{}（待管理员审核；采纳后对所有项目的 agent 生效）", created.id),
+            &format!(
+                "#{}（待管理员审核；采纳后对所有项目的 agent 生效）",
+                created.id
+            ),
         );
         out.emit_value(&json!({ "proposed": true, "proposal_id": created.id, "key": a.key }));
         return Ok(());

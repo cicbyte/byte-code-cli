@@ -59,6 +59,12 @@ QA 库与反馈
   topic log          专题留痕（--log <id> --detail-text；handoff=交接摘要）
   topic convert      阶段转日常任务（--convert <tid> --phase <pid>）
 
+测试执行（配合平台执行记录）
+  test --run -- <cmd>  包裹执行测试命令（--junit <path> 顺手上报；退出码透传）
+  test --upload <file> 离线补传（junit XML / byte-code-pytest --bcode-dump JSON，自动识别）
+  test --cases --pull  平台用例拉取为 YAML（--dir tests/cases；AI 可读用例写代码）
+  test --cases --push  YAML 推送回平台（按 id/externalKey upsert；--dry-run 试运行）
+
 配置与工具
   init [url]         引导写配置（TTY 交互；纯 host 自动补 /api）
   open <task|board>  生成 Web 深链并尝试打开浏览器
@@ -177,6 +183,8 @@ pub enum Command {
     Feedback(FeedbackArgs),
     /// 专题：list 详情 / work 推进阶段 / log 留痕 / convert 阶段转任务 / finish 终验收
     Topic(TopicArgs),
+    /// 测试执行：--run 包裹执行并上报 / --upload junit·dump 补传 / --cases pull·push 用例同步
+    Test(TestArgs),
 }
 
 // 子命令参数体（main 以 Command::X(Args { .. }) 模式匹配）
@@ -499,6 +507,52 @@ pub struct FeedbackArgs {
     /// 忽略理由（必填，回告发起方）
     #[arg(long, requires = "dismiss")]
     pub reason: Option<String>,
+}
+
+#[derive(clap::Args)]
+pub struct TestArgs {
+    /// 包裹执行测试命令（-- 后接完整命令；配 --junit 顺手上报）
+    #[arg(long)]
+    pub run: bool,
+    /// 被包裹命令及其参数（-- 之后原样透传）
+    #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+    pub cmd: Vec<String>,
+    /// junit XML 路径：--run 结束后上报该文件
+    #[arg(long, requires = "run")]
+    pub junit: Option<String>,
+    /// 离线补传文件（junit XML 或 byte-code-pytest --bcode-dump 的 JSON）
+    #[arg(long)]
+    pub upload: Option<String>,
+    /// 强制格式：junit / bcode（缺省按内容嗅探）
+    #[arg(long)]
+    pub format: Option<String>,
+    /// 执行来源：junit（缺省按格式）/ pytest / ci / manual
+    #[arg(long)]
+    pub source: Option<String>,
+    /// 分支覆盖（缺省 git 探测）
+    #[arg(long)]
+    pub branch: Option<String>,
+    /// 环境标识（缺省 local）
+    #[arg(long)]
+    pub env: Option<String>,
+    /// 平台用例 ↔ 仓库 YAML 同步域
+    #[arg(long)]
+    pub cases: bool,
+    /// 拉取平台用例到目录
+    #[arg(long, requires = "cases")]
+    pub pull: bool,
+    /// 推送目录用例回平台（按 id/externalKey upsert）
+    #[arg(long, requires = "cases")]
+    pub push: bool,
+    /// 用例 YAML 目录（缺省 tests/cases）
+    #[arg(long, default_value = "tests/cases")]
+    pub dir: String,
+    /// pull 的状态过滤（缺省 active；all=不过滤）
+    #[arg(long)]
+    pub status: Option<String>,
+    /// push 只打印计划不写平台
+    #[arg(long)]
+    pub dry_run: bool,
 }
 
 #[derive(clap::Args)]

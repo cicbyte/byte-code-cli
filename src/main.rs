@@ -93,6 +93,7 @@ async fn main() {
         Command::Qa(a) => cmd::qa::qa(&cfg, &profile, &a, &out).await,
         Command::Feedback(a) => cmd::feedback::feedback(&cfg, &profile, &a, &out).await,
         Command::Topic(a) => cmd::topic::topic(&cfg, &profile, &a, &out).await,
+        Command::Test(a) => cmd::test::test(&cfg, &profile, &a, &out).await,
     };
 
     if let Err(e) = result {

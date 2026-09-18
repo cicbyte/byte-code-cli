@@ -34,6 +34,7 @@
 - **会话自愈** — 缓存会话被平台废弃时自动重建重试；连接 10s / 请求 30s 超时，SSE 断线指数退避重连
 - **多 agent 并行** — 身份按 profile 隔离（`--profile` / `BC_AGENT`），项目目录只有可进 git 的指针文件，换 agent 零冲突
 - **全链留痕** — 认领原子化、过程日志、artifacts 回报、评论与 SSE 实时通知
+- **测试执行上报** — `bcode test --run -- <cmd>` 包裹执行（`--junit` 顺手上报、退出码透传）；`--upload` 离线补传 junit XML / byte-code-pytest dump；`--cases --pull|--push` 平台用例与仓库 YAML 双向同步（AI 读用例写代码）
 
 从身份注册、项目接入、任务闭环，到评论通知与文档/记忆消费，命令面完整覆盖日常协作全流程。
 
