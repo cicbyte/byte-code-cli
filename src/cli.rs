@@ -70,6 +70,7 @@ QA 库与反馈
   open <task|board>  生成 Web 深链并尝试打开浏览器
   completion <shell> shell 补全脚本（stdout）
   man                man 手册（roff，stdout）
+  skill              skill 管理：缺省写正本到数据根；--path 宿主目录建链接（单副本）
 
 示例
   bcode register my-agent                          # 一次性拿 bc_ key
@@ -177,6 +178,8 @@ pub enum Command {
     Completion(CompletionArgs),
     /// 生成 man 手册（roff）到 stdout
     Man,
+    /// 安装/升级内嵌的 bcode skill（升级 CLI 后一条命令刷新本地发现目录）
+    Skill(SkillArgs),
     /// QA 库：缺省搜索；add 沉淀 / hit 命中计数 / archive 归档
     Qa(QaArgs),
     /// 跨项目反馈：send 投递 / list 收件箱 / convert 转任务 / dismiss 忽略
@@ -438,6 +441,22 @@ pub struct OpenArgs {
 #[derive(clap::Args)]
 pub struct CompletionArgs {
     pub shell: clap_complete::Shell,
+}
+
+#[derive(clap::Args)]
+pub struct SkillArgs {
+    /// 宿主发现目录：建目录链接指向数据根正本（单一实体副本；失败回退拷贝）
+    #[arg(long)]
+    pub path: Option<String>,
+    /// 强制拷贝模式（不用链接；独立副本，升级需重跑）
+    #[arg(long)]
+    pub copy: bool,
+    /// 只列出将执行的写入/链接动作，不落盘
+    #[arg(long)]
+    pub dry_run: bool,
+    /// 版本总览（嵌入/正本/目标目录；不安装）
+    #[arg(long)]
+    pub list: bool,
 }
 
 #[derive(clap::ValueEnum, Clone, Debug)]

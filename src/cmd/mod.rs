@@ -7,6 +7,7 @@ pub mod feedback;
 pub mod identity;
 pub mod project;
 pub mod qa;
+pub mod skill;
 pub mod system;
 pub mod tasks;
 pub mod test;

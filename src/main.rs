@@ -90,6 +90,7 @@ async fn main() {
         Command::Open(a) => cmd::system::open(&cfg, &a.target, a.id, &out),
         Command::Completion(a) => cmd::system::completion(a.shell),
         Command::Man => cmd::system::man(),
+        Command::Skill(a) => cmd::skill::skill(&a, &out),
         Command::Qa(a) => cmd::qa::qa(&cfg, &profile, &a, &out).await,
         Command::Feedback(a) => cmd::feedback::feedback(&cfg, &profile, &a, &out).await,
         Command::Topic(a) => cmd::topic::topic(&cfg, &profile, &a, &out).await,
