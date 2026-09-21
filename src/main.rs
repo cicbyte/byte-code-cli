@@ -96,6 +96,7 @@ async fn main() {
         Command::Topic(a) => cmd::topic::topic(&cfg, &profile, &a, &out).await,
         Command::Discuss(a) => cmd::discuss::discuss(&cfg, &profile, &a, &out).await,
         Command::Release(a) => cmd::release::release(&cfg, &profile, &a, &out).await,
+        Command::Worklog(a) => cmd::worklog::worklog(&cfg, &profile, &a, &out).await,
         Command::Test(a) => cmd::test::test(&cfg, &profile, &a, &out).await,
     };
 

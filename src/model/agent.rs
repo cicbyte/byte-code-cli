@@ -53,6 +53,9 @@ pub struct SessionCreated {
     /// 高频 QA（按命中数前 5——遇到问题先查 QA 库再问人）
     #[serde(default, deserialize_with = "null_to_default")]
     pub top_qas: Vec<QaBrief>,
+    /// 最近 3 条工作日志摘录（项目演化背景）；完整历史走 worklog 命令族
+    #[serde(default, deserialize_with = "null_to_default")]
+    pub worklogs: Vec<WorklogBrief>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -101,6 +104,24 @@ pub struct TopicBrief {
     pub phase_done: i64,
     #[serde(default)]
     pub last_handoff: String,
+}
+
+/// 工作日志摘录（开工包，仅 3 条 + 首行截断）
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorklogBrief {
+    #[serde(default)]
+    pub id: i64,
+    #[serde(default)]
+    pub author: String,
+    #[serde(default)]
+    pub author_type: String,
+    #[serde(default)]
+    pub source: String,
+    #[serde(default)]
+    pub excerpt: String,
+    #[serde(default)]
+    pub created_at: String,
 }
 
 /// QA 摘要（开工包 TopQas）

@@ -15,6 +15,7 @@ pub mod tasks;
 pub mod test;
 pub mod topic;
 pub mod vault;
+pub mod worklog;
 
 use anyhow::{Result, anyhow};
 use serde::de::DeserializeOwned;

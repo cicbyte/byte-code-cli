@@ -305,6 +305,26 @@ fn display_kickoff(boot: &SessionCreated, out: &Out) {
     }
     out.line("");
     out.line(&format!(
+        "── 最近工作日志（{} 条摘录）── 完整历史 bcode worklog",
+        boot.worklogs.len()
+    ));
+    if boot.worklogs.is_empty() {
+        out.line("  （无）");
+    }
+    for w in &boot.worklogs {
+        let author = if w.author_type == "ai" { "[AI] " } else { "" };
+        let src = if w.source == "tasks" {
+            "草稿"
+        } else {
+            "手写"
+        };
+        out.line(&format!(
+            "  #{} [{}] {author}{}：{}",
+            w.id, src, w.author, w.excerpt
+        ));
+    }
+    out.line("");
+    out.line(&format!(
         "── 进行中专题（{}）── bcode topic work 推进",
         boot.active_topics.len()
     ));

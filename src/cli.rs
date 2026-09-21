@@ -42,7 +42,7 @@ const GROUPED_CATALOG: &str = "\
   notify               通知（--unread / --read <id> / --read-all / --watch SSE 实时流）
 
 上下文消费
-  docs [path]        文档中枢（读正文 / --list / --search；--write-file 写入）
+  docs [path]        文档中枢（读正文 / --list / --search；--write-file 写入；--move-from/--move-to 移动）
   memory <key>       项目记忆（--set/--file 写；--global --propose 全局提案）
   memories           记忆列表（--prefix 前缀过滤）
   search <kw>        全局搜索（已获读权的项目范围）
@@ -61,6 +61,11 @@ QA 库与反馈
   release --create <v> --file f ...  创建并上传（--notes-file 说明）
   release --download <v> [-o dir]    下载（--file 按名过滤）
   release --delete <v>               删除（级联清文件）
+
+工作日志（项目演化记录）
+  worklog            倒序列表（id/日期/作者/来源/首行）
+  worklog --show <id> 单条完整内容；--write --file 记录（需能力位）
+  worklog --draft --from --to  从已完成任务/发布生成草稿（stdout，不落库）
 
 专题（长期任务阶段化）
   topic --create     创建专题（--title/--goal/--acceptance；默认自任执行）
@@ -201,6 +206,8 @@ pub enum Command {
     Discuss(DiscussArgs),
     /// 项目发布：create/upload/list/download/delete（本地打包推平台分发）
     Release(ReleaseArgs),
+    /// 工作日志：list/show/write/draft（项目演化记录；写入需 worklog 能力位）
+    Worklog(WorklogArgs),
     /// 测试执行：--run 包裹执行并上报 / --upload junit·dump 补传 / --cases pull·push 用例同步
     Test(TestArgs),
 }
@@ -397,6 +404,12 @@ pub struct DocsArgs {
     /// 写入：本地文件 → vault 目标路径（整文件覆盖，平台自动 .history 快照）
     #[arg(long)]
     pub write_file: Option<String>,
+    /// 移动/重命名：源路径（与 --move-to 配对；目标目录自动创建，同名拒）
+    #[arg(long, requires = "move_to")]
+    pub move_from: Option<String>,
+    /// 移动/重命名：目标路径
+    #[arg(long)]
+    pub move_to: Option<String>,
 }
 
 #[derive(clap::Args)]
@@ -544,6 +557,40 @@ pub struct ReleaseArgs {
     /// 删除指定版本（级联清文件）
     #[arg(long)]
     pub delete: Option<String>,
+}
+
+#[derive(clap::Args)]
+pub struct WorklogArgs {
+    /// 单条完整内容（直连详情端点）
+    #[arg(long)]
+    pub show: Option<i64>,
+    /// 写入一条（--file 或 --content；agent 需 worklog 能力位）
+    #[arg(long)]
+    pub write: bool,
+    /// 写入内容（与 --file 互斥使用）
+    #[arg(long)]
+    pub content: Option<String>,
+    /// 写入内容从本地 UTF-8 文件读取
+    #[arg(long)]
+    pub file: Option<String>,
+    /// 来源：manual 手写（缺省）/ tasks 草稿润色后发布
+    #[arg(long)]
+    pub source: Option<String>,
+    /// 生成草稿到 stdout（不落库；配 --from/--to，上限 92 天）
+    #[arg(long)]
+    pub draft: bool,
+    /// 起始日期 YYYY-MM-DD（含）
+    #[arg(long)]
+    pub from: Option<String>,
+    /// 结束日期 YYYY-MM-DD（含）
+    #[arg(long)]
+    pub to: Option<String>,
+    /// 列表页码
+    #[arg(long)]
+    pub page: Option<i64>,
+    /// 列表每页条数
+    #[arg(long)]
+    pub size: Option<i64>,
 }
 
 #[derive(clap::Args)]

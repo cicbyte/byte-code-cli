@@ -51,6 +51,8 @@ feedback 的设计意图：**目标配了关联即可投递，不需要目标准
 
 **讨论区**（想法 → 议题线程 → 转任务）：`bcode discuss`（列表/详情含回复）、`--new --title`（发起，需 discuss 能力位）、`--reply/--reply-file`（回复）、`--convert`（转任务血缘互链）、`--archive`。
 
+**工作日志**（项目演化记录）：`bcode worklog`（倒序列表）、`--show <id>`（单条全量）、`--write --file`（记录，需 worklog 能力位）、`--draft --from --to`（从已完成任务/发布生成草稿，stdout 不落库，润色后 `--write --source tasks` 发布）。开工包只带 3 条摘录，完整历史走此命令。
+
 **项目发布**（团队内分发）：`bcode release`（列表 --channel）、`--create <v> --file f...`（建+传，maintainer）、`--download <v> [-o dir]`（下载；成员受限走 maintainer）、`--delete`。
 
 **专题**（长期任务阶段化，全生命周期）：`topic --create --title <t> [--goal/--acceptance/--doc-path]`（创建，默认自任执行）、`topic --phases <tid> --file plan.json`（PRD 拆解批量导入阶段，整体替换）、`topic --detail <id>`（阶段清单+最近交接）、`topic --work <tid> --phase <pid> --next`（推进）、`topic --log --action handoff`（交接摘要）、`topic --convert <tid> --phase <pid>`（阶段转任务）。

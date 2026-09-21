@@ -20,6 +20,7 @@ use crate::output::Out;
 /// 会话推导项目，X-Session 即上下文）。
 pub async fn docs(cfg: &Config, profile: &str, a: &crate::cli::DocsArgs, out: &Out) -> Result<()> {
     let ctx = project_ctx(cfg, profile).await?;
+    let pid = ctx.project.project_id;
 
     // vault 内搜索（免参别名）
     if let Some(kw) = &a.search {
@@ -41,6 +42,20 @@ pub async fn docs(cfg: &Config, profile: &str, a: &crate::cli::DocsArgs, out: &O
             out.line(&format!("  {} {}", it.path, it.title));
         }
         out.emit_value(&serde_json::to_value(&res)?);
+        return Ok(());
+    }
+
+    // 移动/重命名（知识库整理：归类、归档——agent 交付后的整理入口）。
+    // 平台暂无免参 move 别名，走项目端点（.bc/project 指向）
+    if let (Some(from), Some(to)) = (&a.move_from, &a.move_to) {
+        ctx.client
+            .post(
+                &format!("/v1/projects/{pid}/docs/file/move"),
+                json!({ "from": from, "to": to }),
+            )
+            .await?;
+        out.kv("已移动", &format!("{from} → {to}"));
+        out.emit_value(&json!({ "moved": true, "from": from, "to": to }));
         return Ok(());
     }
 

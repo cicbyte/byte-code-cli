@@ -11,6 +11,7 @@ pub mod qa;
 pub mod task;
 pub mod test;
 pub mod topic;
+pub mod worklog;
 
 use serde::Deserialize;
 
