@@ -9,7 +9,6 @@ use crate::client::BcodeClient;
 use crate::config::{self, Config};
 use crate::cred::{self, ProjectPointer};
 use crate::model::agent::{AgentTasks, JoinResult, SessionCreated};
-use crate::model::platform::ProjectList;
 use crate::output::Out;
 
 /// `bcode projects`（v2 反馈新增，v3 改走免参端点）：列出 agent 已接入的全部项目
@@ -41,7 +40,7 @@ pub async fn projects(cfg: &Config, profile: &str, out: &Out) -> Result<()> {
         } else {
             format!(" code={}", p.code)
         };
-        // 能力集自查（平台 #415）：空=全部能力，受限时明示（受限操作会被门禁拒）
+        // 能力集自查：空=全部能力，受限时明示（受限操作会被门禁拒）
         let caps = if p.capabilities.is_empty() {
             String::new()
         } else {
@@ -222,23 +221,22 @@ async fn resolve_project(client: &BcodeClient, spec: &str) -> Result<i64> {
     if let Ok(id) = spec.parse::<i64>() {
         return Ok(id);
     }
-    // 名称解析：按 total 翻页，避免 >100 个已加入项目时漏配
-    let mut page = 1;
-    loop {
-        let list: ProjectList = client
-            .get_as(&format!("/v1/projects?page={page}&size=100"))
-            .await?;
-        if let Some(hit) = list.list.iter().find(|p| p.name == spec) {
-            return Ok(hit.id);
-        }
-        if list.list.is_empty() || (page * 100) >= list.total {
-            break;
-        }
-        page += 1;
+    // agent 视角项目解析：GET /v1/agent/projects（名称/短码均可；
+    // 通用 /v1/projects 对 agent 恒空，勿用）
+    #[derive(serde::Deserialize)]
+    struct AgentProjects {
+        #[serde(default, deserialize_with = "crate::model::null_to_default")]
+        list: Vec<crate::model::agent::ProjectBrief>,
     }
-    Err(anyhow!(
-        "未找到名为「{spec}」的项目（agent 只能看到已加入的项目；也可直接用数字 id）"
-    ))
+    let joined: AgentProjects = client.get_as("/v1/agent/projects").await?;
+    joined
+        .list
+        .iter()
+        .find(|p| p.name == spec || p.code == spec)
+        .map(|p| p.id)
+        .ok_or_else(|| {
+            anyhow!("未找到「{spec}」（bcode projects 查已加入项目；名称/短码/数字 id 均可）")
+        })
 }
 
 /// 开工包分段展示：约定 / 高频 QA / 我的任务 / 待审 / 待处理反馈 / 进行中专题

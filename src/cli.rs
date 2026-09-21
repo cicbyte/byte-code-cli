@@ -27,7 +27,7 @@ const GROUPED_CATALOG: &str = "\
   create             建任务（--title/--description/--file JSON 绕开编码坑；实验性）
   update <id>        改字段（--title/--type/--priority/--due；状态流转走 claim/complete）
   claim <id>         原子认领（租约 2h，周期 log 保活）
-  release <id>       释放任务（认领人放回任务池，不必等 2h 租约）
+  task-release <id>  释放任务（认领人放回任务池，不必等 2h 租约）
   watch <id>         关注任务（订阅动态通知，幂等）
   unwatch <id>       取消关注任务
   block <id>         上报阻塞（豁免租约回收；等 CI/等人时用，--reason 必填）
@@ -50,6 +50,17 @@ const GROUPED_CATALOG: &str = "\
 QA 库与反馈
   qa [kw]            问答检索（--add 沉淀 / --hit 计数 / --archive 归档）
   feedback           跨项目反馈（--send 投递 / --sent 已发追踪 / 缺省收件箱 / convert / dismiss）
+
+讨论区（想法 → 议题线程 → 转任务）
+  discuss [id]       讨论列表 / 详情（含回复）；--new --title 发起
+  discuss --reply    回复（--reply 文本 / --reply-file 文件；需 discuss 能力位）
+  discuss --convert  转任务（血缘互链）；--archive 归档切换
+
+项目发布（Releases，团队内分发）
+  release            发布列表（--channel 过滤）
+  release --create <v> --file f ...  创建并上传（--notes-file 说明）
+  release --download <v> [-o dir]    下载（--file 按名过滤）
+  release --delete <v>               删除（级联清文件）
 
 专题（长期任务阶段化）
   topic --create     创建专题（--title/--goal/--acceptance；默认自任执行）
@@ -141,7 +152,7 @@ pub enum Command {
     /// 认领任务（原子；被抢则失败）。租约 2h，周期 log 保活；认错用 release 即时放回
     Claim(TaskIdArg),
     /// 释放任务（认领人放回任务池，即刻可被他人认领；不必等 2h 租约）
-    Release(TaskIdArg),
+    TaskRelease(TaskIdArg),
     /// 上报阻塞（in_progress→blocked，豁免租约回收；等 CI/等人/等环境时用）
     Block(BlockArgs),
     /// 解除阻塞（blocked→in_progress，恢复执行）
@@ -186,6 +197,10 @@ pub enum Command {
     Feedback(FeedbackArgs),
     /// 专题：list 详情 / work 推进阶段 / log 留痕 / convert 阶段转任务 / finish 终验收
     Topic(TopicArgs),
+    /// 讨论区：列表/详情/发起/回复/转任务（想法的任务前置形态）
+    Discuss(DiscussArgs),
+    /// 项目发布：create/upload/list/download/delete（本地打包推平台分发）
+    Release(ReleaseArgs),
     /// 测试执行：--run 包裹执行并上报 / --upload junit·dump 补传 / --cases pull·push 用例同步
     Test(TestArgs),
 }
@@ -465,6 +480,70 @@ pub enum OpenTarget {
     Task,
     /// 项目看板
     Board,
+}
+
+#[derive(clap::Args)]
+pub struct DiscussArgs {
+    /// 讨论 id（缺省列列表；详情/回复/转任务的目标）
+    pub id: Option<i64>,
+    /// 发起讨论（--title 必填；正文 --body 或 --file）
+    #[arg(long)]
+    pub new: bool,
+    /// 标题（发起必填；convert 可覆盖任务标题）
+    #[arg(long)]
+    pub title: Option<String>,
+    /// 正文（markdown）
+    #[arg(long)]
+    pub body: Option<String>,
+    /// 正文/回复从本地 UTF-8 文件读取
+    #[arg(long)]
+    pub file: Option<String>,
+    /// 回复内容
+    #[arg(long)]
+    pub reply: Option<String>,
+    /// 回复内容从文件读取
+    #[arg(long)]
+    pub reply_file: Option<String>,
+    /// 转任务（讨论标 converted，血缘互链）
+    #[arg(long)]
+    pub convert: bool,
+    /// 转任务时的任务类型（bug/chore/test/feature）
+    #[arg(long)]
+    pub r#type: Option<String>,
+    /// 归档/恢复切换
+    #[arg(long)]
+    pub archive: bool,
+}
+
+#[derive(clap::Args)]
+pub struct ReleaseArgs {
+    /// 创建发布（版本号项目内唯一）
+    #[arg(long)]
+    pub create: Option<String>,
+    /// 发布标题（缺省同版本号）
+    #[arg(long)]
+    pub title: Option<String>,
+    /// 发布说明文件（markdown）
+    #[arg(long)]
+    pub notes_file: Option<String>,
+    /// 渠道：stable（缺省）/ beta / nightly
+    #[arg(long)]
+    pub channel: Option<String>,
+    /// 上传文件到指定版本（可多次）
+    #[arg(long)]
+    pub upload: Option<String>,
+    /// 文件路径（upload 可多个；download 按名过滤）
+    #[arg(long)]
+    pub file: Option<Vec<String>>,
+    /// 下载指定版本（缺省全部文件）
+    #[arg(long)]
+    pub download: Option<String>,
+    /// 下载落盘目录（缺省当前目录）
+    #[arg(long, short = 'o')]
+    pub output: Option<String>,
+    /// 删除指定版本（级联清文件）
+    #[arg(long)]
+    pub delete: Option<String>,
 }
 
 #[derive(clap::Args)]

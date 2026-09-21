@@ -1,4 +1,4 @@
-//! 测试执行域命令（#505）：`bcode test --run -- <cmd>` 包裹执行、
+//! 测试执行域命令：`bcode test --run -- <cmd>` 包裹执行、
 //! `--upload <file>` 离线补传（junit XML / byte-code-pytest dump JSON 自动识别）、
 //! `--cases --pull|--push` 平台用例与仓库 tests/ 目录 YAML 双向同步。
 
@@ -236,6 +236,7 @@ pub fn parse_junit(xml: &str) -> Result<TestRunReport> {
         .filter_map(|s| s.attribute("time").and_then(|t| t.parse::<f64>().ok()))
         .sum::<f64>();
     Ok(TestRunReport {
+        idempotency_key: String::new(),
         source: "junit".into(),
         branch: String::new(),
         git_sha: String::new(),

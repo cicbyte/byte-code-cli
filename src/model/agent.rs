@@ -62,7 +62,7 @@ pub struct ProjectBrief {
     #[serde(default)]
     pub code: String,
     pub name: String,
-    /// 能力集（逗号分隔 key；平台 #415 起 AgentProjects 回填，空=全部能力）
+    /// 能力集（逗号分隔 key；AgentProjects 回填，空=全部能力）
     #[serde(default)]
     pub capabilities: String,
 }

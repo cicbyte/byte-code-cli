@@ -52,7 +52,7 @@ async fn main() {
         Command::Create(a) => cmd::tasks::create(&cfg, &profile, &a, &out).await,
         Command::Update(a) => cmd::tasks::update(&cfg, &profile, &a, &out).await,
         Command::Claim(a) => cmd::tasks::claim(&cfg, &profile, a.id, &out).await,
-        Command::Release(a) => cmd::tasks::release(&cfg, &profile, a.id, &out).await,
+        Command::TaskRelease(a) => cmd::tasks::release(&cfg, &profile, a.id, &out).await,
         Command::Block(a) => cmd::tasks::block(&cfg, &profile, a.id, &a.reason, &out).await,
         Command::Unblock(a) => cmd::tasks::unblock(&cfg, &profile, a.id, &out).await,
         Command::Watch(a) => cmd::tasks::watch(&cfg, &profile, a.id, &out).await,
@@ -94,6 +94,8 @@ async fn main() {
         Command::Qa(a) => cmd::qa::qa(&cfg, &profile, &a, &out).await,
         Command::Feedback(a) => cmd::feedback::feedback(&cfg, &profile, &a, &out).await,
         Command::Topic(a) => cmd::topic::topic(&cfg, &profile, &a, &out).await,
+        Command::Discuss(a) => cmd::discuss::discuss(&cfg, &profile, &a, &out).await,
+        Command::Release(a) => cmd::release::release(&cfg, &profile, &a, &out).await,
         Command::Test(a) => cmd::test::test(&cfg, &profile, &a, &out).await,
     };
 

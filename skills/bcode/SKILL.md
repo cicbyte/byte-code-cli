@@ -49,6 +49,10 @@ feedback 的设计意图：**目标配了关联即可投递，不需要目标准
 
 **测试**（pytest/junit 接入）：`test --run -- <cmd>`（包裹测试命令，退出码透传；`--junit x.xml` 顺带上报平台执行记录）、`test --upload x.xml`（离线补传，junit/bcode-dump 自动嗅探）、`test --cases --pull/--push`（平台用例 ↔ 仓库 tests/cases/ YAML 双向同步，--dry-run 试运行）。上报需平台勾选 test_execute 能力。
 
+**讨论区**（想法 → 议题线程 → 转任务）：`bcode discuss`（列表/详情含回复）、`--new --title`（发起，需 discuss 能力位）、`--reply/--reply-file`（回复）、`--convert`（转任务血缘互链）、`--archive`。
+
+**项目发布**（团队内分发）：`bcode release`（列表 --channel）、`--create <v> --file f...`（建+传，maintainer）、`--download <v> [-o dir]`（下载；成员受限走 maintainer）、`--delete`。
+
 **专题**（长期任务阶段化，全生命周期）：`topic --create --title <t> [--goal/--acceptance/--doc-path]`（创建，默认自任执行）、`topic --phases <tid> --file plan.json`（PRD 拆解批量导入阶段，整体替换）、`topic --detail <id>`（阶段清单+最近交接）、`topic --work <tid> --phase <pid> --next`（推进）、`topic --log --action handoff`（交接摘要）、`topic --convert <tid> --phase <pid>`（阶段转任务）。
 
 **长任务（跨窗口/多日）**：`bcode update <id> --checklist-file plan.json`（步骤清单，打勾=进展顺带续租约）、`block <id> --reason` / `unblock <id>`（阻塞豁免租约回收）、`log --action handoff`（三行交接：完成到哪/未竟/环境注意）。完整方法论（checklist 拆解粒度、handoff 时机、专题化判断、断点恢复流程）见 byte-code 仓库的 `long-running-agent` skill——本 skill 只管命令契约，工作流方法论在那边。
@@ -76,7 +80,7 @@ feedback 的设计意图：**目标配了关联即可投递，不需要目标准
 10. **agent 可改任务字段但禁改状态**——`update` 支持 title/description/type/priority/dueDate（空串=清截止）；status 流转走 claim/release/complete，改派是 owner 权限；`reopen` 平台限人类用户（agent 调用必拒，退出码 6）。
 11. **`.bc/project` 优先存项目短码（projectCode）**——跨环境稳定（数字 id 换库会变）；旧指针只有 id 也兼容，start 会自动回填 code。`--project` 支持 code/id/名称。
 12. **feedback 投递**：目标可传**数字 id / 已加入项目名称或短码**（`bcode projects` 可查）；关联判定以平台门禁为准（显式关联 **或** 同分组均可，CLI 不做更严预检——反馈 #12 修复）。来源推导链：`--source` 显式 > `--task` 任务所属 > bindings 兜底（取最早一条，多项目 agent 建议显式传）。
-13. **任务域操作受会话项目约束**（平台 #443）：目标项目 ≠ 当前会话项目会被拒（CLI 已配 claim 归属预检早失败）——跨项目操作请到对应项目目录/会话执行。
+13. **任务域操作受会话项目约束**：目标项目 ≠ 当前会话项目会被拒（CLI 已配 claim 归属预检早失败）——跨项目操作请到对应项目目录/会话执行。
 14. **tasks 列表已含 type/tags/updatedAt**（v3 TaskBrief 增强）——批量决策不必逐条拉详情。
 
 ## 深入阅读（按需，勿预读）

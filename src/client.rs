@@ -127,6 +127,94 @@ impl BcodeClient {
         self.request(reqwest::Method::DELETE, path, None).await
     }
 
+    /// multipart 文件上传（发布文件/附件通道）：认证头 + 壳解包与常规请求一致
+    pub async fn upload_file(&self, path: &str, name: &str, file: &str) -> Result<Value> {
+        let url = format!("{}{}", self.server, path);
+        let bytes = std::fs::read(file)
+            .map_err(|e| BcodeError::Network(format!("读取 {file} 失败：{e}")))?;
+        let part = reqwest::multipart::Part::bytes(bytes).file_name(name.to_string());
+        let form = reqwest::multipart::Form::new().part("file", part);
+        let mut req = self.http.post(&url).multipart(form);
+        if let Some(c) = &self.credential {
+            req = req.header("Authorization", format!("Bearer {}", c.api_key));
+        }
+        if let Some(sid) = &self.session {
+            req = req.header("X-Session", sid);
+        }
+        let resp = req
+            .send()
+            .await
+            .map_err(|e| BcodeError::Network(e.to_string()))?;
+        let status = resp.status();
+        let envelope: ApiEnvelope = resp
+            .json()
+            .await
+            .map_err(|e| BcodeError::Network(format!("响应解析失败（HTTP {status}）：{e}")))?;
+        if status.as_u16() == 401 {
+            return Err(BcodeError::Auth(envelope.message).into());
+        }
+        Ok(envelope.into_data()?)
+    }
+
+    /// 免鉴权直链下载（发布分享 public 链接——不带认证头）
+    pub async fn download_file_pub(&self, path: &str, dest: &std::path::Path) -> Result<u64> {
+        use futures_util::StreamExt;
+        let url = format!("{}{}", self.server, path);
+        let resp = self
+            .http
+            .get(&url)
+            .send()
+            .await
+            .map_err(|e| BcodeError::Network(e.to_string()))?;
+        let status = resp.status();
+        if !status.is_success() {
+            return Err(BcodeError::Network(format!("下载失败（HTTP {status}）")).into());
+        }
+        let mut file = std::fs::File::create(dest)
+            .map_err(|e| BcodeError::Network(format!("创建 {} 失败：{e}", dest.display())))?;
+        let mut stream = resp.bytes_stream();
+        let mut n = 0u64;
+        while let Some(chunk) = stream.next().await {
+            let chunk = chunk.map_err(|e| BcodeError::Network(format!("下载中断：{e}")))?;
+            std::io::Write::write_all(&mut file, &chunk)
+                .map_err(|e| BcodeError::Network(format!("写盘失败：{e}")))?;
+            n += chunk.len() as u64;
+        }
+        Ok(n)
+    }
+
+    /// 文件下载（发布文件/附件）：流式写盘，返回写入字节数
+    pub async fn download_file(&self, path: &str, dest: &std::path::Path) -> Result<u64> {
+        use futures_util::StreamExt;
+        let url = format!("{}{}", self.server, path);
+        let mut req = self.http.get(&url);
+        if let Some(c) = &self.credential {
+            req = req.header("Authorization", format!("Bearer {}", c.api_key));
+        }
+        if let Some(sid) = &self.session {
+            req = req.header("X-Session", sid);
+        }
+        let resp = req
+            .send()
+            .await
+            .map_err(|e| BcodeError::Network(e.to_string()))?;
+        let status = resp.status();
+        if !status.is_success() {
+            return Err(BcodeError::Network(format!("下载失败（HTTP {status}）")).into());
+        }
+        let mut file = std::fs::File::create(dest)
+            .map_err(|e| BcodeError::Network(format!("创建 {} 失败：{e}", dest.display())))?;
+        let mut stream = resp.bytes_stream();
+        let mut n = 0u64;
+        while let Some(chunk) = stream.next().await {
+            let chunk = chunk.map_err(|e| BcodeError::Network(format!("下载中断：{e}")))?;
+            std::io::Write::write_all(&mut file, &chunk)
+                .map_err(|e| BcodeError::Network(format!("写盘失败：{e}")))?;
+            n += chunk.len() as u64;
+        }
+        Ok(n)
+    }
+
     /// POST 并按 model 层强类型解码
     pub async fn post_as<T: DeserializeOwned>(&self, path: &str, body: Value) -> Result<T> {
         let v = self.post(path, body).await?;

@@ -3,6 +3,7 @@
 //! 反序列化即校验，替代命令内裸 `Value` 拼装。
 
 pub mod agent;
+pub mod discuss;
 pub mod docs;
 pub mod feedback;
 pub mod platform;

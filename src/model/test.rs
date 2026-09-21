@@ -1,4 +1,4 @@
-//! 测试执行记录域线缆类型（源：byte-code `api/v1/test`，#505）。
+//! 测试执行记录域线缆类型（源：byte-code `api/v1/test`）。
 //! 上报体 TestRunReport 同时是 byte-code-pytest `--bcode-dump` 离线文件的载荷
 //! （外面包一层 TestRunDumpFile 做格式自识别）。
 
@@ -26,6 +26,10 @@ pub struct TestRunReport {
     pub duration_ms: i64,
     #[serde(default, deserialize_with = "null_to_default")]
     pub cases: Vec<TestRunCaseReport>,
+    /// 插件 dump 携带的幂等键（sha256(git_sha|startedAt|hostname)）——
+    /// 补传原样透传，同一 dump 重复上传命中平台幂等不产生重复 run
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub idempotency_key: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

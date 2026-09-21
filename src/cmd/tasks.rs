@@ -269,7 +269,7 @@ pub async fn task(cfg: &Config, profile: &str, id: i64, out: &Out) -> Result<()>
 /// 租约契约：认领后 2 小时无平台侧动作自动释放——长任务周期 `bcode log` 保活。
 pub async fn claim(cfg: &Config, profile: &str, id: i64, out: &Out) -> Result<()> {
     let ctx = project_ctx(cfg, profile).await?;
-    // 归属预检（#443）：不属于当前指向项目的任务直接早失败给明确文案——
+    // 归属预检：不属于当前指向项目的任务直接早失败给明确文案——
     // 平台侧会话门禁是最终裁决，这里只求错误体验（免一次注定失败的业务错）
     if let Ok(d) = ctx
         .client
@@ -350,7 +350,7 @@ pub async fn unblock(cfg: &Config, profile: &str, id: i64, out: &Out) -> Result<
     Ok(())
 }
 
-/// `bcode watch <id>`：关注任务（订阅动态通知）。平台 watcher API（#424）：
+/// `bcode watch <id>`：关注任务（订阅动态通知）。平台 watcher API：
 /// 评论/认领/完成/阻塞/解除/重开/审核七类事件向关注者扇出通知（操作者本人除外）。
 /// 幂等——重复关注无副作用；读语义，只读能力即可关注。
 pub async fn watch(cfg: &Config, profile: &str, id: i64, out: &Out) -> Result<()> {

@@ -3,10 +3,12 @@
 //! system（init/open/completion/man 便利命令）。
 
 pub mod comms;
+pub mod discuss;
 pub mod feedback;
 pub mod identity;
 pub mod project;
 pub mod qa;
+pub mod release;
 pub mod skill;
 pub mod system;
 pub mod tasks;
