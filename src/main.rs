@@ -26,6 +26,19 @@ async fn main() {
     if cli.insecure {
         cfg.insecure = true;
     }
+    // --server 临时覆盖：注入 active profile 绑定与旧顶层（项目指针绑定
+    // 仍最高——repo 归属不因临时地址改变），仅本次进程生效不落盘
+    if let Some(ref srv) = cli.server {
+        let normalized = srv.trim_end_matches('/').to_string();
+        let profile = config::effective_profile(&cfg, cli.profile.as_ref());
+        cfg.profiles.insert(
+            profile.clone(),
+            config::ProfileDef {
+                server: normalized.clone(),
+            },
+        );
+        cfg.server_url = Some(normalized);
+    }
     if cfg.insecure {
         eprintln!("bcode: 警告：TLS 证书校验已关闭（--insecure），仅限自签/调试环境使用");
     }
@@ -43,6 +56,7 @@ async fn main() {
         Command::Whoami => cmd::identity::whoami(&cfg, &profile, &out).await,
         Command::Status => cmd::project::status(&cfg, &profile, &out).await,
         Command::Profiles => cmd::identity::profiles(&cfg, &out),
+        Command::Use { profile } => cmd::identity::use_profile(&mut cfg, &profile, &out),
         Command::Join(a) => cmd::project::join(&cfg, &profile, &a.code, &out).await,
         Command::Projects => cmd::project::projects(&cfg, &profile, &out).await,
         Command::Start(a) => cmd::project::start(&cfg, &profile, a.project.as_deref(), &out).await,

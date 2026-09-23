@@ -106,6 +106,7 @@ pub(crate) async fn ensure_session(
     // 会话记录以服务端返回为准（--project 传纯 id 时本地无名称）
     cred::save_session(
         profile,
+        server,
         &cred::SessionRecord {
             session_id: boot.session_id.clone(),
             project_id: boot.project.id,
@@ -121,7 +122,15 @@ pub(crate) async fn ensure_session(
 pub(crate) async fn project_ctx(cfg: &Config, profile: &str) -> Result<Ctx> {
     let cwd0 = std::env::current_dir()?;
     let pointer0 = config::find_project_pointer(&cwd0)?;
-    let server = config::effective_server_url_for(cfg, pointer0.as_ref())?;
+    // 指针绑定 > 当前 profile 的绑定 > 旧顶层
+    let server = match pointer0
+        .as_ref()
+        .map(|p| p.server_url.trim())
+        .filter(|u| !u.is_empty())
+    {
+        Some(u) => u.trim_end_matches('/').to_string(),
+        None => config::effective_server_url_profile(cfg, profile)?,
+    };
     let credential = cred::load_credential(profile)?;
     let cwd = std::env::current_dir()?;
     let project = config::find_project_pointer(&cwd)?.ok_or_else(|| {
@@ -130,7 +139,7 @@ pub(crate) async fn project_ctx(cfg: &Config, profile: &str) -> Result<Ctx> {
 
     // 会话防串：记录里的 server 与当前生效地址不一致 → 视为无会话重建
     // （同 profile 同 project id 在公司/个人实例各有会话）
-    let session_id = match cred::load_session(profile, project.project_id) {
+    let session_id = match cred::load_session(profile, &server, project.project_id) {
         Some(s) if s.server_url.is_empty() || s.server_url == server => s.session_id,
         _ => {
             ensure_session(&server, profile, &credential, &project, cfg.insecure)
@@ -156,7 +165,7 @@ pub(crate) async fn project_ctx(cfg: &Config, profile: &str) -> Result<Ctx> {
 
 /// 纯身份上下文（无项目/会话）：join / notify / search 用
 pub(crate) fn identity_client(cfg: &Config, profile: &str) -> Result<BcodeClient> {
-    let server = config::effective_server_url(cfg)?;
+    let server = config::effective_server_url_profile(cfg, profile)?;
     let credential = cred::load_credential(profile)?;
     BcodeClient::new(server, credential, None, cfg.insecure)
 }

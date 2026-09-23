@@ -62,7 +62,7 @@ pub async fn join(cfg: &Config, profile: &str, code: &str, out: &Out) -> Result<
         .post_as("/v1/agent/projects/join", json!({ "code": code }))
         .await?;
     // 指针记录 join 当时的生效地址——多实例部署下本 repo 从此绑定该实例
-    let bound_server = config::effective_server_url(cfg)?;
+    let bound_server = config::effective_server_url_profile(cfg, profile)?;
 
     let ptr = ProjectPointer {
         project_id: res.project_id,
@@ -205,7 +205,8 @@ pub async fn status(cfg: &Config, profile: &str, out: &Out) -> Result<()> {
 
     // 会话存在才带 X-Session 调免参任务端点（一举校验 key+准入+会话三件）；
     // 未建立会话是正常态，降级提示而非报错
-    let Some(sess) = cred::load_session(profile, ptr.project_id) else {
+    let session_server = config::effective_server_url_for_profile(cfg, profile, Some(&ptr))?;
+    let Some(sess) = cred::load_session(profile, &session_server, ptr.project_id) else {
         out.kv("连接", "凭证有效，但未建立会话（bcode start）");
         payload["connected"] = json!(false);
         payload["reason"] = json!("no_session");

@@ -12,14 +12,45 @@ use anyhow::{Context, Result, anyhow, bail};
 
 use crate::cred;
 
+/// profile 定义：一个 agent 身份入口 + 绑定的平台实例
+/// （多实例部署：公司/个人各一套，profile 显式关联身份与服务器）
+#[derive(Debug, Default, Clone, serde::Serialize, serde::Deserialize)]
+pub struct ProfileDef {
+    /// 平台地址，含 API 前缀
+    pub server: String,
+}
+
 #[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
 pub struct Config {
-    /// 平台地址，含 API 前缀，如 http://127.0.0.1:8000/api
+    /// 当前激活 profile（bcode use 切换；等效旧 default_profile）
+    pub active: Option<String>,
+    /// 多 profile 表：profile 名 → 绑定服务器
+    #[serde(default)]
+    pub profiles: std::collections::BTreeMap<String, ProfileDef>,
+    // —— 兼容旧格式（顶层单 server）——读取仍支持，保存时迁移进 profiles
     pub server_url: Option<String>,
     pub default_profile: Option<String>,
     /// 跳过 TLS 证书校验（自签/调试用；--insecure 旗标优先于此）
     #[serde(default)]
     pub insecure: bool,
+}
+
+impl Config {
+    /// 生效 profile 名：active > 旧 default_profile > "default"
+    pub fn active_profile(&self) -> String {
+        self.active
+            .clone()
+            .or_else(|| self.default_profile.clone())
+            .unwrap_or_else(|| "default".into())
+    }
+
+    /// 某 profile 绑定的服务器（无定义时回落旧顶层 server_url）
+    pub fn profile_server(&self, profile: &str) -> Option<String> {
+        self.profiles
+            .get(profile)
+            .map(|p| p.server.clone())
+            .or_else(|| self.server_url.clone())
+    }
 }
 
 /// 数据根：~/.cicbyte/apps/byte-code-cli（BC_HOME 可覆盖）。
@@ -51,8 +82,6 @@ pub fn load_config() -> Result<Config> {
     toml::from_str(&raw).with_context(|| format!("解析 {} 失败", p.display()))
 }
 
-// M3：init 引导式写配置时接入
-#[allow(dead_code)]
 pub fn save_config(cfg: &Config) -> Result<()> {
     let p = config_path()?;
     fs::create_dir_all(bc_root()?)
@@ -60,6 +89,21 @@ pub fn save_config(cfg: &Config) -> Result<()> {
     let raw = toml::to_string_pretty(cfg)?;
     fs::write(&p, raw).with_context(|| format!("写入 {} 失败", p.display()))?;
     Ok(())
+}
+
+/// 指针 > 指定 profile 绑定（start/context 等有明确 profile 的场景）
+pub fn effective_server_url_for_profile(
+    cfg: &Config,
+    profile: &str,
+    pointer: Option<&cred::ProjectPointer>,
+) -> Result<String> {
+    match pointer
+        .map(|p| p.server_url.trim())
+        .filter(|u| !u.is_empty())
+    {
+        Some(u) => Ok(u.trim_end_matches('/').to_string()),
+        None => effective_server_url_profile(cfg, profile),
+    }
 }
 
 /// 生效服务器（项目感知）：`.bc/project` 的 server_url 非空优先（多实例
@@ -78,15 +122,26 @@ pub fn effective_server_url_for(
     }
 }
 
-/// 生效配置：server_url 未配置时报错并给出引导（F18 的 init 交互留 M3，
-/// 当前阶段直接提示手写 config.toml）
+/// 生效配置：profile 绑定 > 旧顶层 server_url；未配置时报错并给引导。
+/// 无 profile 上下文时按当前 active profile 的绑定解析
 pub fn effective_server_url(cfg: &Config) -> Result<String> {
     let hint = config_path()
         .map(|p| p.display().to_string())
         .unwrap_or_default();
-    match &cfg.server_url {
+    let profile = cfg.active_profile();
+    match cfg.profile_server(&profile) {
         Some(u) => Ok(u.trim_end_matches('/').to_string()),
-        None => bail!("未配置平台地址：请在 {hint} 写入 server_url = \"http://<host>:8000/api\""),
+        None => bail!(
+            "未配置平台地址：bcode init <url>，或在 {hint} 配置 [profiles.<名>] server 与 active"
+        ),
+    }
+}
+
+/// 指定 profile 的生效服务器（有明确 profile 的调用场景）
+pub fn effective_server_url_profile(cfg: &Config, profile: &str) -> Result<String> {
+    match cfg.profile_server(profile) {
+        Some(u) => Ok(u.trim_end_matches('/').to_string()),
+        None => effective_server_url(cfg),
     }
 }
 
@@ -107,9 +162,7 @@ fn resolve_profile(cfg: &Config, flag: Option<&str>, env: Option<&str>) -> Strin
     if let Some(p) = env {
         return p.to_string();
     }
-    cfg.default_profile
-        .clone()
-        .unwrap_or_else(|| "default".into())
+    cfg.active_profile()
 }
 
 /// profile 名合法性：profile 会拼进本地路径（agents/<profile>/credential），
@@ -220,6 +273,40 @@ mod tests {
         fs::create_dir_all(root.join(".bc")).unwrap();
         fs::write(root.join(".bc").join("project"), "not-json").unwrap();
         assert!(find_project_pointer(root).is_err());
+    }
+
+    #[test]
+    fn multi_profile_config_parses_and_resolves() {
+        let raw = r#"
+active = "company"
+[profiles.company]
+server = "http://corp.example.com/api"
+[profiles.personal]
+server = "http://dx4600.link:18026/api"
+"#;
+        let cfg: Config = toml::from_str(raw).unwrap();
+        assert_eq!(cfg.active_profile(), "company");
+        assert_eq!(
+            cfg.profile_server("personal").unwrap(),
+            "http://dx4600.link:18026/api"
+        );
+        // 未定义的 profile 回落旧顶层（此处无 → None）
+        assert!(cfg.profile_server("other").is_none());
+    }
+
+    #[test]
+    fn legacy_top_level_still_resolves() {
+        let raw = r#"
+server_url = "http://old:8000/api"
+default_profile = "legacy"
+"#;
+        let cfg: Config = toml::from_str(raw).unwrap();
+        assert_eq!(cfg.active_profile(), "legacy");
+        // 旧顶层对所有 profile 兜底
+        assert_eq!(
+            cfg.profile_server("anything").unwrap(),
+            "http://old:8000/api"
+        );
     }
 
     #[test]

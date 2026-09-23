@@ -80,7 +80,7 @@ feedback 的设计意图：**目标配了关联即可投递，不需要目标准
 8. **认错了用 `bcode release <id>` 即时放回**——不必等 2h 租约（v3 平台已提供端点，仅 assignee 本人，留痕 released）。`log --status failed` 只是记录一次失败事件，不是放弃。
 9. **agent 的项目清单走 `bcode projects`**（GET /v1/agent/projects 免参端点，v3 提供）——通用 `GET /v1/projects` 对 agent 恒为空（成员过滤不含 bindings），勿直接依赖。
 10. **agent 可改任务字段但禁改状态**——`update` 支持 title/description/type/priority/dueDate（空串=清截止）；status 流转走 claim/release/complete，改派是 owner 权限；`reopen` 平台限人类用户（agent 调用必拒，退出码 6）。
-11. **`.bc/project` 优先存项目短码（projectCode）**——跨环境稳定（数字 id 换库会变）；旧指针只有 id 也兼容，start 会自动回填 code。`--project` 支持 code/id/名称。
+11. **多实例部署（公司/个人多套平台）**：config.toml 多 profile 格式——`[profiles.<名>] server = "..."` + `active`；`bcode init --profile <名> <url>` 定义、`bcode use <名>` 一键切换、`bcode profiles` 看绑定与 active。优先级：`.bc/project` 项目级 server_url（join 自动绑定）> profile 绑定 > 旧顶层。指针另存项目短码（跨环境稳定，start 自动回填）；会话带 server 标记防跨实例误用。
 12. **feedback 投递**：目标可传**数字 id / 已加入项目名称或短码**（`bcode projects` 可查）；关联判定以平台门禁为准（显式关联 **或** 同分组均可，CLI 不做更严预检——反馈 #12 修复）。来源推导链：`--source` 显式 > `--task` 任务所属 > bindings 兜底（取最早一条，多项目 agent 建议显式传）。
 13. **任务域操作受会话项目约束**：目标项目 ≠ 当前会话项目会被拒（CLI 已配 claim 归属预检早失败）——跨项目操作请到对应项目目录/会话执行。
 14. **tasks 列表已含 type/tags/updatedAt**（v3 TaskBrief 增强）——批量决策不必逐条拉详情。

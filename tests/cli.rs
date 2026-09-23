@@ -42,7 +42,12 @@ impl Sandbox {
     }
 
     fn write_session(&self, profile: &str, project_id: i64, session_id: &str) {
-        let dir = self.root.join("sessions").join(profile);
+        // 实例隔离路径：sessions/<profile>/<host_port>/<pid>.json（host 与测试 config 一致）
+        let dir = self
+            .root
+            .join("sessions")
+            .join(profile)
+            .join("127.0.0.1_8000");
         std::fs::create_dir_all(&dir).unwrap();
         let s = serde_json::json!({
             "session_id": session_id, "project_id": project_id, "project_name": "demo"
@@ -107,7 +112,7 @@ fn profiles_lists_local_identities() {
     assert_eq!(arr.len(), 2);
     assert_eq!(arr[0]["profile"], "alice");
     assert_eq!(arr[0]["agent"], "alice-cli");
-    assert_eq!(v["current"], "default");
+    assert_eq!(v["active"], "default");
 }
 
 #[test]
@@ -173,9 +178,10 @@ fn init_writes_config_in_noninteractive_mode() {
     cmd.args(["init", "http://127.0.0.1:9/api"]);
     cmd.assert().success();
     let raw = std::fs::read_to_string(sb.root.join("config.toml")).unwrap();
+    // 新格式：写入 active profile 的绑定（旧顶层 server_url 退役）
     assert!(
-        raw.contains(r#"server_url = "http://127.0.0.1:9/api""#),
-        "config 未写入：{raw}"
+        raw.contains(r#"server = "http://127.0.0.1:9/api""#) && raw.contains("active"),
+        "config 未按新格式写入：{raw}"
     );
 }
 
@@ -240,7 +246,7 @@ fn init_auto_appends_api_prefix() {
     cmd.assert().success();
     let raw = std::fs::read_to_string(sb.root.join("config.toml")).unwrap();
     assert!(
-        raw.contains(r#"server_url = "http://127.0.0.1:9/api""#),
+        raw.contains(r#"server = "http://127.0.0.1:9/api""#),
         "未自动补 /api：{raw}"
     );
 }

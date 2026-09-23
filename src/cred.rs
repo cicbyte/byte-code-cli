@@ -106,21 +106,41 @@ pub fn list_profiles() -> Vec<String> {
     out
 }
 
-pub fn session_path(profile: &str, project_id: i64) -> Result<PathBuf> {
+/// 会话路径按实例隔离：sessions/<profile>/<host_port>/<pid>.json——
+/// project_id 跨实例不唯一（公司/个人实例各有 id=N 的项目），同 profile
+/// 双实例的会话必须可共存，否则来回切换互相覆盖、每次都重建。
+/// 实例目录取 server 的 host[:port]（冒号转下划线，可读可调试）；
+/// 旧两段路径（无实例层）自然失配走懒重建，无需迁移
+pub fn session_path(profile: &str, server: &str, project_id: i64) -> Result<PathBuf> {
+    let instance = instance_dir(server);
     Ok(bc_root()?
         .join("sessions")
         .join(profile)
+        .join(instance)
         .join(format!("{project_id}.json")))
 }
 
-pub fn load_session(profile: &str, project_id: i64) -> Option<SessionRecord> {
-    let p = session_path(profile, project_id).ok()?;
+/// server → 实例目录段：取 authority（host[:port]），: → _
+fn instance_dir(server: &str) -> String {
+    let rest = server
+        .trim_start_matches("http://")
+        .trim_start_matches("https://");
+    let authority = rest.split('/').next().unwrap_or(rest);
+    if authority.is_empty() {
+        "default".into()
+    } else {
+        authority.replace(':', "_")
+    }
+}
+
+pub fn load_session(profile: &str, server: &str, project_id: i64) -> Option<SessionRecord> {
+    let p = session_path(profile, server, project_id).ok()?;
     let raw = fs::read_to_string(p).ok()?;
     serde_json::from_str(&raw).ok()
 }
 
-pub fn save_session(profile: &str, rec: &SessionRecord) -> Result<()> {
-    let p = session_path(profile, rec.project_id)?;
+pub fn save_session(profile: &str, server: &str, rec: &SessionRecord) -> Result<()> {
+    let p = session_path(profile, server, rec.project_id)?;
     if let Some(dir) = p.parent() {
         fs::create_dir_all(dir)?;
     }
@@ -133,6 +153,29 @@ pub fn save_session(profile: &str, rec: &SessionRecord) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn instance_dir_extracts_authority() {
+        assert_eq!(
+            instance_dir("http://127.0.0.1:18020/api"),
+            "127.0.0.1_18020"
+        );
+        assert_eq!(
+            instance_dir("https://dx4600.link:18026/api"),
+            "dx4600.link_18026"
+        );
+        assert_eq!(instance_dir("http://plain.host/api"), "plain.host");
+        assert_eq!(instance_dir("junk"), "junk");
+    }
+
+    #[test]
+    fn session_paths_isolate_by_instance() {
+        let a = session_path("dev", "http://a.com:1/api", 8).unwrap();
+        let b = session_path("dev", "http://b.com:2/api", 8).unwrap();
+        assert_ne!(a, b, "同 profile 同 pid 跨实例必须分文件");
+        let expect = format!("a.com_1{}8.json", std::path::MAIN_SEPARATOR);
+        assert!(a.ends_with(&expect) || a.ends_with("a.com_1/8.json"));
+    }
 
     #[test]
     fn debug_output_never_contains_plain_key() {

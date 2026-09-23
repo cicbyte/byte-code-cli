@@ -46,7 +46,15 @@ pub async fn init(cfg: &mut Config, url: Option<&str>, out: &Out) -> Result<()> 
         eprintln!("bcode: 警告：{server} 暂不可达（仍已保存，可用 bcode status 复验）");
     }
 
-    cfg.server_url = Some(server);
+    // 写多 profile 格式：写入当前 profile 的绑定并激活（旧顶层键自然退役）
+    let profile = crate::config::effective_profile(cfg, None);
+    cfg.profiles.insert(
+        profile.clone(),
+        crate::config::ProfileDef {
+            server: server.clone(),
+        },
+    );
+    cfg.active = Some(profile);
     config::save_config(cfg)?;
 
     let path = config::config_path()?;

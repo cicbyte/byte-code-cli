@@ -105,7 +105,9 @@ pub async fn whoami(cfg: &Config, profile: &str, out: &Out) -> Result<()> {
             }
         }
         payload["project"] = json!({ "id": ptr.project_id, "name": ptr.project_name });
-        if let Some(s) = cred::load_session(profile, ptr.project_id) {
+        let session_server =
+            config::effective_server_url_for_profile(cfg, profile, Some(&ptr)).unwrap_or_default();
+        if let Some(s) = cred::load_session(profile, &session_server, ptr.project_id) {
             out.kv(
                 "session",
                 &format!("{}（缓存）", &s.session_id[..12.min(s.session_id.len())]),
@@ -124,33 +126,52 @@ pub async fn whoami(cfg: &Config, profile: &str, out: &Out) -> Result<()> {
     Ok(())
 }
 
-/// `bcode profiles`：本地 profile 清单与 default 指向
+/// `bcode profiles`：本地 profile 清单（凭证 + server 绑定 + active 标记）
 pub fn profiles(cfg: &Config, out: &Out) -> Result<()> {
     let current = config::effective_profile(cfg, None);
-    let names = cred::list_profiles();
+    let mut names = cred::list_profiles();
+    // config 里定义了绑定但还没凭证的 profile 也列出（如先 init 后 register 的中间态）
+    for p in cfg.profiles.keys() {
+        if !names.contains(p) {
+            names.push(p.clone());
+        }
+    }
+    names.sort();
     let mut arr = vec![];
     for n in &names {
         let is_cur = *n == current;
-        let is_def = cfg.default_profile.as_deref() == Some(n.as_str());
-        let mut marks = String::new();
-        if is_cur {
-            marks.push_str(" ←当前");
-        }
-        if is_def {
-            marks.push_str(" ·default");
-        }
-        if marks.is_empty() {
-            marks.push_str("   ");
-        }
+        let marks = if is_cur { " ←active" } else { "" };
         let cred_name = cred::load_credential(n)
             .map(|c| c.name)
-            .unwrap_or_else(|_| "?".into());
-        out.line(&format!("  {n:<20} {cred_name}{marks}"));
-        arr.push(json!({ "profile": n, "agent": cred_name, "current": is_cur }));
+            .unwrap_or_else(|_| "（无凭证）".into());
+        let server = cfg
+            .profile_server(n)
+            .map(|s| s.replace("http://", "").replace("https://", ""))
+            .unwrap_or_default();
+        out.line(&format!("  {n:<16} {cred_name:<24} {server}{marks}"));
+        arr.push(json!({
+            "profile": n, "agent": cred_name,
+            "server": cfg.profile_server(n), "active": is_cur,
+        }));
     }
     if names.is_empty() {
-        out.line("（无 profile——bcode register <name> [--profile <p>] 创建）");
+        out.line("（无 profile——bcode register <name> 或 bcode init 先配 server）");
     }
-    out.emit_value(&json!({ "profiles": arr, "current": current }));
+    out.emit_value(&json!({ "profiles": arr, "active": current }));
+    Ok(())
+}
+
+/// `bcode use <profile>`：切换激活 profile——写 config 的 active，
+/// 此后默认命令按该 profile 的身份与 server 绑定运行（kubectl use-context 模式）
+pub fn use_profile(cfg: &mut Config, profile: &str, out: &Out) -> Result<()> {
+    // 允许切到尚未定义 server 绑定的 profile（仅切身份；server 走全局兜底）
+    cfg.active = Some(profile.to_string());
+    config::save_config(cfg)?;
+    let server = cfg
+        .profile_server(profile)
+        .map(|s| s.replace("http://", "").replace("https://", ""))
+        .unwrap_or_else(|| "（未绑定 server，走全局）".into());
+    out.kv("已切换", &format!("active → {profile}（server: {server}）"));
+    out.emit_value(&json!({ "active": profile }));
     Ok(())
 }

@@ -13,7 +13,8 @@ const GROUPED_CATALOG: &str = "\
   register <name>    注册身份（key 只此一次返回并落盘，不回显）
   whoami             本地概览：profile/凭证/项目指向/会话缓存（不打网络）
   status             在线校验：身份/准入/会话有效性 + 可见任务采样
-  profiles           本地 profile 清单
+  profiles           本地 profile 清单（server 绑定 + active 标记）
+  use <p>            切换激活 profile（多实例切换入口）
   join <code>        凭接入码加入项目（写 .bc/project）
   projects           已加入项目清单（标注当前目录指向）
 
@@ -123,6 +124,10 @@ pub struct Cli {
     /// 跳过 TLS 证书校验（自签/调试专用；优先于 config.toml 的 insecure）
     #[arg(long, global = true)]
     pub insecure: bool,
+    /// 临时服务器地址（当次生效：覆盖 profile/项目指针之外的地址配置；
+    /// mysql -h 的 CLI 等价物。不含 key——凭证仍按 profile 取）
+    #[arg(long, global = true)]
+    pub server: Option<String>,
 
     #[command(subcommand)]
     pub command: Command,
@@ -138,6 +143,8 @@ pub enum Command {
     Status,
     /// 本地 profile 清单
     Profiles,
+    /// 切换激活 profile（多实例：改 active 并按其绑定连接）
+    Use { profile: String },
     /// 凭接入码加入项目，成功写 <repo>/.bc/project
     Join(JoinArgs),
     /// 列出已加入的项目（标注当前目录指向）
