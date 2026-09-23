@@ -92,6 +92,7 @@ pub(crate) async fn ensure_session(
     project: &cred::ProjectPointer,
     insecure: bool,
 ) -> Result<SessionCreated> {
+    // 多实例防串：目标地址以指针绑定为准备入参时已解析，此处信任 server 参数
     let client = BcodeClient::new(server.to_string(), credential.clone(), None, insecure)?;
     let mut body = json!({});
     if !project.project_code.is_empty() {
@@ -109,23 +110,29 @@ pub(crate) async fn ensure_session(
             session_id: boot.session_id.clone(),
             project_id: boot.project.id,
             project_name: boot.project.name.clone(),
+            server_url: server.to_string(),
         },
     )?;
     Ok(boot)
 }
 
-/// 项目作用域上下文：凭证 + .bc/project 指向 + 会话（缺则静默 start）
+/// 项目作用域上下文：凭证 + .bc/project 指向 + 会话（缺则静默 start）。
+/// 服务器解析：指针 server_url 优先（多实例绑定），全局兜底
 pub(crate) async fn project_ctx(cfg: &Config, profile: &str) -> Result<Ctx> {
-    let server = config::effective_server_url(cfg)?;
+    let cwd0 = std::env::current_dir()?;
+    let pointer0 = config::find_project_pointer(&cwd0)?;
+    let server = config::effective_server_url_for(cfg, pointer0.as_ref())?;
     let credential = cred::load_credential(profile)?;
     let cwd = std::env::current_dir()?;
     let project = config::find_project_pointer(&cwd)?.ok_or_else(|| {
         anyhow!("当前目录不在任何项目内：在项目仓库根目录执行，或先 bcode join <接入码>")
     })?;
 
+    // 会话防串：记录里的 server 与当前生效地址不一致 → 视为无会话重建
+    // （同 profile 同 project id 在公司/个人实例各有会话）
     let session_id = match cred::load_session(profile, project.project_id) {
-        Some(s) => s.session_id,
-        None => {
+        Some(s) if s.server_url.is_empty() || s.server_url == server => s.session_id,
+        _ => {
             ensure_session(&server, profile, &credential, &project, cfg.insecure)
                 .await?
                 .session_id

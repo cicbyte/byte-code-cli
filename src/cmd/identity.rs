@@ -95,6 +95,15 @@ pub async fn whoami(cfg: &Config, profile: &str, out: &Out) -> Result<()> {
             "project",
             &format!("{} (id={})", ptr.project_name, ptr.project_id),
         );
+        if !ptr.server_url.is_empty() {
+            out.kv("绑定实例", &ptr.server_url);
+            // 与全局不一致时明示生效来源（多实例部署核心场景）
+            if let Some(global) = &cfg.server_url
+                && global.trim_end_matches('/') != ptr.server_url
+            {
+                out.kv("生效地址", &format!("{}（项目级覆盖全局）", ptr.server_url));
+            }
+        }
         payload["project"] = json!({ "id": ptr.project_id, "name": ptr.project_name });
         if let Some(s) = cred::load_session(profile, ptr.project_id) {
             out.kv(

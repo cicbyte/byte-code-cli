@@ -61,11 +61,14 @@ pub async fn join(cfg: &Config, profile: &str, code: &str, out: &Out) -> Result<
     let res: JoinResult = client
         .post_as("/v1/agent/projects/join", json!({ "code": code }))
         .await?;
+    // 指针记录 join 当时的生效地址——多实例部署下本 repo 从此绑定该实例
+    let bound_server = config::effective_server_url(cfg)?;
 
     let ptr = ProjectPointer {
         project_id: res.project_id,
         project_code: res.project_code.clone(),
         project_name: res.project_name.clone(),
+        server_url: bound_server,
     };
     let cwd = std::env::current_dir()?;
     // 覆盖不同项目的既有指向时明示切换，避免无感知改写
@@ -92,7 +95,8 @@ pub async fn join(cfg: &Config, profile: &str, code: &str, out: &Out) -> Result<
         &format!("{} (id={}{code_suffix})", res.project_name, res.project_id),
     );
     out.kv("写入", &marker.display().to_string());
-    out.line("（下一步：bcode start 建立会话并查看开工包）");
+    out.kv("绑定实例", &ptr.server_url);
+    out.line("（本目录此后优先连该实例；下一步：bcode start 建立会话并查看开工包）");
 
     out.emit_value(&json!({
         "project": { "id": ptr.project_id, "code": ptr.project_code, "name": ptr.project_name },
@@ -108,7 +112,9 @@ pub async fn start(
     project_flag: Option<&str>,
     out: &Out,
 ) -> Result<()> {
-    let server = config::effective_server_url(cfg)?;
+    let cwd0 = std::env::current_dir()?;
+    let server =
+        config::effective_server_url_for(cfg, config::find_project_pointer(&cwd0)?.as_ref())?;
     let credential = cred::load_credential(profile)?;
 
     // 项目解析：--project（code/数字 id/名称）优先，缺省取 .bc/project 指向
@@ -126,6 +132,8 @@ pub async fn start(
                     .filter(|s| s.parse::<i64>().is_err())
                     .unwrap_or_default(),
                 project_name: String::new(),
+                // 显式指定项目不落盘指针，无需绑定地址
+                server_url: String::new(),
             }
         }
         None => {
@@ -152,7 +160,9 @@ pub async fn start(
 /// `bcode context`（F14）：开工包约定（conventions）原样输出——
 /// AI 建立项目认知的入口。会话同键复用续期，此处重取保证约定最新。
 pub async fn context(cfg: &Config, profile: &str, out: &Out) -> Result<()> {
-    let server = config::effective_server_url(cfg)?;
+    let cwd0 = std::env::current_dir()?;
+    let server =
+        config::effective_server_url_for(cfg, config::find_project_pointer(&cwd0)?.as_ref())?;
     let credential = cred::load_credential(profile)?;
     let cwd = std::env::current_dir()?;
     let ptr = config::find_project_pointer(&cwd)?.ok_or_else(|| {
@@ -173,7 +183,7 @@ pub async fn context(cfg: &Config, profile: &str, out: &Out) -> Result<()> {
 /// `bcode status`：打一次网络校验身份与会话的真实有效性（whoami 的在线版）。
 /// 无凭证/无项目指向时给出分步引导而不是报错堆栈。
 pub async fn status(cfg: &Config, profile: &str, out: &Out) -> Result<()> {
-    let server = config::effective_server_url(cfg)?;
+    let server = config::effective_server_url_for(cfg, None)?;
     let credential = cred::load_credential(profile)?;
     let agent_name = credential.name.clone();
 

@@ -62,6 +62,22 @@ pub fn save_config(cfg: &Config) -> Result<()> {
     Ok(())
 }
 
+/// 生效服务器（项目感知）：`.bc/project` 的 server_url 非空优先（多实例
+/// 部署时本 repo 绑定特定平台），否则回落全局 config——指针为 None 或字段
+/// 为空即纯全局行为，旧指针完全兼容
+pub fn effective_server_url_for(
+    cfg: &Config,
+    pointer: Option<&cred::ProjectPointer>,
+) -> Result<String> {
+    match pointer
+        .map(|p| p.server_url.trim())
+        .filter(|u| !u.is_empty())
+    {
+        Some(u) => Ok(u.trim_end_matches('/').to_string()),
+        None => effective_server_url(cfg),
+    }
+}
+
 /// 生效配置：server_url 未配置时报错并给出引导（F18 的 init 交互留 M3，
 /// 当前阶段直接提示手写 config.toml）
 pub fn effective_server_url(cfg: &Config) -> Result<String> {
@@ -204,6 +220,36 @@ mod tests {
         fs::create_dir_all(root.join(".bc")).unwrap();
         fs::write(root.join(".bc").join("project"), "not-json").unwrap();
         assert!(find_project_pointer(root).is_err());
+    }
+
+    #[test]
+    fn pointer_server_url_overrides_global_when_set() {
+        let cfg = Config {
+            server_url: Some("http://global:8000/api".into()),
+            ..Default::default()
+        };
+        let mut ptr = cred::ProjectPointer {
+            project_id: 1,
+            project_code: String::new(),
+            project_name: "n".into(),
+            server_url: String::new(),
+        };
+        // 空=回落全局
+        assert_eq!(
+            effective_server_url_for(&cfg, Some(&ptr)).unwrap(),
+            "http://global:8000/api"
+        );
+        // 非空=优先，尾斜杠规整
+        ptr.server_url = "http://company:9000/api/".into();
+        assert_eq!(
+            effective_server_url_for(&cfg, Some(&ptr)).unwrap(),
+            "http://company:9000/api"
+        );
+        // 无指针=纯全局
+        assert_eq!(
+            effective_server_url_for(&cfg, None).unwrap(),
+            "http://global:8000/api"
+        );
     }
 
     #[test]

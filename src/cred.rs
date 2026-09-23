@@ -36,6 +36,10 @@ pub struct ProjectPointer {
     #[serde(default)]
     pub project_code: String,
     pub project_name: String,
+    /// 项目级服务器地址（多实例部署：公司/个人各一套时，本 repo 绑定特定实例）。
+    /// 空=用全局 config.toml；非空优先于全局
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub server_url: String,
 }
 
 /// 会话缓存：数据根下 sessions/<profile>/<project_id>.json
@@ -44,6 +48,10 @@ pub struct SessionRecord {
     pub session_id: String,
     pub project_id: i64,
     pub project_name: String,
+    /// 建立会话时的服务器地址——load 时与当前生效地址不匹配则视为失效
+    /// （同一 profile 同一 project id 在不同实例各有会话，防串）
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub server_url: String,
 }
 
 pub fn credential_path(profile: &str) -> Result<PathBuf> {
