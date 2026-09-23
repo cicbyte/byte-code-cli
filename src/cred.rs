@@ -14,6 +14,10 @@ pub struct Credential {
     pub name: String,
     pub agent_id: i64,
     pub api_key: String,
+    /// 注册实例地址（多实例防串：这个身份属于哪套平台——配合平台侧
+    /// register_ip 交叉定位归属；旧凭证无此键时空串兼容）
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub server_url: String,
 }
 
 /// Debug 脱敏：key 只保留前缀占位，杜绝任何 `{:?}` 调试输出泄漏
@@ -183,6 +187,7 @@ mod tests {
             name: "bcode-e2e".into(),
             agent_id: 25,
             api_key: "bc_deadbeefdeadbeef".into(),
+            server_url: String::new(),
         };
         let dbg = format!("{cred:?}");
         assert!(!dbg.contains("deadbeef"), "Debug 输出泄漏了明文 key：{dbg}");

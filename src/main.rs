@@ -51,7 +51,15 @@ async fn main() {
 
     let result = match cli.command {
         Command::Register(a) => {
-            cmd::identity::register(&cfg, &profile, &a.name, a.capabilities.as_deref(), &out).await
+            cmd::identity::register(
+                &cfg,
+                &profile,
+                &a.name,
+                a.capabilities.as_deref(),
+                a.force,
+                &out,
+            )
+            .await
         }
         Command::Whoami => cmd::identity::whoami(&cfg, &profile, &out).await,
         Command::Status => cmd::project::status(&cfg, &profile, &out).await,

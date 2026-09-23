@@ -1,6 +1,6 @@
 //! 身份域命令（注册层）：register 注册 / whoami 本地概览 / profiles 本地清单。
 
-use anyhow::Result;
+use anyhow::{Result, bail};
 use serde_json::json;
 
 use crate::client::BcodeClient;
@@ -16,13 +16,31 @@ pub async fn register(
     profile: &str,
     name: &str,
     capabilities: Option<&str>,
+    force: bool,
     out: &Out,
 ) -> Result<()> {
-    let server = config::effective_server_url(cfg)?;
-    if cred::load_credential(profile).is_ok() {
-        // profile 已有凭证：register 生成的是新身份，覆盖前明示
+    let server = config::effective_server_url_profile(cfg, profile)?;
+    // 覆盖防护：显示新旧差异，--force 才放行（多实例下静默覆盖会丢另一
+    // 实例的认证——反馈 #27 处置后平台把这块责任划给了 CLI）
+    if let Ok(old) = cred::load_credential(profile) {
+        if !force {
+            let old_server = if old.server_url.is_empty() {
+                "未知实例".to_string()
+            } else {
+                old.server_url.clone()
+            };
+            bail!(
+                "profile「{profile}」已有凭证，拒绝覆盖：
+	现有：{} (id={}) @ {old_server}
+	本次：{name} @ {server}
+确认换新身份请加 --force（旧 key 请在 Web Agent 管理页吊销）",
+                old.name,
+                old.agent_id,
+            );
+        }
         out.line(&format!(
-            "注意：profile「{profile}」已有凭证，本次将覆盖（旧 key 请在 Web Agent 管理页吊销）"
+            "注意：已覆盖 profile「{profile}」的凭证（旧：{} id={}，请在 Web 吊销旧 key）",
+            old.name, old.agent_id
         ));
     }
 
@@ -30,13 +48,14 @@ pub async fn register(
     if let Some(caps) = capabilities {
         body["capabilities"] = json!(caps);
     }
-    let client = BcodeClient::anonymous(server, cfg.insecure)?;
+    let client = BcodeClient::anonymous(server.clone(), cfg.insecure)?;
     let created: RegisterCreated = client.post_as("/v1/agent/register", body).await?;
 
     let credential = cred::Credential {
         name: name.to_string(),
         agent_id: created.agent_id,
         api_key: created.api_key,
+        server_url: server.clone(),
     };
     let cred_path = cred::credential_path(profile)?;
     cred::save_credential(profile, &credential)?;
@@ -148,10 +167,22 @@ pub fn profiles(cfg: &Config, out: &Out) -> Result<()> {
             .profile_server(n)
             .map(|s| s.replace("http://", "").replace("https://", ""))
             .unwrap_or_default();
-        out.line(&format!("  {n:<16} {cred_name:<24} {server}{marks}"));
+        let agent_id = cred::load_credential(n).map(|c| c.agent_id).ok();
+        let id_disp = agent_id
+            .map(|i| format!("#{i}"))
+            .unwrap_or_else(|| "—".into());
+        // 实例归属：凭证记录的注册实例优先，回落 profile 绑定
+        let bound = cred::load_credential(n)
+            .ok()
+            .filter(|c| !c.server_url.is_empty())
+            .map(|c| c.server_url.replace("http://", "").replace("https://", ""))
+            .unwrap_or_else(|| server.clone());
+        out.line(&format!(
+            "  {n:<14} {id_disp:<6} {cred_name:<22} {bound}{marks}"
+        ));
         arr.push(json!({
-            "profile": n, "agent": cred_name,
-            "server": cfg.profile_server(n), "active": is_cur,
+            "profile": n, "agent": cred_name, "agent_id": agent_id,
+            "server": cfg.profile_server(n), "registered_instance": bound, "active": is_cur,
         }));
     }
     if names.is_empty() {

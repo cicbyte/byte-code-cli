@@ -135,7 +135,7 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Command {
-    /// 注册身份（key 只此一次返回并落盘，不回显）
+    /// 注册身份（key 只此一次返回并落盘，不回显；覆盖已有凭证需 --force）
     Register(RegArgs),
     /// 本地概览：当前 profile / 凭证 / 项目指向 / 会话缓存（不打网络）
     Whoami,
@@ -225,6 +225,9 @@ pub enum Command {
 pub struct RegArgs {
     /// 全局唯一名称，如 codex-cli；重名被拒时可加后缀重试
     pub name: String,
+    /// 覆盖 profile 已有凭证（防护默认拒绝——多实例下静默覆盖会丢另一实例认证）
+    #[arg(long)]
+    pub force: bool,
     /// 逗号分隔能力声明（可选）
     #[arg(long)]
     pub capabilities: Option<String>,
